@@ -12,8 +12,8 @@ use warnings::register;
 use SelfLoader;
 
 use vars qw($VERSION $DATE $FILE);
-$VERSION = '1.11';
-$DATE = '2004/04/13';
+$VERSION = '1.12';
+$DATE = '2004/05/02';
 $FILE = __FILE__;
 
 use vars qw(@ISA @EXPORT_OK);
@@ -579,7 +579,7 @@ Binding requirements are indexed with the
 pharse 'shall[dd]' where dd is an unique number
 for each header section.
 This conforms to standard federal
-government practices, 490A (L<STD490A/3.2.3.6>).
+government practices, L<STD490A 3.2.3.6|Docs::US_DOD::STD490A/3.2.3.6>.
 In accordance with the License, Software Diamonds
 is not liable for any requirement, binding or otherwise.
 

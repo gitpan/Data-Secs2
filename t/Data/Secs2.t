@@ -7,8 +7,8 @@ use warnings;
 use warnings::register;
 
 use vars qw($VERSION $DATE $FILE);
-$VERSION = '0.05';   # automatically generated file
-$DATE = '2004/04/25';
+$VERSION = '0.06';   # automatically generated file
+$DATE = '2004/05/02';
 $FILE = __FILE__;
 
 
@@ -79,7 +79,7 @@ BEGIN {
    #
    require Test::Tech;
    Test::Tech->import( qw(finish is_skip ok plan skip skip_tests tech_config) );
-   plan(tests => 38);
+   plan(tests => 34);
 
 }
 
@@ -140,16 +140,16 @@ use warnings;
          perl_typify secsify secs_elementify stringify textify transify);
 
     my $uut = 'Data::Secs2';
-    my $loaded;
+    my ($loaded, $event, $big_secs2);
 
 my $test_data1 =
 'U1[1] 80
 L[5]
   A[0]
   A[5] ARRAY
-  U1[1] 2
+  N 2
   A[5] hello
-  U1[1] 4
+  N 4
 ';
 
 my $test_data2 =
@@ -165,18 +165,18 @@ L[6]
 
 my $test_data3 =
 'U1[1] 80
-U1[1] 2
+N 2
 L[4]
   A[0]
   A[5] ARRAY
   A[5] hello
   A[5] world
-U2[1] 512
+N 512
 ';
 
 my $test_data4 =
 'U1[1] 80
-U1[1] 2
+N 2
 L[6]
   A[0]
   A[4] HASH
@@ -222,7 +222,7 @@ L[6]
   L[3]
     A[0]
     A[5] Index
-    U1[1] 10
+    N 10
   A[3] msg
   L[3]
     A[0]
@@ -257,18 +257,184 @@ my $test_data9 =
 L[5]
   A[0]
   A[5] ARRAY
+  N[3] 78 45 25
+  N[2] 512 1024
+  N 100000
+';
+
+my $test_data10 =
+'U1[1] 80
+L[3]
+  A[0]
+  A[5] ARRAY
   L[5]
     A[0]
     A[5] ARRAY
-    U1[1] 78
-    U1[1] 45
-    U1[1] 25
+    N 2
+    A[5] hello
+    N 4
+';
+
+my $test_data11 =
+'U1[1] 80
+L[3]
+  A[0]
+  A[5] ARRAY
+  L[6]
+    A[0]
+    A[4] HASH
+    A[4] body
+    A[5] hello
+    A[6] header
+    A[9] To: world
+';
+
+my $test_data12 =
+'U1[1] 80
+L[5]
+  A[0]
+  A[5] ARRAY
+  N 2
   L[4]
     A[0]
     A[5] ARRAY
-    U2[1] 512
-    U2[1] 1024
-  U4[1] 100000
+    A[5] hello
+    A[5] world
+  N 512
+';
+
+my $test_data13 =
+'U1[1] 80
+L[4]
+  A[0]
+  A[5] ARRAY
+  N 2
+  L[6]
+    A[0]
+    A[4] HASH
+    A[6] header
+    L[6]
+      A[11] Class::None
+      A[4] HASH
+      A[4] From
+      A[6] nobody
+      A[2] To
+      A[6] nobody
+    A[3] msg
+    L[4]
+      A[0]
+      A[5] ARRAY
+      A[5] hello
+      A[5] world
+';
+
+my $test_data14 =
+'U1[1] 80
+L[4]
+  A[0]
+  A[5] ARRAY
+  L[6]
+    A[0]
+    A[4] HASH
+    A[6] header
+    L[6]
+      A[11] Class::None
+      A[4] HASH
+      A[4] From
+      A[6] nobody
+      A[2] To
+      A[6] nobody
+    A[3] msg
+    L[4]
+      A[0]
+      A[5] ARRAY
+      A[5] hello
+      A[5] world
+  L[6]
+    A[0]
+    A[4] HASH
+    A[6] header
+    L[3]
+      A[0]
+      A[5] Index
+      N 16
+    A[3] msg
+    L[3]
+      A[0]
+      A[5] ARRAY
+      A[4] body
+';
+
+my $test_data15 =
+'U1[1] 80
+U1[1] 2
+L[6]
+  A[0]
+  A[4] HASH
+  A[6] header
+  L[6]
+    A[11] Class::None
+    A[4] HASH
+    A[4] From
+    A[6] nobody
+    A[2] To
+    A[6] nobody
+  A[3] msg
+  L[4]
+    A[0]
+    A[5] ARRAY
+    A[5] hello
+    A[5] world
+';
+
+my $test_data16 =
+'U1[1] 80
+L[6]
+  A[0]
+  A[4] HASH
+  A[6] header
+  L[6]
+    A[11] Class::None
+    A[4] HASH
+    A[4] From
+    A[6] nobody
+    A[2] To
+    A[6] nobody
+  A[3] msg
+  L[4]
+    A[0]
+    A[5] ARRAY
+    A[5] hello
+    A[5] world
+L[6]
+  A[0]
+  A[4] HASH
+  A[6] header
+  L[3]
+    A[0]
+    A[5] Index
+    U1 10
+  A[3] msg
+  L[3]
+    A[0]
+    A[5] ARRAY
+    A[4] body
+';
+
+my $test_data17 = 'a50150010541004105' . unpack('H*','ARRAY') . 
+                 'a5034e2d19' .  'a90402000400' . 'b0000186a0';
+
+#######
+# multicell numberics, Perl Secs Object
+#
+my $test_data18 =
+'U1[1] 80
+L[5]
+  A[0]
+  A[5] ARRAY
+  U1[3] 78 45 25
+  U2[2] 512 1024
+  U4 100000
 ';
 
 skip_tests( 1 ) unless ok(
@@ -298,9 +464,9 @@ ok(  stringify( 2 ), # actual results
 
 ok(  stringify( '2', 'hello', 4 ), # actual results
      'U1[1] 80
-U1[1] 2
+N 2
 A[5] hello
-U1[1] 4
+N 4
 ', # expected results
      "",
      "stringify an array");
@@ -361,54 +527,68 @@ ok(      secsify( listify( {msg => ['hello', 'world'] , header => $obj },
 
 #  ok:  10
 
-ok(  secsify( listify(perlify( transify($test_data1 ) ) ) ), # actual results
-     $test_data1, # expected results
+ok(  secsify( listify( perlify( transify($test_data1) ) ) ), # actual results
+     $test_data10, # expected results
      "",
      "ascii secsify listifcation perilification transfication of test_data1");
 
 #  ok:  11
 
 ok(  secsify( listify(perlify( transify($test_data2 ) ) ) ), # actual results
-     $test_data2, # expected results
+     $test_data11, # expected results
      "",
      "ascii secsify listifcation perilification transfication of test_data2");
 
 #  ok:  12
 
 ok(  secsify( listify(perlify( transify($test_data3 )) ) ), # actual results
-     $test_data3, # expected results
+     $test_data12, # expected results
      "",
      "ascii secsify listifcation perilification transfication of test_data3");
 
 #  ok:  13
 
 ok(  secsify( listify(perlify( transify($test_data4 ))) ), # actual results
-     $test_data4, # expected results
+     $test_data13, # expected results
      "",
      "ascii secsify listifcation perilification transfication of test_data4");
 
 #  ok:  14
 
 ok(  secsify( listify(perlify( transify($test_data5))) ), # actual results
-     $test_data5, # expected results
+     $test_data14, # expected results
      "",
      "ascii secsify listifcation perilification transfication of test_data5");
 
 #  ok:  15
 
-ok(  my $big_secs2 = unpack('H*',secsify( listify( ['2', 'hello', 4] ), {type => 'binary'})), # actual results
+ok(  unpack('H*',secsify( listify( ['2', 'hello', 4] ), {type => 'binary'})), # actual results
      'a50150010541004105' . unpack('H*','ARRAY') . 'a501024105' . unpack('H*','hello') . 'a50104', # expected results
      "",
      "binary secsify an array reference");
 
 #  ok:  16
 
-ok(  $big_secs2 = unpack('H*',secsify( listify( $test_data6 ), {type => 'binary'})), # actual results
+ok(  unpack('H*',secsify( listify( $test_data6 ), [type => 'binary'])), # actual results
      $test_data7, # expected results
      "",
      "binary secsify numeric arrays");
 
 #  ok:  17
+
+ok(  unpack('H*',secsify( listify( ['2', 'hello', 4] ), {type => 'binary', scalar => 1})), # actual results
+     'a50150010541004105' . unpack('H*','ARRAY') . 'a4024105' . unpack('H*','hello') . 'a404', # expected results
+     "",
+     "scalar binary secsify an array reference");
+
+#  ok:  18
+
+ok(  unpack('H*',secsify( listify( $test_data6 ), type => 'binary', scalar => 1)), # actual results
+     $test_data17, # expected results
+     "",
+     "scalar binary secsify numeric arrays");
+
+#  ok:  19
 
    # Perl code from C:
 $big_secs2 = 
@@ -440,21 +620,50 @@ ok(  unpack('H*',
      "",
      "binary secsify array with nested hashes, arrays, objects");
 
-#  ok:  18
+#  ok:  20
 
 ok(  secsify(neuterify (pack('H*',$big_secs2))), # actual results
-     $test_data4, # expected results
+     $test_data15, # expected results
      "",
      "neuterify a big secsii");
 
-#  ok:  19
+#  ok:  21
 
 ok(  secsify(neuterify (pack('H*',$test_data7))), # actual results
      $test_data8, # expected results
      "",
-     "neuterify a multicell binary Perl SECS obj");
+     "neuterify binary secsii");
 
-#  ok:  20
+#  ok:  22
+
+   # Perl code from C:
+   $event = neuterify (pack('H*',$test_data17));
+   $event =~ s/\n\t.*?$//;
+   while(chomp($event)) { };
+
+ok(  $event, # actual results
+     'Format byte length size field is zero.', # expected results
+     "",
+     "neuterify scalar binary secsii, length size error");
+
+#  ok:  23
+
+   # Perl code from C:
+$event = neuterify (pack('H*',$test_data17), scalar => 1);
+
+ok(  ref($event), # actual results
+     'ARRAY', # expected results
+     "",
+     "neuterify scalar binary secsii, no error");
+
+#  ok:  24
+
+ok(  secsify($event), # actual results
+     $test_data18, # expected results
+     "",
+     "neuterify scalar binary secsii");
+
+#  ok:  25
 
    # Perl code from C:
     my $ascii_secsii =
@@ -484,132 +693,80 @@ L
    # Perl code from C:
 my $list = transify ($ascii_secsii, obj_format_code => 'P');
 
-skip_tests( 1 ) unless ok(
-      ref($list), # actual results
-      'ARRAY', # expected results
-      "$list",
-      "transify a free for all secsii input"); 
+ok(  ref($list), # actual results
+     'ARRAY', # expected results
+     "$list",
+     "transify a free for all secsii input");
 
-#  ok:  21
+#  ok:  26
 
 ok(  ref($list) ? secsify( $list ) : '', # actual results
-     $test_data5, # expected results
+     $test_data16, # expected results
      "",
-     "secsify transifed free style secs text");
+     "secsify transified free style secs text");
 
-#  ok:  22
+#  ok:  27
+
+   # Perl code from C:
+    $ascii_secsii =
+'
+L
+( 
+  A "msg"
+  L,4 A[0] A[5] world
+';
+
+   # Perl code from C:
+$list = transify ($ascii_secsii);
+
+ok(  ref(\$list), # actual results
+     'SCALAR', # expected results
+     "",
+     "transify a bad free for all secsii input");
+
+#  ok:  28
 
 ok(  ref(my $number_list = Data::Secs2->new(perl_secs_numbers => 'strict')->listify( $test_data6 )), # actual results
      'ARRAY', # expected results
      "",
-     "strict Perl listify numberic arrays");
+     "Perl listify numeric arrays");
 
-#  ok:  23
+#  ok:  29
 
 ok(  secsify($number_list), # actual results
      $test_data9, # expected results
      "",
-     "secify strict Perl  listified numberic arrays");
-
-#  ok:  24
-
-ok(  ref($number_list = listify( $test_data6 )), # actual results
-     'ARRAY', # expected results
-     "",
-     "multicell listify numberic arrays");
-
-#  ok:  25
-
-ok(  secsify($number_list), # actual results
-     $test_data8, # expected results
-     "",
-     "secify multicell listified numberic arrays");
-
-#  ok:  26
-
-ok(  config('perl_secs_numbers'), # actual results
-     'multicell', # expected results
-     "",
-     "read configuration");
-
-#  ok:  27
-
-ok(  config('perl_secs_numbers','strict'), # actual results
-     'multicell', # expected results
-     "",
-     "write configuration");
-
-#  ok:  28
-
-ok(  config('perl_secs_numbers'), # actual results
-     'strict', # expected results
-     "",
-     "verifiy write configuration");
-
-#  ok:  29
-
-ok(  config('perl_secs_numbers','multicell'), # actual results
-     'strict', # expected results
-     "",
-     "restore configuration");
+     "secify Perl  listified numberic arrays");
 
 #  ok:  30
 
-ok(  textify($number_list), # actual results
-     '', # expected results
+ok(  [config('type')], # actual results
+     ['type','ascii'], # expected results
      "",
-     "textify listified list of number arrays");
+     "read configuration");
 
 #  ok:  31
 
-ok(  [@{$number_list->[9]}], # actual results
-     [78,45,25], # expected results
+ok(  [config('type','binary')], # actual results
+     ['type','ascii'], # expected results
      "",
-     "verify 1st textified item element body");
+     "write configuration");
 
 #  ok:  32
 
-ok(  [@{$number_list->[11]}], # actual results
-     [512,1024], # expected results
+ok(  [config('type')], # actual results
+     ['type','binary'], # expected results
      "",
-     "verify 2nd textified item element body");
+     "verify write configuration");
 
 #  ok:  33
 
-ok(  [@{$number_list->[13]}], # actual results
-     [100000], # expected results
+ok(  [config('type','ascii')], # actual results
+     ['type','binary'], # expected results
      "",
-     "verify 3rd textified item element body");
+     "restore configuration");
 
 #  ok:  34
-
-ok(  numberify($number_list), # actual results
-     '', # expected results
-     "",
-     "numberify listified list of number arrays");
-
-#  ok:  35
-
-ok(  unpack('H*', $number_list->[9]), # actual results
-     '4e2d19', # expected results
-     "",
-     "verify 1st numberified item element body");
-
-#  ok:  36
-
-ok(  unpack('H*', $number_list->[11]), # actual results
-     '02000400', # expected results
-     "",
-     "verify 2nd numberified item element body");
-
-#  ok:  37
-
-ok(  unpack('H*', $number_list->[13]), # actual results
-     '000186a0', # expected results
-     "",
-     "verify 3rd numberified item element body");
-
-#  ok:  38
 
 
 =head1 comment out

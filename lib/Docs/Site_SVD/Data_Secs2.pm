@@ -10,25 +10,26 @@ use warnings;
 use warnings::register;
 
 use vars qw($VERSION $DATE $FILE );
-$VERSION = '0.05';
-$DATE = '2004/04/25';
+$VERSION = '0.06';
+$DATE = '2004/05/02';
 $FILE = __FILE__;
 
 use vars qw(%INVENTORY);
 %INVENTORY = (
-    'lib/Docs/Site_SVD/Data_Secs2.pm' => [qw(0.05 2004/04/25), 'revised 0.04'],
-    'MANIFEST' => [qw(0.05 2004/04/25), 'generated, replaces 0.04'],
-    'Makefile.PL' => [qw(0.05 2004/04/25), 'generated, replaces 0.04'],
-    'README' => [qw(0.05 2004/04/25), 'generated, replaces 0.04'],
-    'lib/Data/Secs2.pm' => [qw(1.18 2004/04/25), 'revised 1.17'],
-    't/Data/Secs2.d' => [qw(0.04 2004/04/25), 'revised 0.03'],
-    't/Data/Secs2.pm' => [qw(0.04 2004/04/25), 'revised 0.03'],
-    't/Data/Secs2.t' => [qw(0.05 2004/04/25), 'revised 0.04'],
-    't/Data/File/Package.pm' => [qw(1.16 2004/04/25), 'unchanged'],
-    't/Data/File/SmartNL.pm' => [qw(1.13 2004/04/25), 'unchanged'],
-    't/Data/Text/Scrub.pm' => [qw(1.11 2004/04/25), 'unchanged'],
-    't/Data/Test/Tech.pm' => [qw(1.21 2004/04/25), 'revised 1.2'],
-    't/Data/Data/SecsPack.pm' => [qw(0.03 2004/04/25), 'revised 0.02'],
+    'lib/Docs/Site_SVD/Data_Secs2.pm' => [qw(0.06 2004/05/02), 'revised 0.05'],
+    'MANIFEST' => [qw(0.06 2004/05/02), 'generated, replaces 0.05'],
+    'Makefile.PL' => [qw(0.06 2004/05/02), 'generated, replaces 0.05'],
+    'README' => [qw(0.06 2004/05/02), 'generated, replaces 0.05'],
+    'lib/Data/Secs2.pm' => [qw(1.19 2004/05/02), 'revised 1.18'],
+    't/Data/Secs2.d' => [qw(0.05 2004/05/02), 'revised 0.04'],
+    't/Data/Secs2.pm' => [qw(0.05 2004/05/02), 'revised 0.04'],
+    't/Data/Secs2.t' => [qw(0.06 2004/05/02), 'revised 0.05'],
+    't/Data/File/Package.pm' => [qw(1.16 2004/05/02), 'revised 1.15'],
+    't/Data/File/SmartNL.pm' => [qw(1.14 2004/05/02), 'revised 1.13'],
+    't/Data/Text/Scrub.pm' => [qw(1.12 2004/05/02), 'revised 1.11'],
+    't/Data/Test/Tech.pm' => [qw(1.22 2004/05/02), 'revised 1.21'],
+    't/Data/Data/SecsPack.pm' => [qw(0.04 2004/05/02), 'revised 0.03'],
+    't/Data/Data/Startup.pm' => [qw(0.03 2004/05/02), 'new'],
 
 );
 
@@ -55,11 +56,11 @@ use vars qw(%INVENTORY);
 
   Data::Secs2 - pack, unpack, format, transform between Perl data and SEMI E5-94 nested data
 
- Revision: C
+ Revision: D
 
- Version: 0.05
+ Version: 0.06
 
- Date: 2004/04/25
+ Date: 2004/05/02
 
  Prepared for: General Public 
 
@@ -88,7 +89,7 @@ no matter how many nests of arrays and hashes it contains.
 
 =head2 1.3 Document overview.
 
-This document releases Data::Secs2 version 0.05
+This document releases Data::Secs2 version 0.06
 providing a description of the inventory, installation
 instructions and other information necessary to
 utilize and track this release.
@@ -103,7 +104,7 @@ system file specification.
 
 This document releases the file 
 
- Data-Secs2-0.05.tar.gz
+ Data-Secs2-0.06.tar.gz
 
 found at the following repository(s):
 
@@ -121,7 +122,7 @@ copyright © 2003 2004 Software Diamonds
 
 =item Copyright holder contact.
 
- 603 882-0846 E<lt>support@SoftwareDiamonds.comE<gt>
+ 603 882-0846 E<lt> support@SoftwareDiamonds.com E<gt>
 
 =item License.
 
@@ -175,19 +176,20 @@ consists of the following files:
 
  file                                                         version date       comment
  ------------------------------------------------------------ ------- ---------- ------------------------
- lib/Docs/Site_SVD/Data_Secs2.pm                              0.05    2004/04/25 revised 0.04
- MANIFEST                                                     0.05    2004/04/25 generated, replaces 0.04
- Makefile.PL                                                  0.05    2004/04/25 generated, replaces 0.04
- README                                                       0.05    2004/04/25 generated, replaces 0.04
- lib/Data/Secs2.pm                                            1.18    2004/04/25 revised 1.17
- t/Data/Secs2.d                                               0.04    2004/04/25 revised 0.03
- t/Data/Secs2.pm                                              0.04    2004/04/25 revised 0.03
- t/Data/Secs2.t                                               0.05    2004/04/25 revised 0.04
- t/Data/File/Package.pm                                       1.16    2004/04/25 unchanged
- t/Data/File/SmartNL.pm                                       1.13    2004/04/25 unchanged
- t/Data/Text/Scrub.pm                                         1.11    2004/04/25 unchanged
- t/Data/Test/Tech.pm                                          1.21    2004/04/25 revised 1.2
- t/Data/Data/SecsPack.pm                                      0.03    2004/04/25 revised 0.02
+ lib/Docs/Site_SVD/Data_Secs2.pm                              0.06    2004/05/02 revised 0.05
+ MANIFEST                                                     0.06    2004/05/02 generated, replaces 0.05
+ Makefile.PL                                                  0.06    2004/05/02 generated, replaces 0.05
+ README                                                       0.06    2004/05/02 generated, replaces 0.05
+ lib/Data/Secs2.pm                                            1.19    2004/05/02 revised 1.18
+ t/Data/Secs2.d                                               0.05    2004/05/02 revised 0.04
+ t/Data/Secs2.pm                                              0.05    2004/05/02 revised 0.04
+ t/Data/Secs2.t                                               0.06    2004/05/02 revised 0.05
+ t/Data/File/Package.pm                                       1.16    2004/05/02 revised 1.15
+ t/Data/File/SmartNL.pm                                       1.14    2004/05/02 revised 1.13
+ t/Data/Text/Scrub.pm                                         1.12    2004/05/02 revised 1.11
+ t/Data/Test/Tech.pm                                          1.22    2004/05/02 revised 1.21
+ t/Data/Data/SecsPack.pm                                      0.04    2004/05/02 revised 0.03
+ t/Data/Data/Startup.pm                                       0.03    2004/05/02 new
 
 
 =head2 3.3 Changes
@@ -247,6 +249,62 @@ as a SEMI E5-94 empty list L[0].
 
 Added support for the C<CODE> underlying Perl data type.
 
+=item Data-Secs2-0.06
+
+Changed the definition of a C<SECS Object>, eliminating the option of have
+numbers packed or unpacked to unpack only. Replaced the slot for packed
+with a new encoding of a 'Numeric Scalar'. 
+Perl does not  support 'Test Scalars' while the SEMI E5-94 standard does not 
+support neither scalars. Other languages, such as APL, support nested array,
+'Text Scalars' and 'Numeric Scalars'.
+
+BEFORE: (Data-Secs2-0.05)
+
+ U1
+ [1 2 3] # unpacked
+
+ U1
+ $*%  # packed
+
+
+AFTER: (Data-Secs2-0.06)
+
+ U1
+ [1 2 3]  # numeric array
+
+ U1
+ 1  # numeric scalar
+
+ A
+ 'hello'  # text array
+
+ A
+ 'h' # text scalar
+
+Note that altough text scalars are possible and exist in other
+languages, the C<Data::Secs2> program module
+does not provide support for them.
+In Perl what other languages consider text arrays are text scalars.
+Since underlying Perl language does not
+support them, they are not part of common Perl practices, and
+turning Perl text arrays into text scalars and introducing
+text arrays require extensive gyrations to Perl.
+
+Added a new format type to C<SECS Object> with unspecified
+bytes per cell, format 'N', where the 'N' stands for number.
+Eliminated the C<textify> and C<numerify> subroutines that
+packed and unpacked C<SECS Object> numeric data. It is always
+unpacked for C<Data-Secs2>. Eliminated the C<perl_secs_numbers>
+for the C<listify> subroutine. Since have a crystal clear encoding
+of scalar numberics and scalar arrays (lists), Perl numeric arrays will
+always be encoded as 'multicell' when going form Perl nested lists to
+C<SECS Object>.
+
+Changed the output of the C<perlify> subroutine from a list of
+variables to a reference to a list of variables and introduced
+a scalar as an error message. This allows another way to
+output error messages beside optional C<warns> and C<dies>.
+
 =back
 
 =head2 3.4 Adaptation data.
@@ -285,13 +343,13 @@ Enter one of the following repositories in a web browser:
   http://www.softwarediamonds/packages/
   http://www.perl.com/CPAN/authors/id/S/SO/SOFTDIA/
 
-Right click on 'Data-Secs2-0.05.tar.gz' and download to a temporary
+Right click on 'Data-Secs2-0.06.tar.gz' and download to a temporary
 installation directory.
 Enter the following where $make is 'nmake' for microsoft
 windows; otherwise 'make'.
 
- gunzip Data-Secs2-0.05.tar.gz
- tar -xf Data-Secs2-0.05.tar
+ gunzip Data-Secs2-0.06.tar.gz
+ tar -xf Data-Secs2-0.06.tar
  perl Makefile.PL
  $make test
  $make install
@@ -304,7 +362,8 @@ not install, download and install unxutils from
 
 =item Prerequistes.
 
- 'Data::SecsPack' => '0.01',
+ 'Data::SecsPack' => '0.04',
+ 'Data::Startup' => '0.02'
 
 
 =item Security, privacy, or safety precautions.
@@ -323,7 +382,7 @@ as part of the installation:
 If there are installation problems or questions with the installation
 contact
 
- 603 882-0846 E<lt>support@SoftwareDiamonds.comE<gt>
+ 603 882-0846 E<lt> support@SoftwareDiamonds.com E<gt>
 
 =back
 
@@ -361,27 +420,17 @@ Plain Old Documentation
 
 =item L<Data::Secs2|Data::Secs2> 
 
+=item L<Data::SecsPack|Data::SecsPack> 
+
+=item L<Data::Startup|Data::Startup> 
+
 =item L<Docs::US_DOD::SVD|Docs::US_DOD::SVD> 
 
 =item L<Docs::US_DOD::STD|Docs::US_DOD::STD> 
 
-
 =back
 
 =for html
-<hr>
-<p><br>
-<!-- BLK ID="PROJECT_MANAGEMENT" -->
-<!-- /BLK -->
-<p><br>
-<!-- BLK ID="NOTICE" -->
-<!-- /BLK -->
-<p><br>
-<!-- BLK ID="OPT-IN" -->
-<!-- /BLK -->
-<p><br>
-<!-- BLK ID="LOG_CGI" -->
-<!-- /BLK -->
 <p><br>
 
 =cut
@@ -391,11 +440,11 @@ Plain Old Documentation
 __DATA__
 
 DISTNAME: Data-Secs2^
-VERSION : 0.05^
+VERSION : 0.06^
 FREEZE: 1^
 PREVIOUS_DISTNAME:  ^
-PREVIOUS_RELEASE: 0.04^
-REVISION: C^
+PREVIOUS_RELEASE: 0.05^
+REVISION: D^
 
 AUTHOR  : SoftwareDiamonds.com E<lt>support@SoftwareDiamonds.comE<gt>^
 ABSTRACT: pack, unpack, format, transform between Perl data and SEMI E5-94 SECS-II nested data^
@@ -426,10 +475,12 @@ lib/File/SmartNL.pm => t/Data/File/SmartNL.pm
 lib/Text/Scrub.pm => t/Data/Text/Scrub.pm
 lib/Test/Tech.pm => t/Data/Test/Tech.pm
 lib/Data/SecsPack.pm => t/Data/Data/SecsPack.pm
+lib/Data/Startup.pm => t/Data/Data/Startup.pm
 ^
 
 PREREQ_PM:
-'Data::SecsPack' => '0.01',
+'Data::SecsPack' => '0.04',
+'Data::Startup' => '0.02'
 ^
 README_PODS: lib/Data/Secs2.pm^
 TESTS: t/Data/Secs2.t^
@@ -491,6 +542,62 @@ The Perl undef was not finding a home in the SECS2 Object. Found a home
 as a SEMI E5-94 empty list L[0].
 
 Added support for the C<CODE> underlying Perl data type.
+
+\=item Data-Secs2-0.06
+
+Changed the definition of a C<SECS Object>, eliminating the option of have
+numbers packed or unpacked to unpack only. Replaced the slot for packed
+with a new encoding of a 'Numeric Scalar'. 
+Perl does not  support 'Test Scalars' while the SEMI E5-94 standard does not 
+support neither scalars. Other languages, such as APL, support nested array,
+'Text Scalars' and 'Numeric Scalars'.
+
+BEFORE: (Data-Secs2-0.05)
+
+ U1
+ [1 2 3] # unpacked
+
+ U1
+ $*%  # packed
+
+
+AFTER: (Data-Secs2-0.06)
+
+ U1
+ [1 2 3]  # numeric array
+
+ U1
+ 1  # numeric scalar
+
+ A
+ 'hello'  # text array
+
+ A
+ 'h' # text scalar
+
+Note that altough text scalars are possible and exist in other
+languages, the C<Data::Secs2> program module
+does not provide support for them.
+In Perl what other languages consider text arrays are text scalars.
+Since underlying Perl language does not
+support them, they are not part of common Perl practices, and
+turning Perl text arrays into text scalars and introducing
+text arrays require extensive gyrations to Perl.
+
+Added a new format type to C<SECS Object> with unspecified
+bytes per cell, format 'N', where the 'N' stands for number.
+Eliminated the C<textify> and C<numerify> subroutines that
+packed and unpacked C<SECS Object> numeric data. It is always
+unpacked for C<Data-Secs2>. Eliminated the C<perl_secs_numbers>
+for the C<listify> subroutine. Since have a crystal clear encoding
+of scalar numberics and scalar arrays (lists), Perl numeric arrays will
+always be encoded as 'multicell' when going form Perl nested lists to
+C<SECS Object>.
+
+Changed the output of the C<perlify> subroutine from a list of
+variables to a reference to a list of variables and introduced
+a scalar as an error message. This allows another way to
+output error messages beside optional C<warns> and C<dies>.
 
 \=back
 
@@ -588,10 +695,8 @@ not install, download and install unxutils from
  http://packages.softwarediamonds.com
 ^
 
-SUPPORT: 603 882-0846 E<lt>support@SoftwareDiamonds.comE<gt>
-^
+SUPPORT: 603 882-0846 E<lt> support@SoftwareDiamonds.com E<gt>^
 
-SUPPORT: 603 882-0846 E<lt>support@SoftwareDiamonds.comE<gt>^
 
 NOTES:
 The following are useful acronyms:
@@ -622,29 +727,19 @@ SEE_ALSO:
 
 \=item L<Data::Secs2|Data::Secs2> 
 
+\=item L<Data::SecsPack|Data::SecsPack> 
+
+\=item L<Data::Startup|Data::Startup> 
+
 \=item L<Docs::US_DOD::SVD|Docs::US_DOD::SVD> 
 
 \=item L<Docs::US_DOD::STD|Docs::US_DOD::STD> 
-
 
 \=back
 ^
 
 
-HTML:
-<hr>
-<p><br>
-<!-- BLK ID="PROJECT_MANAGEMENT" -->
-<!-- /BLK -->
-<p><br>
-<!-- BLK ID="NOTICE" -->
-<!-- /BLK -->
-<p><br>
-<!-- BLK ID="OPT-IN" -->
-<!-- /BLK -->
-<p><br>
-<!-- BLK ID="LOG_CGI" -->
-<!-- /BLK -->
+HTML: 
 <p><br>
 ^
 ~-~
