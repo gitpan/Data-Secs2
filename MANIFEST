@@ -6,7 +6,8 @@ lib/Data/Secs2.pm
 t/Data/Secs2.d
 t/Data/Secs2.pm
 t/Data/Secs2.t
-tlib/File/Package.pm
-tlib/File/SmartNL.pm
-tlib/Text/Scrub.pm
-tlib/Test/Tech.pm
+t/Data/File/Package.pm
+t/Data/File/SmartNL.pm
+t/Data/Text/Scrub.pm
+t/Data/Test/Tech.pm
+t/Data/Data/SecsPack.pm
