@@ -7,8 +7,8 @@ use warnings;
 use warnings::register;
 
 use vars qw($VERSION $DATE);
-$VERSION = '0.03';   # automatically generated file
-$DATE = '2004/04/17';
+$VERSION = '0.04';   # automatically generated file
+$DATE = '2004/04/25';
 
 
 ##### Demonstration Script ####
@@ -100,8 +100,8 @@ MSG
 demo( "\ \ \ \ use\ File\:\:Package\;\
 \ \ \ \ my\ \$fp\ \=\ \'File\:\:Package\'\;\
 \
-\ \ \ \ use\ Data\:\:Secs2\ qw\(arrayify\ listify\ neuterify\ numberify\ \
-\ \ \ \ \ \ \ \ \ perlify\ secsify\ secs_elementify\ stringify\ textify\ transify\)\;\
+\ \ \ \ use\ Data\:\:Secs2\ qw\(arrayify\ config\ listify\ neuterify\ numberify\ perlify\ \
+\ \ \ \ \ \ \ \ \ perl_typify\ secsify\ secs_elementify\ stringify\ textify\ transify\)\;\
 \
 \ \ \ \ my\ \$uut\ \=\ \'Data\:\:Secs2\'\;\
 \ \ \ \ my\ \$loaded\;\
@@ -192,12 +192,53 @@ L\[6\]\
 \ \ \ \ A\[0\]\
 \ \ \ \ A\[5\]\ ARRAY\
 \ \ \ \ A\[4\]\ body\
+\'\;\
+\
+my\ \$test_data6\ \=\ \[\ \[78\,45\,25\]\,\ \[512\,1024\]\,\ 100000\ \]\;\
+\
+my\ \$test_data7\ \=\ \'a50150010541004105\'\ \.\ unpack\(\'H\*\'\,\'ARRAY\'\)\ \.\ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \'a5034e2d19\'\ \.\ \ \'a90402000400\'\ \.\ \'b104000186a0\'\;\
+\
+\#\#\#\#\#\#\#\
+\#\ multicell\ numberics\,\ Perl\ Secs\ Object\
+\#\
+my\ \$test_data8\ \=\
+\'U1\[1\]\ 80\
+L\[5\]\
+\ \ A\[0\]\
+\ \ A\[5\]\ ARRAY\
+\ \ U1\[3\]\ 78\ 45\ 25\
+\ \ U2\[2\]\ 512\ 1024\
+\ \ U4\[1\]\ 100000\
+\'\;\
+\
+\
+\#\#\#\#\#\#\#\
+\#\ Strict\ Perl\ numberics\,\ Perl\ Secs\ Object\
+\#\
+my\ \$test_data9\ \=\
+\'U1\[1\]\ 80\
+L\[5\]\
+\ \ A\[0\]\
+\ \ A\[5\]\ ARRAY\
+\ \ L\[5\]\
+\ \ \ \ A\[0\]\
+\ \ \ \ A\[5\]\ ARRAY\
+\ \ \ \ U1\[1\]\ 78\
+\ \ \ \ U1\[1\]\ 45\
+\ \ \ \ U1\[1\]\ 25\
+\ \ L\[4\]\
+\ \ \ \ A\[0\]\
+\ \ \ \ A\[5\]\ ARRAY\
+\ \ \ \ U2\[1\]\ 512\
+\ \ \ \ U2\[1\]\ 1024\
+\ \ U4\[1\]\ 100000\
 \'\;"); # typed in command           
           use File::Package;
     my $fp = 'File::Package';
 
-    use Data::Secs2 qw(arrayify listify neuterify numberify 
-         perlify secsify secs_elementify stringify textify transify);
+    use Data::Secs2 qw(arrayify config listify neuterify numberify perlify 
+         perl_typify secsify secs_elementify stringify textify transify);
 
     my $uut = 'Data::Secs2';
     my $loaded;
@@ -288,6 +329,47 @@ L[6]
     A[0]
     A[5] ARRAY
     A[4] body
+';
+
+my $test_data6 = [ [78,45,25], [512,1024], 100000 ];
+
+my $test_data7 = 'a50150010541004105' . unpack('H*','ARRAY') . 
+                 'a5034e2d19' .  'a90402000400' . 'b104000186a0';
+
+#######
+# multicell numberics, Perl Secs Object
+#
+my $test_data8 =
+'U1[1] 80
+L[5]
+  A[0]
+  A[5] ARRAY
+  U1[3] 78 45 25
+  U2[2] 512 1024
+  U4[1] 100000
+';
+
+
+#######
+# Strict Perl numberics, Perl Secs Object
+#
+my $test_data9 =
+'U1[1] 80
+L[5]
+  A[0]
+  A[5] ARRAY
+  L[5]
+    A[0]
+    A[5] ARRAY
+    U1[1] 78
+    U1[1] 45
+    U1[1] 25
+  L[4]
+    A[0]
+    A[5] ARRAY
+    U2[1] 512
+    U2[1] 1024
+  U4[1] 100000
 ';; # execution
 
 print << 'EOF';
@@ -403,6 +485,19 @@ demo( "my\ \$big_secs2\ \=\ unpack\(\'H\*\'\,secsify\(\ listify\(\ \[\'2\'\,\ \'
 print << 'EOF';
 
  => ##################
+ => # binary secsify numeric arrays
+ => # 
+ => ###
+
+EOF
+
+demo( "\$big_secs2\ \=\ unpack\(\'H\*\'\,secsify\(\ listify\(\ \$test_data6\ \)\,\ \{type\ \=\>\ \'binary\'\}\)\)", # typed in command           
+      $big_secs2 = unpack('H*',secsify( listify( $test_data6 ), {type => 'binary'}))); # execution
+
+
+print << 'EOF';
+
+ => ##################
  => # neuterify a big secsii
  => # 
  => ###
@@ -411,6 +506,19 @@ EOF
 
 demo( "secsify\(neuterify\ \(pack\(\'H\*\'\,\$big_secs2\)\)\)", # typed in command           
       secsify(neuterify (pack('H*',$big_secs2)))); # execution
+
+
+print << 'EOF';
+
+ => ##################
+ => # neuterify a multicell binary Perl SECS obj
+ => # 
+ => ###
+
+EOF
+
+demo( "secsify\(neuterify\ \(pack\(\'H\*\'\,\$test_data7\)\)\)", # typed in command           
+      secsify(neuterify (pack('H*',$test_data7)))); # execution
 
 
 print << 'EOF';
@@ -492,20 +600,20 @@ demo( "ref\(\$list\)\ \?\ secsify\(\ \$list\ \)\ \:\ \'\'", # typed in command
 print << 'EOF';
 
  => ##################
- => # listify a list of number arrays
+ => # strict Perl listify numberic arrays
  => # 
  => ###
 
 EOF
 
-demo( "ref\(my\ \$number_list\ \=\ listify\(\ my\ \$test_data6\ \=\ \[\ \[78\,45\,25\]\,\ \[512\,1024\]\,\ 100000\ \]\ \)\)", # typed in command           
-      ref(my $number_list = listify( my $test_data6 = [ [78,45,25], [512,1024], 100000 ] ))); # execution
+demo( "ref\(my\ \$number_list\ \=\ Data\:\:Secs2\-\>new\(perl_secs_numbers\ \=\>\ \'strict\'\)\-\>listify\(\ \$test_data6\ \)\)", # typed in command           
+      ref(my $number_list = Data::Secs2->new(perl_secs_numbers => 'strict')->listify( $test_data6 ))); # execution
 
 
 print << 'EOF';
 
  => ##################
- => # secify a listified list of number arrays
+ => # secify strict Perl  listified numberic arrays
  => # 
  => ###
 
@@ -513,6 +621,84 @@ EOF
 
 demo( "secsify\(\$number_list\)", # typed in command           
       secsify($number_list)); # execution
+
+
+print << 'EOF';
+
+ => ##################
+ => # multicell listify numberic arrays
+ => # 
+ => ###
+
+EOF
+
+demo( "ref\(\$number_list\ \=\ listify\(\ \$test_data6\ \)\)", # typed in command           
+      ref($number_list = listify( $test_data6 ))); # execution
+
+
+print << 'EOF';
+
+ => ##################
+ => # secify multicell listified numberic arrays
+ => # 
+ => ###
+
+EOF
+
+demo( "secsify\(\$number_list\)", # typed in command           
+      secsify($number_list)); # execution
+
+
+print << 'EOF';
+
+ => ##################
+ => # read configuration
+ => # 
+ => ###
+
+EOF
+
+demo( "config\(\'perl_secs_numbers\'\)", # typed in command           
+      config('perl_secs_numbers')); # execution
+
+
+print << 'EOF';
+
+ => ##################
+ => # write configuration
+ => # 
+ => ###
+
+EOF
+
+demo( "config\(\'perl_secs_numbers\'\,\'strict\'\)", # typed in command           
+      config('perl_secs_numbers','strict')); # execution
+
+
+print << 'EOF';
+
+ => ##################
+ => # verifiy write configuration
+ => # 
+ => ###
+
+EOF
+
+demo( "config\(\'perl_secs_numbers\'\)", # typed in command           
+      config('perl_secs_numbers')); # execution
+
+
+print << 'EOF';
+
+ => ##################
+ => # restore configuration
+ => # 
+ => ###
+
+EOF
+
+demo( "config\(\'perl_secs_numbers\'\,\'multicell\'\)", # typed in command           
+      config('perl_secs_numbers','multicell')); # execution
 
 
 print << 'EOF';

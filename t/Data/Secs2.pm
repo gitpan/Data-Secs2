@@ -10,8 +10,8 @@ use warnings;
 use warnings::register;
 
 use vars qw($VERSION $DATE $FILE );
-$VERSION = '0.03';
-$DATE = '2004/04/17';
+$VERSION = '0.04';
+$DATE = '2004/04/25';
 $FILE = __FILE__;
 
 ########
@@ -40,7 +40,7 @@ $FILE = __FILE__;
 
  Version: 
 
- Date: 2004/04/17
+ Date: 2004/04/24
 
  Prepared for: General Public 
 
@@ -80,7 +80,7 @@ L<STD FormDB Test Description Fields|Test::STDmaker/STD FormDB Test Description 
 
 =head2 Test Plan
 
- T: 30^
+ T: 38^
 
 =head2 ok: 1
 
@@ -88,8 +88,8 @@ L<STD FormDB Test Description Fields|Test::STDmaker/STD FormDB Test Description 
   C:
      use File::Package;
      my $fp = 'File::Package';
-     use Data::Secs2 qw(arrayify listify neuterify numberify 
-          perlify secsify secs_elementify stringify textify transify);
+     use Data::Secs2 qw(arrayify config listify neuterify numberify perlify 
+          perl_typify secsify secs_elementify stringify textify transify);
      my $uut = 'Data::Secs2';
      my $loaded;
  my $test_data1 =
@@ -174,6 +174,43 @@ L<STD FormDB Test Description Fields|Test::STDmaker/STD FormDB Test Description 
      A[0]
      A[5] ARRAY
      A[4] body
+ ';
+ my $test_data6 = [ [78,45,25], [512,1024], 100000 ];
+ my $test_data7 = 'a50150010541004105' . unpack('H*','ARRAY') . 
+                  'a5034e2d19' .  'a90402000400' . 'b104000186a0';
+ #######
+ # multicell numberics, Perl Secs Object
+ #
+ my $test_data8 =
+ 'U1[1] 80
+ L[5]
+   A[0]
+   A[5] ARRAY
+   U1[3] 78 45 25
+   U2[2] 512 1024
+   U4[1] 100000
+ ';
+
+ #######
+ # Strict Perl numberics, Perl Secs Object
+ #
+ my $test_data9 =
+ 'U1[1] 80
+ L[5]
+   A[0]
+   A[5] ARRAY
+   L[5]
+     A[0]
+     A[5] ARRAY
+     U1[1] 78
+     U1[1] 45
+     U1[1] 25
+   L[4]
+     A[0]
+     A[5] ARRAY
+     U2[1] 512
+     U2[1] 1024
+   U4[1] 100000
  ';
  ^
  VO: ^
@@ -321,6 +358,13 @@ L<STD FormDB Test Description Fields|Test::STDmaker/STD FormDB Test Description 
 
 =head2 ok: 17
 
+  N: binary secsify numeric arrays^
+  A: $big_secs2 = unpack('H*',secsify( listify( $test_data6 ), {type => 'binary'}))^
+  E: $test_data7^
+ ok: 17^
+
+=head2 ok: 18
+
  VO: ^
   N: binary secsify array with nested hashes, arrays, objects^
 
@@ -354,16 +398,23 @@ L<STD FormDB Test Description Fields|Test::STDmaker/STD FormDB Test Description 
     )
  ^
   E: $big_secs2^
- ok: 17^
+ ok: 18^
 
-=head2 ok: 18
+=head2 ok: 19
 
   N: neuterify a big secsii^
   A: secsify(neuterify (pack('H*',$big_secs2)))^
   E: $test_data4^
- ok: 18^
+ ok: 19^
 
-=head2 ok: 19
+=head2 ok: 20
+
+  N: neuterify a multicell binary Perl SECS obj^
+  A: secsify(neuterify (pack('H*',$test_data7)))^
+  E: $test_data8^
+ ok: 20^
+
+=head2 ok: 21
 
   N: transify a free for all secsii input^
 
@@ -394,94 +445,126 @@ L<STD FormDB Test Description Fields|Test::STDmaker/STD FormDB Test Description 
  DM: $list^
   A: ref($list)^
  SE: 'ARRAY'^
- ok: 19^
-
-=head2 ok: 20
-
-  N: secsify transifed free style secs text^
-  A: ref($list) ? secsify( $list ) : ''^
-  E: $test_data5^
- ok: 20^
-
-=head2 ok: 21
-
-  N: listify a list of number arrays^
-  A: ref(my $number_list = listify( my $test_data6 = [ [78,45,25], [512,1024], 100000 ] ))^
-  E: 'ARRAY'^
  ok: 21^
 
 =head2 ok: 22
 
-  N: secify a listified list of number arrays^
-  A: secsify($number_list)^
-
-  E:
- 'U1[1] 80
- L[5]
-   A[0]
-   A[5] ARRAY
-   U1[3] 78 45 25
-   U2[2] 512 1024
-   U4[1] 100000
- '
- ^
+  N: secsify transifed free style secs text^
+  A: ref($list) ? secsify( $list ) : ''^
+  E: $test_data5^
  ok: 22^
 
 =head2 ok: 23
 
-  N: textify listified list of number arrays^
-  A: textify($number_list)^
-  E: ''^
+  N: strict Perl listify numberic arrays^
+  A: ref(my $number_list = Data::Secs2->new(perl_secs_numbers => 'strict')->listify( $test_data6 ))^
+  E: 'ARRAY'^
  ok: 23^
 
 =head2 ok: 24
 
-  N: verify 1st textified item element body^
-  A: [@{$number_list->[9]}]^
-  E: [78,45,25]^
+  N: secify strict Perl  listified numberic arrays^
+  A: secsify($number_list)^
+  E: $test_data9^
  ok: 24^
 
 =head2 ok: 25
 
-  N: verify 2nd textified item element body^
-  A: [@{$number_list->[11]}]^
-  E: [512,1024]^
+  N: multicell listify numberic arrays^
+  A: ref($number_list = listify( $test_data6 ))^
+  E: 'ARRAY'^
  ok: 25^
 
 =head2 ok: 26
 
-  N: verify 3rd textified item element body^
-  A: [@{$number_list->[13]}]^
-  E: [100000]^
+  N: secify multicell listified numberic arrays^
+  A: secsify($number_list)^
+  E: $test_data8^
  ok: 26^
 
 =head2 ok: 27
 
-  N: numberify listified list of number arrays^
-  A: numberify($number_list)^
-  E: ''^
+  N: read configuration^
+  A: config('perl_secs_numbers')^
+  E: 'multicell'^
  ok: 27^
 
 =head2 ok: 28
 
-  N: verify 1st numberified item element body^
-  A: unpack('H*', $number_list->[9])^
-  E: '4e2d19'^
+  N: write configuration^
+  A: config('perl_secs_numbers','strict')^
+  E: 'multicell'^
  ok: 28^
 
 =head2 ok: 29
 
-  N: verify 2nd numberified item element body^
-  A: unpack('H*', $number_list->[11])^
-  E: '02000400'^
+  N: verifiy write configuration^
+  A: config('perl_secs_numbers')^
+  E: 'strict'^
  ok: 29^
 
 =head2 ok: 30
 
+  N: restore configuration^
+  A: config('perl_secs_numbers','multicell')^
+  E: 'strict'^
+ ok: 30^
+
+=head2 ok: 31
+
+  N: textify listified list of number arrays^
+  A: textify($number_list)^
+  E: ''^
+ ok: 31^
+
+=head2 ok: 32
+
+  N: verify 1st textified item element body^
+  A: [@{$number_list->[9]}]^
+  E: [78,45,25]^
+ ok: 32^
+
+=head2 ok: 33
+
+  N: verify 2nd textified item element body^
+  A: [@{$number_list->[11]}]^
+  E: [512,1024]^
+ ok: 33^
+
+=head2 ok: 34
+
+  N: verify 3rd textified item element body^
+  A: [@{$number_list->[13]}]^
+  E: [100000]^
+ ok: 34^
+
+=head2 ok: 35
+
+  N: numberify listified list of number arrays^
+  A: numberify($number_list)^
+  E: ''^
+ ok: 35^
+
+=head2 ok: 36
+
+  N: verify 1st numberified item element body^
+  A: unpack('H*', $number_list->[9])^
+  E: '4e2d19'^
+ ok: 36^
+
+=head2 ok: 37
+
+  N: verify 2nd numberified item element body^
+  A: unpack('H*', $number_list->[11])^
+  E: '02000400'^
+ ok: 37^
+
+=head2 ok: 38
+
   N: verify 3rd numberified item element body^
   A: unpack('H*', $number_list->[13])^
   E: '000186a0'^
- ok: 30^
+ ok: 38^
 
 
 
@@ -601,15 +684,15 @@ Demo: Secs2.d^
 Verify: Secs2.t^
 
 
- T: 30^
+ T: 38^
 
 
  C:
     use File::Package;
     my $fp = 'File::Package';
 
-    use Data::Secs2 qw(arrayify listify neuterify numberify 
-         perlify secsify secs_elementify stringify textify transify);
+    use Data::Secs2 qw(arrayify config listify neuterify numberify perlify 
+         perl_typify secsify secs_elementify stringify textify transify);
 
     my $uut = 'Data::Secs2';
     my $loaded;
@@ -700,6 +783,47 @@ L[6]
     A[0]
     A[5] ARRAY
     A[4] body
+';
+
+my $test_data6 = [ [78,45,25], [512,1024], 100000 ];
+
+my $test_data7 = 'a50150010541004105' . unpack('H*','ARRAY') . 
+                 'a5034e2d19' .  'a90402000400' . 'b104000186a0';
+
+#######
+# multicell numberics, Perl Secs Object
+#
+my $test_data8 =
+'U1[1] 80
+L[5]
+  A[0]
+  A[5] ARRAY
+  U1[3] 78 45 25
+  U2[2] 512 1024
+  U4[1] 100000
+';
+
+
+#######
+# Strict Perl numberics, Perl Secs Object
+#
+my $test_data9 =
+'U1[1] 80
+L[5]
+  A[0]
+  A[5] ARRAY
+  L[5]
+    A[0]
+    A[5] ARRAY
+    U1[1] 78
+    U1[1] 45
+    U1[1] 25
+  L[4]
+    A[0]
+    A[5] ARRAY
+    U2[1] 512
+    U2[1] 1024
+  U4[1] 100000
 ';
 ^
 
@@ -819,6 +943,11 @@ ok: 15^
  E: 'a50150010541004105' . unpack('H*','ARRAY') . 'a501024105' . unpack('H*','hello') . 'a50104'^
 ok: 16^
 
+ N: binary secsify numeric arrays^
+ A: $big_secs2 = unpack('H*',secsify( listify( $test_data6 ), {type => 'binary'}))^
+ E: $test_data7^
+ok: 17^
+
 VO: ^
  N: binary secsify array with nested hashes, arrays, objects^
 
@@ -854,12 +983,17 @@ unpack('H*',
 ^
 
  E: $big_secs2^
-ok: 17^
+ok: 18^
 
  N: neuterify a big secsii^
  A: secsify(neuterify (pack('H*',$big_secs2)))^
  E: $test_data4^
-ok: 18^
+ok: 19^
+
+ N: neuterify a multicell binary Perl SECS obj^
+ A: secsify(neuterify (pack('H*',$test_data7)))^
+ E: $test_data8^
+ok: 20^
 
  N: transify a free for all secsii input^
 
@@ -893,73 +1027,92 @@ L
 DM: $list^
  A: ref($list)^
 SE: 'ARRAY'^
-ok: 19^
+ok: 21^
 
  N: secsify transifed free style secs text^
  A: ref($list) ? secsify( $list ) : ''^
  E: $test_data5^
-ok: 20^
-
- N: listify a list of number arrays^
- A: ref(my $number_list = listify( my $test_data6 = [ [78,45,25], [512,1024], 100000 ] ))^
- E: 'ARRAY'^
-ok: 21^
-
- N: secify a listified list of number arrays^
- A: secsify($number_list)^
-
- E:
-'U1[1] 80
-L[5]
-  A[0]
-  A[5] ARRAY
-  U1[3] 78 45 25
-  U2[2] 512 1024
-  U4[1] 100000
-'
-^
-
 ok: 22^
+
+ N: strict Perl listify numberic arrays^
+ A: ref(my $number_list = Data::Secs2->new(perl_secs_numbers => 'strict')->listify( $test_data6 ))^
+ E: 'ARRAY'^
+ok: 23^
+
+ N: secify strict Perl  listified numberic arrays^
+ A: secsify($number_list)^
+ E: $test_data9^
+ok: 24^
+
+ N: multicell listify numberic arrays^
+ A: ref($number_list = listify( $test_data6 ))^
+ E: 'ARRAY'^
+ok: 25^
+
+ N: secify multicell listified numberic arrays^
+ A: secsify($number_list)^
+ E: $test_data8^
+ok: 26^
+
+ N: read configuration^
+ A: config('perl_secs_numbers')^
+ E: 'multicell'^
+ok: 27^
+
+ N: write configuration^
+ A: config('perl_secs_numbers','strict')^
+ E: 'multicell'^
+ok: 28^
+
+ N: verifiy write configuration^
+ A: config('perl_secs_numbers')^
+ E: 'strict'^
+ok: 29^
+
+ N: restore configuration^
+ A: config('perl_secs_numbers','multicell')^
+ E: 'strict'^
+ok: 30^
 
  N: textify listified list of number arrays^
  A: textify($number_list)^
  E: ''^
-ok: 23^
+ok: 31^
 
  N: verify 1st textified item element body^
  A: [@{$number_list->[9]}]^
  E: [78,45,25]^
-ok: 24^
+ok: 32^
 
  N: verify 2nd textified item element body^
  A: [@{$number_list->[11]}]^
  E: [512,1024]^
-ok: 25^
+ok: 33^
 
  N: verify 3rd textified item element body^
  A: [@{$number_list->[13]}]^
  E: [100000]^
-ok: 26^
+ok: 34^
 
  N: numberify listified list of number arrays^
  A: numberify($number_list)^
  E: ''^
-ok: 27^
+ok: 35^
 
  N: verify 1st numberified item element body^
  A: unpack('H*', $number_list->[9])^
  E: '4e2d19'^
-ok: 28^
+ok: 36^
 
  N: verify 2nd numberified item element body^
  A: unpack('H*', $number_list->[11])^
  E: '02000400'^
-ok: 29^
+ok: 37^
 
  N: verify 3rd numberified item element body^
  A: unpack('H*', $number_list->[13])^
  E: '000186a0'^
-ok: 30^
+ok: 38^
 
 
 See_Also: ^

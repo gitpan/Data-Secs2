@@ -10,25 +10,25 @@ use warnings;
 use warnings::register;
 
 use vars qw($VERSION $DATE $FILE );
-$VERSION = '0.04';
-$DATE = '2004/04/17';
+$VERSION = '0.05';
+$DATE = '2004/04/25';
 $FILE = __FILE__;
 
 use vars qw(%INVENTORY);
 %INVENTORY = (
-    'lib/Docs/Site_SVD/Data_Secs2.pm' => [qw(0.04 2004/04/17), 'revised 0.03'],
-    'MANIFEST' => [qw(0.04 2004/04/17), 'generated, replaces 0.03'],
-    'Makefile.PL' => [qw(0.04 2004/04/17), 'generated, replaces 0.03'],
-    'README' => [qw(0.04 2004/04/17), 'generated, replaces 0.03'],
-    'lib/Data/Secs2.pm' => [qw(1.17 2004/04/17), 'revised 1.16'],
-    't/Data/Secs2.d' => [qw(0.03 2004/04/17), 'revised 0.02'],
-    't/Data/Secs2.pm' => [qw(0.03 2004/04/17), 'revised 0.02'],
-    't/Data/Secs2.t' => [qw(0.04 2004/04/17), 'revised 0.03'],
-    't/Data/File/Package.pm' => [qw(1.16 2004/04/17), 'unchanged'],
-    't/Data/File/SmartNL.pm' => [qw(1.13 2004/04/17), 'unchanged'],
-    't/Data/Text/Scrub.pm' => [qw(1.11 2004/04/17), 'unchanged'],
-    't/Data/Test/Tech.pm' => [qw(1.2 2004/04/17), 'revised 1.17'],
-    't/Data/Data/SecsPack.pm' => [qw(0.02 2004/04/17), 'unchanged'],
+    'lib/Docs/Site_SVD/Data_Secs2.pm' => [qw(0.05 2004/04/25), 'revised 0.04'],
+    'MANIFEST' => [qw(0.05 2004/04/25), 'generated, replaces 0.04'],
+    'Makefile.PL' => [qw(0.05 2004/04/25), 'generated, replaces 0.04'],
+    'README' => [qw(0.05 2004/04/25), 'generated, replaces 0.04'],
+    'lib/Data/Secs2.pm' => [qw(1.18 2004/04/25), 'revised 1.17'],
+    't/Data/Secs2.d' => [qw(0.04 2004/04/25), 'revised 0.03'],
+    't/Data/Secs2.pm' => [qw(0.04 2004/04/25), 'revised 0.03'],
+    't/Data/Secs2.t' => [qw(0.05 2004/04/25), 'revised 0.04'],
+    't/Data/File/Package.pm' => [qw(1.16 2004/04/25), 'unchanged'],
+    't/Data/File/SmartNL.pm' => [qw(1.13 2004/04/25), 'unchanged'],
+    't/Data/Text/Scrub.pm' => [qw(1.11 2004/04/25), 'unchanged'],
+    't/Data/Test/Tech.pm' => [qw(1.21 2004/04/25), 'revised 1.2'],
+    't/Data/Data/SecsPack.pm' => [qw(0.03 2004/04/25), 'revised 0.02'],
 
 );
 
@@ -57,9 +57,9 @@ use vars qw(%INVENTORY);
 
  Revision: C
 
- Version: 0.04
+ Version: 0.05
 
- Date: 2004/04/17
+ Date: 2004/04/25
 
  Prepared for: General Public 
 
@@ -88,7 +88,7 @@ no matter how many nests of arrays and hashes it contains.
 
 =head2 1.3 Document overview.
 
-This document releases Data::Secs2 version 0.04
+This document releases Data::Secs2 version 0.05
 providing a description of the inventory, installation
 instructions and other information necessary to
 utilize and track this release.
@@ -103,12 +103,12 @@ system file specification.
 
 This document releases the file 
 
- Data-Secs2-0.04.tar.gz
+ Data-Secs2-0.05.tar.gz
 
 found at the following repository(s):
 
   http://www.softwarediamonds/packages/
-  http://www.perl.com/CPAN-local/authors/id/S/SO/SOFTDIA/
+  http://www.perl.com/CPAN/authors/id/S/SO/SOFTDIA/
 
 Restrictions regarding duplication and license provisions
 are as follows:
@@ -175,19 +175,19 @@ consists of the following files:
 
  file                                                         version date       comment
  ------------------------------------------------------------ ------- ---------- ------------------------
- lib/Docs/Site_SVD/Data_Secs2.pm                              0.04    2004/04/17 revised 0.03
- MANIFEST                                                     0.04    2004/04/17 generated, replaces 0.03
- Makefile.PL                                                  0.04    2004/04/17 generated, replaces 0.03
- README                                                       0.04    2004/04/17 generated, replaces 0.03
- lib/Data/Secs2.pm                                            1.17    2004/04/17 revised 1.16
- t/Data/Secs2.d                                               0.03    2004/04/17 revised 0.02
- t/Data/Secs2.pm                                              0.03    2004/04/17 revised 0.02
- t/Data/Secs2.t                                               0.04    2004/04/17 revised 0.03
- t/Data/File/Package.pm                                       1.16    2004/04/17 unchanged
- t/Data/File/SmartNL.pm                                       1.13    2004/04/17 unchanged
- t/Data/Text/Scrub.pm                                         1.11    2004/04/17 unchanged
- t/Data/Test/Tech.pm                                          1.2     2004/04/17 revised 1.17
- t/Data/Data/SecsPack.pm                                      0.02    2004/04/17 unchanged
+ lib/Docs/Site_SVD/Data_Secs2.pm                              0.05    2004/04/25 revised 0.04
+ MANIFEST                                                     0.05    2004/04/25 generated, replaces 0.04
+ Makefile.PL                                                  0.05    2004/04/25 generated, replaces 0.04
+ README                                                       0.05    2004/04/25 generated, replaces 0.04
+ lib/Data/Secs2.pm                                            1.18    2004/04/25 revised 1.17
+ t/Data/Secs2.d                                               0.04    2004/04/25 revised 0.03
+ t/Data/Secs2.pm                                              0.04    2004/04/25 revised 0.03
+ t/Data/Secs2.t                                               0.05    2004/04/25 revised 0.04
+ t/Data/File/Package.pm                                       1.16    2004/04/25 unchanged
+ t/Data/File/SmartNL.pm                                       1.13    2004/04/25 unchanged
+ t/Data/Text/Scrub.pm                                         1.11    2004/04/25 unchanged
+ t/Data/Test/Tech.pm                                          1.21    2004/04/25 revised 1.2
+ t/Data/Data/SecsPack.pm                                      0.03    2004/04/25 revised 0.02
 
 
 =head2 3.3 Changes
@@ -219,10 +219,33 @@ Coordiated with the lastest Test::STDmaker by moving the
 test library from tlib to t/Data, the same directory as the test script
 and deleting the test library File::TestPath program module.
 
+=item Data-Secs2-0.04
+
 Greater expanded the subroutines to the following: arrayify, itemify, 
 listify, neuterify, scalarize, secsify, stringify, transify, vectorize.
 Added descriptions and tests for the new functions.
 
+=item Data-Secs2-0.05
+
+Change Perlify to allow translation packed multi-cell number item elements
+as number arrays. Single cell number item elements are still translated
+as a number scalar. This situation exists because SEMI E5 treats a
+single text character and a single number as a cell, while Perl treats
+multiple characters and a single number as a scalar. Granted
+there is the Perl function C<vec> that allows some manipulation
+of multicell data. But it is stretch to say that because of the 
+C<vec> function that multicell integers are an underlying Perl data
+type.
+
+Added C<new> and C<config> subroutine to supply the default, (startup)
+options for each subroutine in the C<Data::Secs2> program module.
+The default options may be overriden with a subroutine input for
+most subroutines.
+
+The Perl undef was not finding a home in the SECS2 Object. Found a home
+as a SEMI E5-94 empty list L[0].
+
+Added support for the C<CODE> underlying Perl data type.
 
 =back
 
@@ -260,15 +283,15 @@ If all else fails, the file may be manually installed.
 Enter one of the following repositories in a web browser:
 
   http://www.softwarediamonds/packages/
-  http://www.perl.com/CPAN-local/authors/id/S/SO/SOFTDIA/
+  http://www.perl.com/CPAN/authors/id/S/SO/SOFTDIA/
 
-Right click on 'Data-Secs2-0.04.tar.gz' and download to a temporary
+Right click on 'Data-Secs2-0.05.tar.gz' and download to a temporary
 installation directory.
 Enter the following where $make is 'nmake' for microsoft
 windows; otherwise 'make'.
 
- gunzip Data-Secs2-0.04.tar.gz
- tar -xf Data-Secs2-0.04.tar
+ gunzip Data-Secs2-0.05.tar.gz
+ tar -xf Data-Secs2-0.05.tar
  perl Makefile.PL
  $make test
  $make install
@@ -306,12 +329,7 @@ contact
 
 =head2 3.7 Possible problems and known errors
 
-The only reason this exists is that it appears earlier versions
-of the 'Data::Dumper' module, say version 2.102 and before, did
-not sort the hash keys.
-
-For at least 'Data::Dumper' version 2.12 there is a sort keys
-option and 'Data::Dumper' should be used directly.
+None.
 
 =head1 4.0 NOTES
 
@@ -373,10 +391,10 @@ Plain Old Documentation
 __DATA__
 
 DISTNAME: Data-Secs2^
-VERSION : 0.04^
+VERSION : 0.05^
 FREEZE: 1^
 PREVIOUS_DISTNAME:  ^
-PREVIOUS_RELEASE: 0.03^
+PREVIOUS_RELEASE: 0.04^
 REVISION: C^
 
 AUTHOR  : SoftwareDiamonds.com E<lt>support@SoftwareDiamonds.comE<gt>^
@@ -391,7 +409,7 @@ SVD_FSPEC: Unix^
 REPOSITORY_DIR: packages^
 REPOSITORY: 
   http://www.softwarediamonds/packages/
-  http://www.perl.com/CPAN-local/authors/id/S/SO/SOFTDIA/
+  http://www.perl.com/CPAN/authors/id/S/SO/SOFTDIA/
 ^
 
 COMPRESS: gzip^
@@ -446,10 +464,33 @@ Coordiated with the lastest Test::STDmaker by moving the
 test library from tlib to t/Data, the same directory as the test script
 and deleting the test library File::TestPath program module.
 
+\=item Data-Secs2-0.04
+
 Greater expanded the subroutines to the following: arrayify, itemify, 
 listify, neuterify, scalarize, secsify, stringify, transify, vectorize.
 Added descriptions and tests for the new functions.
 
+\=item Data-Secs2-0.05
+
+Change Perlify to allow translation packed multi-cell number item elements
+as number arrays. Single cell number item elements are still translated
+as a number scalar. This situation exists because SEMI E5 treats a
+single text character and a single number as a cell, while Perl treats
+multiple characters and a single number as a scalar. Granted
+there is the Perl function C<vec> that allows some manipulation
+of multicell data. But it is stretch to say that because of the 
+C<vec> function that multicell integers are an underlying Perl data
+type.
+
+Added C<new> and C<config> subroutine to supply the default, (startup)
+options for each subroutine in the C<Data::Secs2> program module.
+The default options may be overriden with a subroutine input for
+most subroutines.
+
+The Perl undef was not finding a home in the SECS2 Object. Found a home
+as a SEMI E5-94 empty list L[0].
+
+Added support for the C<CODE> underlying Perl data type.
 
 \=back
 
@@ -468,12 +509,7 @@ no matter how many nests of arrays and hashes it contains.
 ^
 
 PROBLEMS:
-The only reason this exists is that it appears earlier versions
-of the 'Data::Dumper' module, say version 2.102 and before, did
-not sort the hash keys.
-
-For at least 'Data::Dumper' version 2.12 there is a sort keys
-option and 'Data::Dumper' should be used directly.
+None.
 ^
 
 LICENSE:

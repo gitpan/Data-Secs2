@@ -13,8 +13,8 @@ use Test ();   # do not import the "Test" subroutines
 use Data::Secs2 qw(stringify);
 
 use vars qw($VERSION $DATE $FILE);
-$VERSION = '1.2';
-$DATE = '2004/04/17';
+$VERSION = '1.21';
+$DATE = '2004/04/25';
 $FILE = __FILE__;
 
 use vars qw(@ISA @EXPORT_OK);
@@ -93,7 +93,7 @@ sub demo
    # This subroutine uses no object data; therefore,
    # drop any class or object.
    #
-   shift @_ if UNIVERSAL::isa($_[0],__PACKAGE__);
+   shift if UNIVERSAL::isa($_[0],__PACKAGE__);
 
    my ($quoted_expression, @expression) = @_;
 
@@ -137,7 +137,9 @@ sub demo
 #
 sub finish
 {
+    $tech_p = Test::Tech->new() unless $tech_p;
     my $self = UNIVERSAL::isa($_[0],__PACKAGE__) ? shift @_ : $tech_p;
+    $self = ref($self) ? $self : $tech_p;
 
     return undef unless $Test::TESTOUT;  # if IO::Handle object may be destroyed and undef
     return undef unless $Test::planned;  
@@ -202,16 +204,16 @@ sub DESTORY
 }
 
 
-
-
 ######
 #
 #
 sub is_skip
 {
-   my $self = (UNIVERSAL::isa($_[0],__PACKAGE__) && ref($_[0])) ? shift @_ : $tech_p;
-   return ($self->{Skip_Tests}, $self->{Skip_Diag}) if wantarray;
-   $self->{Skip_Tests};
+    $tech_p = Test::Tech->new() unless $tech_p;
+    my $self = (UNIVERSAL::isa($_[0],__PACKAGE__) && ref($_[0])) ? shift @_ : $tech_p;
+    $self = ref($self) ? $self : $tech_p;
+    return ($self->{Skip_Tests}, $self->{Skip_Diag}) if wantarray;
+    $self->{Skip_Tests};
    
 }
 
@@ -222,14 +224,16 @@ sub is_skip
 sub ok
 {
 
-   ######
-   # If no object, use the default $tech_p object.
-   #
-   my $self = (UNIVERSAL::isa($_[0],__PACKAGE__) && ref($_[0])) ? shift @_ : $tech_p;
+    ######
+    # If no object, use the default $tech_p object.
+    #
+    $tech_p = Test::Tech->new() unless $tech_p;
+    my $self = (UNIVERSAL::isa($_[0],__PACKAGE__) && ref($_[0])) ? shift @_ : $tech_p;
+    $self = ref($self) ? $self : $tech_p;
 
-   my ($diagnostic,$name) = ('',''); 
-   my $options = {};
-   if( ref($_[-1]) ) {
+    my ($diagnostic,$name) = ('',''); 
+    my $options = {};
+    if( ref($_[-1]) ) {
        $options = pop @_;
        if( ref($options) eq 'ARRAY') {
            my %options = @$options;
@@ -238,27 +242,40 @@ sub ok
        elsif( ref($options) ne 'HASH') {
            $options = {};
        }
-   }
-   $diagnostic = $options->{diagnostic} if defined $options->{diagnostic};
-   $name = $options->{name} if defined $options->{name};
+    }
+    $diagnostic = $options->{diagnostic} if defined $options->{diagnostic};
+    $name = $options->{name} if defined $options->{name};
 
-   my ($actual_result, $expected_result, $diagnostic_in, $name_in) = @_;
+    my ($actual_result, $expected_result, $diagnostic_in, $name_in) = @_;
 
 
-   ######### 
-   # Fill in undefined inputs
-   #
-   $diagnostic = $diagnostic_in if defined $diagnostic_in;
-   $name = $name_in if defined $name_in;
-   $diagnostic = $name unless defined $diagnostic;
-   $self->{test_name} = $name;  # used by tied handle Test::Tech::Output
+    ######### 
+    # Fill in undefined inputs
+    #
+    $diagnostic = $diagnostic_in if defined $diagnostic_in;
+    $name = $name_in if defined $name_in;
+    $diagnostic = $name unless defined $diagnostic;
+    $self->{test_name} = $name;  # used by tied handle Test::Tech::Output
 
-   if($self->{Skip_Tests}) { # skip rest of tests switch
-       &Test::skip( 1, '', '', $self->{Skip_Diag});
-       return 1; 
-   }
+    if($self->{Skip_Tests}) { # skip rest of tests switch
+        &Test::skip( 1, '', '', $self->{Skip_Diag});
+        return 1; 
+    }
 
-   &Test::ok(stringify($actual_result), stringify($expected_result), $diagnostic);
+    $actual_result = stringify($actual_result);
+    $expected_result = stringify($expected_result);
+    foreach ($actual_result,$expected_result) {
+        if(ref($_)) {
+            $$_ =~ s/\n\n/\n# /g; 
+            $$_ =~ s/\n([^#])/\n# $1/g;
+            $diagnostic = 'Test::Tech::stringify() broken.';
+            $self->{test_name} .= ' # ' . $diagnostic;
+            &Test::ok($$_,'',$diagnostic,$diagnostic);
+            return 0;
+        }
+    } 
+
+    &Test::ok($actual_result, $expected_result, $diagnostic);
 
 }
 
@@ -272,7 +289,7 @@ sub plan
    # This subroutine uses no object data; therefore,
    # drop any class or object.
    #
-   shift @_ if UNIVERSAL::isa($_[0],__PACKAGE__);
+   shift if UNIVERSAL::isa($_[0],__PACKAGE__);
 
    &Test::plan( @_ );
 
@@ -320,39 +337,54 @@ EOF
 sub skip
 {
 
-   ######
-   # If no object, use the default $tech_p object.
-   #
-   my $self = (UNIVERSAL::isa($_[0],__PACKAGE__) && ref($_[0])) ? shift @_ : $tech_p;
+    ######
+    # If no object, use the default $tech_p object.
+    #
+    $tech_p = Test::Tech->new() unless $tech_p;
+    my $self = (UNIVERSAL::isa($_[0],__PACKAGE__) && ref($_[0])) ? shift @_ : $tech_p;
+    $self = ref($self) ? $self : $tech_p;
 
-   my ($diagnostic,$name) = ('',''); 
-   my $options = {};
-   if( ref($_[-1]) ) {
-       $options = pop @_;
-       if( ref($options) eq 'ARRAY') {
-           my %options = @$options;
-           $options = \%options;
-       }
-       elsif( ref($options) ne 'HASH') {
-           $options = {};
-       }
-   }
-   $diagnostic = $options->{diagnostic} if $options->{diagnostic};
-   $name = $options->{name} if $options->{name};
+    my ($diagnostic,$name) = ('',''); 
+    my $options = {};
+    if( ref($_[-1]) ) {
+        $options = pop @_;
+        if( ref($options) eq 'ARRAY') {
+            my %options = @$options;
+            $options = \%options;
+        }
+        elsif( ref($options) ne 'HASH') {
+            $options = {};
+        }
+    }
+    $diagnostic = $options->{diagnostic} if $options->{diagnostic};
+    $name = $options->{name} if $options->{name};
 
-   my ($mod, $actual_result, $expected_result, $diagnostic_in, $name_in) = @_;
+    my ($mod, $actual_result, $expected_result, $diagnostic_in, $name_in) = @_;
 
-   $diagnostic = $diagnostic_in if defined $diagnostic_in;
-   $name = $name_in if defined $name_in;
-   $diagnostic = $name unless defined $diagnostic;
-   $self->{test_name} = $name;  # used by tied handle Test::Tech::Output
+    $diagnostic = $diagnostic_in if defined $diagnostic_in;
+    $name = $name_in if defined $name_in;
+    $diagnostic = $name unless defined $diagnostic;
+    $self->{test_name} = $name;  # used by tied handle Test::Tech::Output
 
-   if($self->{Skip_Tests}) {  # skip rest of tests switch
-       &Test::skip( 1, '', '', $self->{Skip_Diag});
-       return 1; 
-   }
+    if($self->{Skip_Tests}) {  # skip rest of tests switch
+        &Test::skip( 1, '', '', $self->{Skip_Diag});
+        return 1; 
+    }
   
-   &Test::skip($mod, stringify($actual_result), stringify($expected_result), $diagnostic);
+    $actual_result = stringify($actual_result);
+    $expected_result = stringify($expected_result);
+    foreach ($actual_result,$expected_result) {
+        if(ref($_)) {
+            $$_ =~ s/\n\n/\n# /g; 
+            $$_ =~ s/\n([^#])/\n# $1/g;
+            $diagnostic = 'Test::Tech::stringify() broken.';
+            $self->{test_name} .= ' # ' . $diagnostic;
+            &Test::ok($$_,'',$diagnostic,$diagnostic);
+            return 0;
+        }
+    } 
+
+    &Test::skip($mod, $actual_result, $expected_result, $diagnostic);
 
 }
 
@@ -363,18 +395,20 @@ sub skip
 sub skip_tests
 {
 
-   ######
-   # If no object, use the default $tech_p object.
-   #
-   my $self = (UNIVERSAL::isa($_[0],__PACKAGE__) && ref($_[0])) ? shift @_ : $tech_p;
+    ######
+    # If no object, use the default $tech_p object.
+    #
+    $tech_p = Test::Tech->new() unless $tech_p;
+    my $self = (UNIVERSAL::isa($_[0],__PACKAGE__) && ref($_[0])) ? shift @_ : $tech_p;
+    $self = ref($self) ? $self : $tech_p;
 
-   my ($value,$diagnostic) =  @_;
-   my $result = $self->{Skip_Tests};
-   $value = 1 unless (defined $value);
-   $self->{Skip_Tests} = $value;
-   $diagnostic = 'Test not performed because of previous failure.' unless defined $diagnostic;
-   $self->{Skip_Diag} = $value ? $diagnostic : '';
-   $result;
+    my ($value,$diagnostic) =  @_;
+    my $result = $self->{Skip_Tests};
+    $value = 1 unless (defined $value);
+    $self->{Skip_Tests} = $value;
+    $diagnostic = 'Test not performed because of previous failure.' unless defined $diagnostic;
+    $self->{Skip_Diag} = $value ? $diagnostic : '';
+    $result;
    
 }
 
@@ -392,66 +426,67 @@ sub skip_tests
 sub tech_config
 {
 
-   ######
-   # If no object, use the default $tech_p object.
-   #
-   my $self = (UNIVERSAL::isa($_[0],__PACKAGE__) && ref($_[0])) ? shift @_ : $tech_p;
+    ######
+    # If no object, use the default $tech_p object.
+    #
+    $tech_p = Test::Tech->new() unless $tech_p;
+    my $self = (UNIVERSAL::isa($_[0],__PACKAGE__) && ref($_[0])) ? shift @_ : $tech_p;
+    $self = ref($self) ? $self : $tech_p;
 
-   my ($key, $value) = @_;
-   my @keys = split /\./, $key;
+    my ($key, $value) = @_;
+    my @keys = split /\./, $key;
 
-   #########
-   # Follow the hash with the current
-   # dot index until there are no more
-   # hashes. For success, the dot hash 
-   # notation must match the structure.
-   #
-   my $key_p = $self;
-   while (@keys) {
+    #########
+    # Follow the hash with the current
+    # dot index until there are no more
+    # hashes. For success, the dot hash 
+    # notation must match the structure.
+    #
+    my $key_p = $self;
+    while (@keys) {
 
-       $key = shift @keys;
+        $key = shift @keys;
 
-       ######
-       # Do not allow creation of new configs
-       #
-       if( defined( $key_p->{$key}) ) {
+        ######
+        # Do not allow creation of new configs
+        #
+        if( defined( $key_p->{$key}) ) {
 
-           ########
-           # Follow the hash
-           # 
-           if( ref($key_p->{$key}) eq 'HASH' ) { 
-               $key_p  = $key_p->{$key};
-           }
-           else {
-              if(@keys) {
+            ########
+            # Follow the hash
+            # 
+            if( ref($key_p->{$key}) eq 'HASH' ) { 
+                $key_p  = $key_p->{$key};
+            }
+            else {
+               if(@keys) {
                    warn( "More key levels than hashes.\n");
                    return undef; 
-              } 
-              last;
-           }
-       }
-   }
+               } 
+               last;
+            }
+        }
+    }
 
 
-   #########
-   # References to arrays and scalars in the config may
-   # be transparent.
-   #
-   my $current_value = $key_p->{$key};
-   if( ref($current_value) eq 'SCALAR') {
-       $current_value = $$current_value;
-   }
-   if (defined $value && $key ne 'ntest') {
-       if( ref($value) eq 'SCALAR' ) {
-           ${$key_p->{$key}} = $$value;
-       }
-       else {
-           ${$key_p->{$key}} = $value;
-       }
-   }
+    #########
+    # References to arrays and scalars in the config may
+    # be transparent.
+    #
+    my $current_value = $key_p->{$key};
+    if( ref($current_value) eq 'SCALAR') {
+        $current_value = $$current_value;
+    }
+    if (defined $value && $key ne 'ntest') {
+        if( ref($value) eq 'SCALAR' ) {
+            ${$key_p->{$key}} = $$value;
+        }
+        else {
+            ${$key_p->{$key}} = $value;
+        }
+    }
 
-   $current_value;
-
+    $current_value;
 }
 
 
