@@ -11,8 +11,8 @@ use warnings::register;
 use attributes;
 
 use vars qw($VERSION $DATE $FILE);
-$VERSION = '1.14';
-$DATE = '2003/09/18';
+$VERSION = '1.15';
+$DATE = '2003/09/20';
 $FILE = __FILE__;
 
 use vars qw(@ISA @EXPORT_OK);
@@ -260,10 +260,30 @@ sub arrayify
              return  \@array;
          }
 
-         elsif( attributes::reftype($var), 'ARRAY') {
+         elsif( attributes::reftype($var) eq 'ARRAY') {
              $class = (ref($var) ne 'ARRAY') ? ref($var) : '';
              @array = ($class,  'ARRAY', @$var);
              return \@array;
+         }
+
+         elsif(attributes::reftype($var) eq 'SCALAR') {
+             $class = (ref($var) ne 'SCALAR') ? ref($var) : '';
+             @array = ($class,  'SCALAR', $$var);
+             return \@array;
+         }
+
+         elsif(attributes::reftype($var) eq 'REF') {
+             $class = (ref($var) ne attributes::reftype($var)) ? ref($var) : '';
+             @array = ($class,  attributes::reftype($var), $$var);
+             return \@array;
+         }
+
+         elsif(attributes::reftype($var) eq 'GLOB') {
+             $class = (ref($var) ne attributes::reftype($var)) ? ref($var) : '';
+             @array = ($class,  attributes::reftype($var));
+             push @array,(*$var{SCALAR},*$var{ARRAY},*$var{HASH},*$var{CODE},
+                          *$var{IO},*$var{NAME},*$var{PACKAGE},"*$var"),
+             return \@array;  
          }
 
      }
@@ -355,30 +375,35 @@ Leaves $var as is.
 
 =back
 
-=head2 listify subroutine/method
+=head2 secsify subroutine/method
 
-The 'arrayify' subroutine/method walks a data structure and
+The 'secsify' subroutine/method walks a data structure and
 converts all underlying array and hash references to arrays
-by applying the 'arrayify_var' subroutine/method.
+by applying the 'arrayify' subroutine/method.
 
-The listification of nested data is in accordance with SEMI E5-94,
-Semiconductor Equipment Communications Standard 2 (SECSII)
-(pronounced 'sex two' with gussto and a perverted smile). 
-
-
-
-The SECSI standard addresses transmitting SECSII messages from one machine to
-another machine (always host to equipment) serially via RS-232. And, there is
-another SECS standard for TCP/IP. 
+The secsification of the nested data is in accordance with 
+L<SEMI|http://www.semi.org> E5-94,
+Semiconductor Equipment Communications Standard 2 (SECS-II),
+pronounced 'sex two' with gussto and a perverted smile. 
+The SEMI E4 SECS-I standard addresses transmitting SECSII messages from one machine to
+another machine (all most always host to equipment) serially via RS-232. And, there is
+another SECS standard for TCP/IP, the SEMI E37 standard,
+High-Speed SECS Message Services (HSMS) Generic Services.
 
 In order not to plagarize college students,
-credit must be given where credir it due.
-Tony Blair, when he was just out of
-school, worked on these standards and
-later used the skills he learned
-to sex up intelligence reports.
+credit must be given where credit is due.
+Tony Blair, when he was a college intern at Intel Fab 4, in London
+invented the SEMI SECS standards.
+When the Intel Fab 4 management discovered Tony's secsification of
+their host and equipment, 
+they elected to have security to escort Tony out the door.
+This was Mr. Blair's introduction to elections which he
+leverage into being elected prime minister. 
+In this new position he used the skills he learned
+at the Intel fab to secsify intelligence reports on Iraq's
+weopons of mass distruction.
  
-The SEMI E5-94 SECSII standard is a method of forming listified packed
+The SEMI E5 SECS-II standard is a method of forming listified packed
 messages from nested data. 
 It consists of elements where each element is a format code, 
 number of elements followed by the elements. 

@@ -10,24 +10,24 @@ use warnings;
 use warnings::register;
 
 use vars qw($VERSION $DATE $FILE );
-$VERSION = '0.01';
-$DATE = '2003/09/18';
+$VERSION = '0.02';
+$DATE = '2003/09/20';
 $FILE = __FILE__;
 
 use vars qw(%INVENTORY);
 %INVENTORY = (
-    'lib/Docs/Site_SVD/Data_Secs2.pm' => [qw(0.01 2003/09/18), 'revised 0.01'],
-    'MANIFEST' => [qw(0.01 2003/09/18), 'generated, replaces 0.01'],
-    'Makefile.PL' => [qw(0.01 2003/09/18), 'generated, replaces 0.01'],
-    'README' => [qw(0.01 2003/09/18), 'generated, replaces 0.01'],
-    'lib/Data/Secs2.pm' => [qw(1.14 2003/09/18), 'revised 1.13'],
-    't/Data/Secs2.d' => [qw(0.01 2003/09/18), 'new'],
-    't/Data/Secs2.pm' => [qw(0.01 2003/09/18), 'new'],
-    't/Data/Secs2.t' => [qw(0.02 2003/09/18), 'revised 0.01'],
-    'tlib/File/Package.pm' => [qw(1.12 2003/09/18), 'new'],
-    'tlib/File/SmartNL.pm' => [qw(1.12 2003/09/18), 'unchanged'],
-    'tlib/Text/Scrub.pm' => [qw(1.11 2003/09/18), 'revised 1.1'],
-    'tlib/Test/Tech.pm' => [qw(1.14 2003/09/18), 'revised 1.13'],
+    'lib/Docs/Site_SVD/Data_Secs2.pm' => [qw(0.02 2003/09/20), 'revised 0.01'],
+    'MANIFEST' => [qw(0.02 2003/09/20), 'generated, replaces 0.01'],
+    'Makefile.PL' => [qw(0.02 2003/09/20), 'generated, replaces 0.01'],
+    'README' => [qw(0.02 2003/09/20), 'generated, replaces 0.01'],
+    'lib/Data/Secs2.pm' => [qw(1.15 2003/09/20), 'revised 1.14'],
+    't/Data/Secs2.d' => [qw(0.01 2003/09/18), 'unchanged'],
+    't/Data/Secs2.pm' => [qw(0.01 2003/09/18), 'unchanged'],
+    't/Data/Secs2.t' => [qw(0.02 2003/09/18), 'unchanged'],
+    'tlib/File/Package.pm' => [qw(1.12 2003/09/20), 'unchanged'],
+    'tlib/File/SmartNL.pm' => [qw(1.12 2003/09/20), 'unchanged'],
+    'tlib/Text/Scrub.pm' => [qw(1.11 2003/09/20), 'unchanged'],
+    'tlib/Test/Tech.pm' => [qw(1.15 2003/09/20), 'revised 1.14'],
 
 );
 
@@ -54,11 +54,11 @@ use vars qw(%INVENTORY);
 
   File::FileUtil - Generic file utilites developed originally for Test::STDmaker and ExtUtils::SVDmaker
 
- Revision: -
+ Revision: A
 
- Version: 0.01
+ Version: 0.02
 
- Date: 2003/09/18
+ Date: 2003/09/20
 
  Prepared for: General Public 
 
@@ -87,7 +87,7 @@ no matter how many nests of arrays and hashes it contains.
 
 =head2 1.3 Document overview.
 
-This document releases Data::Secs2 version 0.01
+This document releases Data::Secs2 version 0.02
 providing a description of the inventory, installation
 instructions and other information necessary to
 utilize and track this release.
@@ -103,8 +103,8 @@ system file specification.
 This document releases the file found
 at the following repository(s):
 
-   http://www.softwarediamonds/packages/Data-Secs2-0.01
-   http://www.perl.com/CPAN-local/authors/id/S/SO/SOFTDIA/Data-Secs2-0.01
+   http://www.softwarediamonds/packages/Data-Secs2-0.02
+   http://www.perl.com/CPAN-local/authors/id/S/SO/SOFTDIA/Data-Secs2-0.02
 
 
 Restrictions regarding duplication and license provisions
@@ -172,25 +172,21 @@ consists of the following files:
 
  file                                                         version date       comment
  ------------------------------------------------------------ ------- ---------- ------------------------
- lib/Docs/Site_SVD/Data_Secs2.pm                              0.01    2003/09/18 revised 0.01
- MANIFEST                                                     0.01    2003/09/18 generated, replaces 0.01
- Makefile.PL                                                  0.01    2003/09/18 generated, replaces 0.01
- README                                                       0.01    2003/09/18 generated, replaces 0.01
- lib/Data/Secs2.pm                                            1.14    2003/09/18 revised 1.13
- t/Data/Secs2.d                                               0.01    2003/09/18 new
- t/Data/Secs2.pm                                              0.01    2003/09/18 new
- t/Data/Secs2.t                                               0.02    2003/09/18 revised 0.01
- tlib/File/Package.pm                                         1.12    2003/09/18 new
- tlib/File/SmartNL.pm                                         1.12    2003/09/18 unchanged
- tlib/Text/Scrub.pm                                           1.11    2003/09/18 revised 1.1
- tlib/Test/Tech.pm                                            1.14    2003/09/18 revised 1.13
+ lib/Docs/Site_SVD/Data_Secs2.pm                              0.02    2003/09/20 revised 0.01
+ MANIFEST                                                     0.02    2003/09/20 generated, replaces 0.01
+ Makefile.PL                                                  0.02    2003/09/20 generated, replaces 0.01
+ README                                                       0.02    2003/09/20 generated, replaces 0.01
+ lib/Data/Secs2.pm                                            1.15    2003/09/20 revised 1.14
+ t/Data/Secs2.d                                               0.01    2003/09/18 unchanged
+ t/Data/Secs2.pm                                              0.01    2003/09/18 unchanged
+ t/Data/Secs2.t                                               0.02    2003/09/18 unchanged
+ tlib/File/Package.pm                                         1.12    2003/09/20 unchanged
+ tlib/File/SmartNL.pm                                         1.12    2003/09/20 unchanged
+ tlib/Text/Scrub.pm                                           1.11    2003/09/20 unchanged
+ tlib/Test/Tech.pm                                            1.15    2003/09/20 revised 1.14
 
 
 =head2 3.3 Changes
-
-The file names from 0.01 were changed as follows:
-
- $file =~ s/Strify/Secs2/
 
 Changes to past revisions are as follows: 
 
@@ -202,9 +198,14 @@ Originated
 
 =item Data-Secs2-0.01
 
-Abandoned Data::Dumper in favor of SEMI
-SECS-II (E35) for stringifying Perl 
-data.
+Abandoned Data::Dumper in favor of L<SEMI|http://www.semi.org> E35,
+SECS-II, standard for stringifying Perl data.
+
+=item Data-Secs2-0.02
+
+Added arrayification of REF and GLOB references.
+Thus, the 'Data::Secs2' module will nest into
+REF and GLOB references.
 
 =back
 
@@ -239,8 +240,8 @@ Follow the instructions for the the chosen installation software.
 
 The distribution file is at the following respositories:
 
-   http://www.softwarediamonds/packages/Data-Secs2-0.01
-   http://www.perl.com/CPAN-local/authors/id/S/SO/SOFTDIA/Data-Secs2-0.01
+   http://www.softwarediamonds/packages/Data-Secs2-0.02
+   http://www.perl.com/CPAN-local/authors/id/S/SO/SOFTDIA/Data-Secs2-0.02
 
 
 =item Prerequistes.
@@ -337,11 +338,11 @@ Plain Old Documentation
 __DATA__
 
 DISTNAME: Data-Secs2^
-VERSION : 0.01^
+VERSION : 0.02^
 FREEZE: 1^
-PREVIOUS_DISTNAME: Data-Strify^
+PREVIOUS_DISTNAME:  ^
 PREVIOUS_RELEASE: 0.01^
-REVISION: -^
+REVISION: A^
 
 AUTHOR  : SoftwareDiamonds.com E<lt>support@SoftwareDiamonds.comE<gt>^
 ABSTRACT: Generic file utilities originally developed to support Test::STDmaker^
@@ -362,7 +363,7 @@ COMPRESS: gzip^
 COMPRESS_SUFFIX: gz^
 
 RESTRUCTURE:  ^
-CHANGE2CURRENT: $file =~ s/Strify/Secs2/^
+CHANGE2CURRENT:  ^
 
 AUTO_REVISE: 
 lib/Data/Secs2.pm
@@ -389,9 +390,14 @@ Originated
 
 \=item Data-Secs2-0.01
 
-Abandoned Data::Dumper in favor of SEMI
-SECS-II (E35) for stringifying Perl 
-data.
+Abandoned Data::Dumper in favor of L<SEMI|http://www.semi.org> E35,
+SECS-II, standard for stringifying Perl data.
+
+\=item Data-Secs2-0.02
+
+Added arrayification of REF and GLOB references.
+Thus, the 'Data::Secs2' module will nest into
+REF and GLOB references.
 
 \=back
 
