@@ -10,26 +10,26 @@ use warnings;
 use warnings::register;
 
 use vars qw($VERSION $DATE $FILE );
-$VERSION = '0.06';
-$DATE = '2004/05/02';
+$VERSION = '0.07';
+$DATE = '2004/05/11';
 $FILE = __FILE__;
 
 use vars qw(%INVENTORY);
 %INVENTORY = (
-    'lib/Docs/Site_SVD/Data_Secs2.pm' => [qw(0.06 2004/05/02), 'revised 0.05'],
-    'MANIFEST' => [qw(0.06 2004/05/02), 'generated, replaces 0.05'],
-    'Makefile.PL' => [qw(0.06 2004/05/02), 'generated, replaces 0.05'],
-    'README' => [qw(0.06 2004/05/02), 'generated, replaces 0.05'],
-    'lib/Data/Secs2.pm' => [qw(1.19 2004/05/02), 'revised 1.18'],
-    't/Data/Secs2.d' => [qw(0.05 2004/05/02), 'revised 0.04'],
-    't/Data/Secs2.pm' => [qw(0.05 2004/05/02), 'revised 0.04'],
-    't/Data/Secs2.t' => [qw(0.06 2004/05/02), 'revised 0.05'],
-    't/Data/File/Package.pm' => [qw(1.16 2004/05/02), 'revised 1.15'],
-    't/Data/File/SmartNL.pm' => [qw(1.14 2004/05/02), 'revised 1.13'],
-    't/Data/Text/Scrub.pm' => [qw(1.12 2004/05/02), 'revised 1.11'],
-    't/Data/Test/Tech.pm' => [qw(1.22 2004/05/02), 'revised 1.21'],
-    't/Data/Data/SecsPack.pm' => [qw(0.04 2004/05/02), 'revised 0.03'],
-    't/Data/Data/Startup.pm' => [qw(0.03 2004/05/02), 'new'],
+    'lib/Docs/Site_SVD/Data_Secs2.pm' => [qw(0.07 2004/05/11), 'revised 0.06'],
+    'MANIFEST' => [qw(0.07 2004/05/11), 'generated, replaces 0.06'],
+    'Makefile.PL' => [qw(0.07 2004/05/11), 'generated, replaces 0.06'],
+    'README' => [qw(0.07 2004/05/11), 'generated, replaces 0.06'],
+    'lib/Data/Secs2.pm' => [qw(1.22 2004/05/11), 'revised 1.19'],
+    't/Data/Secs2.d' => [qw(0.06 2004/05/11), 'revised 0.05'],
+    't/Data/Secs2.pm' => [qw(0.06 2004/05/11), 'revised 0.05'],
+    't/Data/Secs2.t' => [qw(0.07 2004/05/11), 'revised 0.06'],
+    't/Data/File/Package.pm' => [qw(1.17 2004/05/11), 'revised 1.16'],
+    't/Data/File/SmartNL.pm' => [qw(1.15 2004/05/11), 'revised 1.14'],
+    't/Data/Text/Scrub.pm' => [qw(1.13 2004/05/11), 'revised 1.12'],
+    't/Data/Test/Tech.pm' => [qw(1.24 2004/05/11), 'revised 1.22'],
+    't/Data/Data/SecsPack.pm' => [qw(0.07 2004/05/11), 'revised 0.04'],
+    't/Data/Data/Startup.pm' => [qw(0.06 2004/05/11), 'revised 0.03'],
 
 );
 
@@ -48,25 +48,29 @@ use vars qw(%INVENTORY);
 
 
 
+=head1 NAME
+
+ Data::Secs2 - pack, unpack, format between Perl data and SEMI E5-94 nested data
+
 =head1 Title Page
 
  Software Version Description
 
  for
 
-  Data::Secs2 - pack, unpack, format, transform between Perl data and SEMI E5-94 nested data
+  Data::Secs2 - pack, unpack, format between Perl data and SEMI E5-94 nested data
 
- Revision: D
+ Revision: E
 
- Version: 0.06
+ Version: 0.07
 
- Date: 2004/05/02
+ Date: 2004/05/11
 
  Prepared for: General Public 
 
  Prepared by:  SoftwareDiamonds.com E<lt>support@SoftwareDiamonds.comE<gt>
 
- Copyright: copyright © 2003 2004 Software Diamonds
+ Copyright: copyright 2003 2004 Software Diamonds
 
  Classification: NONE
 
@@ -89,7 +93,7 @@ no matter how many nests of arrays and hashes it contains.
 
 =head2 1.3 Document overview.
 
-This document releases Data::Secs2 version 0.06
+This document releases Data::Secs2 version 0.07
 providing a description of the inventory, installation
 instructions and other information necessary to
 utilize and track this release.
@@ -104,7 +108,7 @@ system file specification.
 
 This document releases the file 
 
- Data-Secs2-0.06.tar.gz
+ Data-Secs2-0.07.tar.gz
 
 found at the following repository(s):
 
@@ -118,7 +122,7 @@ are as follows:
 
 =item Copyright.
 
-copyright © 2003 2004 Software Diamonds
+copyright 2003 2004 Software Diamonds
 
 =item Copyright holder contact.
 
@@ -148,6 +152,21 @@ disclaimer in the documentation and/or
 other materials provided with the
 distribution.
 
+=item 3
+
+Commercial installation of the binary or source
+must visually present to the installer 
+the above copyright notice,
+this list of conditions intact,
+that the original source is available
+at http://softwarediamonds.com
+and provide means
+for the installer to actively accept
+the list of conditions; 
+otherwise, a license fee must be paid to
+Softwareware Diamonds.
+
+
 =back
 
 SOFTWARE DIAMONDS, http://www.SoftwareDiamonds.com,
@@ -176,20 +195,20 @@ consists of the following files:
 
  file                                                         version date       comment
  ------------------------------------------------------------ ------- ---------- ------------------------
- lib/Docs/Site_SVD/Data_Secs2.pm                              0.06    2004/05/02 revised 0.05
- MANIFEST                                                     0.06    2004/05/02 generated, replaces 0.05
- Makefile.PL                                                  0.06    2004/05/02 generated, replaces 0.05
- README                                                       0.06    2004/05/02 generated, replaces 0.05
- lib/Data/Secs2.pm                                            1.19    2004/05/02 revised 1.18
- t/Data/Secs2.d                                               0.05    2004/05/02 revised 0.04
- t/Data/Secs2.pm                                              0.05    2004/05/02 revised 0.04
- t/Data/Secs2.t                                               0.06    2004/05/02 revised 0.05
- t/Data/File/Package.pm                                       1.16    2004/05/02 revised 1.15
- t/Data/File/SmartNL.pm                                       1.14    2004/05/02 revised 1.13
- t/Data/Text/Scrub.pm                                         1.12    2004/05/02 revised 1.11
- t/Data/Test/Tech.pm                                          1.22    2004/05/02 revised 1.21
- t/Data/Data/SecsPack.pm                                      0.04    2004/05/02 revised 0.03
- t/Data/Data/Startup.pm                                       0.03    2004/05/02 new
+ lib/Docs/Site_SVD/Data_Secs2.pm                              0.07    2004/05/11 revised 0.06
+ MANIFEST                                                     0.07    2004/05/11 generated, replaces 0.06
+ Makefile.PL                                                  0.07    2004/05/11 generated, replaces 0.06
+ README                                                       0.07    2004/05/11 generated, replaces 0.06
+ lib/Data/Secs2.pm                                            1.22    2004/05/11 revised 1.19
+ t/Data/Secs2.d                                               0.06    2004/05/11 revised 0.05
+ t/Data/Secs2.pm                                              0.06    2004/05/11 revised 0.05
+ t/Data/Secs2.t                                               0.07    2004/05/11 revised 0.06
+ t/Data/File/Package.pm                                       1.17    2004/05/11 revised 1.16
+ t/Data/File/SmartNL.pm                                       1.15    2004/05/11 revised 1.14
+ t/Data/Text/Scrub.pm                                         1.13    2004/05/11 revised 1.12
+ t/Data/Test/Tech.pm                                          1.24    2004/05/11 revised 1.22
+ t/Data/Data/SecsPack.pm                                      0.07    2004/05/11 revised 0.04
+ t/Data/Data/Startup.pm                                       0.06    2004/05/11 revised 0.03
 
 
 =head2 3.3 Changes
@@ -305,6 +324,11 @@ variables to a reference to a list of variables and introduced
 a scalar as an error message. This allows another way to
 output error messages beside optional C<warns> and C<dies>.
 
+=item Data-Secs2-0.07
+
+The C<secs_elementify> subroutine did not handle a numeric zero properly.
+Added test for numeric zero and undef.
+
 =back
 
 =head2 3.4 Adaptation data.
@@ -343,13 +367,13 @@ Enter one of the following repositories in a web browser:
   http://www.softwarediamonds/packages/
   http://www.perl.com/CPAN/authors/id/S/SO/SOFTDIA/
 
-Right click on 'Data-Secs2-0.06.tar.gz' and download to a temporary
+Right click on 'Data-Secs2-0.07.tar.gz' and download to a temporary
 installation directory.
 Enter the following where $make is 'nmake' for microsoft
 windows; otherwise 'make'.
 
- gunzip Data-Secs2-0.06.tar.gz
- tar -xf Data-Secs2-0.06.tar
+ gunzip Data-Secs2-0.07.tar.gz
+ tar -xf Data-Secs2-0.07.tar
  perl Makefile.PL
  $make test
  $make install
@@ -362,7 +386,7 @@ not install, download and install unxutils from
 
 =item Prerequistes.
 
- 'Data::SecsPack' => '0.04',
+ 'Data::SecsPack' => '0.06',
  'Data::Startup' => '0.02'
 
 
@@ -440,17 +464,17 @@ Plain Old Documentation
 __DATA__
 
 DISTNAME: Data-Secs2^
-VERSION : 0.06^
+VERSION : 0.07^
 FREEZE: 1^
 PREVIOUS_DISTNAME:  ^
-PREVIOUS_RELEASE: 0.05^
-REVISION: D^
+PREVIOUS_RELEASE: 0.06^
+REVISION: E^
 
 AUTHOR  : SoftwareDiamonds.com E<lt>support@SoftwareDiamonds.comE<gt>^
 ABSTRACT: pack, unpack, format, transform between Perl data and SEMI E5-94 SECS-II nested data^
-TITLE   :  Data::Secs2 - pack, unpack, format, transform between Perl data and SEMI E5-94 nested data^
+TITLE   :  Data::Secs2 - pack, unpack, format between Perl data and SEMI E5-94 nested data^
 END_USER: General Public^
-COPYRIGHT: copyright © 2003 2004 Software Diamonds^
+COPYRIGHT: copyright 2003 2004 Software Diamonds^
 CLASSIFICATION: NONE^
 TEMPLATE:  ^
 CSS: help.css^
@@ -479,7 +503,7 @@ lib/Data/Startup.pm => t/Data/Data/Startup.pm
 ^
 
 PREREQ_PM:
-'Data::SecsPack' => '0.04',
+'Data::SecsPack' => '0.06',
 'Data::Startup' => '0.02'
 ^
 README_PODS: lib/Data/Secs2.pm^
@@ -599,6 +623,11 @@ variables to a reference to a list of variables and introduced
 a scalar as an error message. This allows another way to
 output error messages beside optional C<warns> and C<dies>.
 
+\=item Data-Secs2-0.07
+
+The C<secs_elementify> subroutine did not handle a numeric zero properly.
+Added test for numeric zero and undef.
+
 \=back
 
 ^
@@ -641,6 +670,21 @@ this list of conditions and the following
 disclaimer in the documentation and/or
 other materials provided with the
 distribution.
+
+\=item 3
+
+Commercial installation of the binary or source
+must visually present to the installer 
+the above copyright notice,
+this list of conditions intact,
+that the original source is available
+at http://softwarediamonds.com
+and provide means
+for the installer to actively accept
+the list of conditions; 
+otherwise, a license fee must be paid to
+Softwareware Diamonds.
+
 
 \=back
 
@@ -743,5 +787,9 @@ HTML:
 <p><br>
 ^
 ~-~
+
+
+
+
 
 

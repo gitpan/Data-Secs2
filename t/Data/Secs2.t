@@ -7,8 +7,8 @@ use warnings;
 use warnings::register;
 
 use vars qw($VERSION $DATE $FILE);
-$VERSION = '0.06';   # automatically generated file
-$DATE = '2004/05/02';
+$VERSION = '0.07';   # automatically generated file
+$DATE = '2004/05/11';
 $FILE = __FILE__;
 
 
@@ -235,6 +235,10 @@ my $test_data6 = [ [78,45,25], [512,1024], 100000 ];
 my $test_data7 = 'a50150010541004105' . unpack('H*','ARRAY') . 
                  'a5034e2d19' .  'a90402000400' . 'b104000186a0';
 
+my $test_data17 = 'a50150010541004105' . unpack('H*','ARRAY') . 
+                 'a5034e2d19' .  'a90402000400' . 'b0000186a0';
+
+   # Perl code from QC:
 #######
 # multicell numberics, Perl Secs Object
 #
@@ -421,8 +425,6 @@ L[6]
     A[4] body
 ';
 
-my $test_data17 = 'a50150010541004105' . unpack('H*','ARRAY') . 
-                 'a5034e2d19' .  'a90402000400' . 'b0000186a0';
 
 #######
 # multicell numberics, Perl Secs Object
@@ -435,6 +437,18 @@ L[5]
   U1[3] 78 45 25
   U2[2] 512 1024
   U4 100000
+';
+
+my $test_data19 =
+'U1[1] 80
+L[7]
+  A[0]
+  A[5] ARRAY
+  N 2
+  A[5] hello
+  N 4
+  N 0
+  L[0]
 ';
 
 skip_tests( 1 ) unless ok(
@@ -488,8 +502,8 @@ L[6]
 
 #  ok:  5
 
-ok(  secsify( listify( ['2', 'hello', 4] ) ), # actual results
-     $test_data1, # expected results
+ok(  secsify( listify( ['2', 'hello', 4, 0, undef] ) ), # actual results
+     $test_data19, # expected results
      "",
      "ascii secsify lisfication of test_data1 an array reference");
 

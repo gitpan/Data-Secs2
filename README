@@ -135,8 +135,7 @@ DESCRIPTION
      Mountain View, CA 94043-4080 USA
      (415) 964-5111
      Easylink: 62819945
-     http://www.semiconductor-intl.org
-     http://www.reed-electronics.com/semiconductor/
+     http://www.semi.org
 
     Other important SEMI standards address message transfer protocol of
     SECSII messages. They are the SEMI E4 SECS-I for transmitting SECSII
@@ -877,206 +876,8 @@ DEMONSTRATION
      my $test_data7 = 'a50150010541004105' . unpack('H*','ARRAY') . 
                       'a5034e2d19' .  'a90402000400' . 'b104000186a0';
 
-     #######
-     # multicell numberics, Perl Secs Object
-     #
-     my $test_data8 =
-     'U1[1] 80
-     L[5]
-       A[0]
-       A[5] ARRAY
-       U1[3] 78 45 25
-       U2[2] 512 1024
-       U4[1] 100000
-     ';
-
-     #######
-     # Strict Perl numberics, Perl Secs Object
-     #
-     my $test_data9 =
-     'U1[1] 80
-     L[5]
-       A[0]
-       A[5] ARRAY
-       N[3] 78 45 25
-       N[2] 512 1024
-       N 100000
-     ';
-
-     my $test_data10 =
-     'U1[1] 80
-     L[3]
-       A[0]
-       A[5] ARRAY
-       L[5]
-         A[0]
-         A[5] ARRAY
-         N 2
-         A[5] hello
-         N 4
-     ';
-
-     my $test_data11 =
-     'U1[1] 80
-     L[3]
-       A[0]
-       A[5] ARRAY
-       L[6]
-         A[0]
-         A[4] HASH
-         A[4] body
-         A[5] hello
-         A[6] header
-         A[9] To: world
-     ';
-
-     my $test_data12 =
-     'U1[1] 80
-     L[5]
-       A[0]
-       A[5] ARRAY
-       N 2
-       L[4]
-         A[0]
-         A[5] ARRAY
-         A[5] hello
-         A[5] world
-       N 512
-     ';
-
-     my $test_data13 =
-     'U1[1] 80
-     L[4]
-       A[0]
-       A[5] ARRAY
-       N 2
-       L[6]
-         A[0]
-         A[4] HASH
-         A[6] header
-         L[6]
-           A[11] Class::None
-           A[4] HASH
-           A[4] From
-           A[6] nobody
-           A[2] To
-           A[6] nobody
-         A[3] msg
-         L[4]
-           A[0]
-           A[5] ARRAY
-           A[5] hello
-           A[5] world
-     ';
-
-     my $test_data14 =
-     'U1[1] 80
-     L[4]
-       A[0]
-       A[5] ARRAY
-       L[6]
-         A[0]
-         A[4] HASH
-         A[6] header
-         L[6]
-           A[11] Class::None
-           A[4] HASH
-           A[4] From
-           A[6] nobody
-           A[2] To
-           A[6] nobody
-         A[3] msg
-         L[4]
-           A[0]
-           A[5] ARRAY
-           A[5] hello
-           A[5] world
-       L[6]
-         A[0]
-         A[4] HASH
-         A[6] header
-         L[3]
-           A[0]
-           A[5] Index
-           N 16
-         A[3] msg
-         L[3]
-           A[0]
-           A[5] ARRAY
-           A[4] body
-     ';
-
-     my $test_data15 =
-     'U1[1] 80
-     U1[1] 2
-     L[6]
-       A[0]
-       A[4] HASH
-       A[6] header
-       L[6]
-         A[11] Class::None
-         A[4] HASH
-         A[4] From
-         A[6] nobody
-         A[2] To
-         A[6] nobody
-       A[3] msg
-       L[4]
-         A[0]
-         A[5] ARRAY
-         A[5] hello
-         A[5] world
-     ';
-
-     my $test_data16 =
-     'U1[1] 80
-     L[6]
-       A[0]
-       A[4] HASH
-       A[6] header
-       L[6]
-         A[11] Class::None
-         A[4] HASH
-         A[4] From
-         A[6] nobody
-         A[2] To
-         A[6] nobody
-       A[3] msg
-       L[4]
-         A[0]
-         A[5] ARRAY
-         A[5] hello
-         A[5] world
-     L[6]
-       A[0]
-       A[4] HASH
-       A[6] header
-       L[3]
-         A[0]
-         A[5] Index
-         U1 10
-       A[3] msg
-       L[3]
-         A[0]
-         A[5] ARRAY
-         A[4] body
-     ';
-
      my $test_data17 = 'a50150010541004105' . unpack('H*','ARRAY') . 
                       'a5034e2d19' .  'a90402000400' . 'b0000186a0';
-
-     #######
-     # multicell numberics, Perl Secs Object
-     #
-     my $test_data18 =
-     'U1[1] 80
-     L[5]
-       A[0]
-       A[5] ARRAY
-       U1[3] 78 45 25
-       U2[2] 512 1024
-       U4 100000
-     ';
 
      ##################
      # stringify an array
@@ -1112,15 +913,17 @@ DEMONSTRATION
      # ascii secsify lisfication of test_data1 an array reference
      # 
 
-     secsify( listify( ['2', 'hello', 4] ) )
+     secsify( listify( ['2', 'hello', 4, 0, undef] ) )
 
      # 'U1[1] 80
-     #L[5]
+     #L[7]
      #  A[0]
      #  A[5] ARRAY
      #  N 2
      #  A[5] hello
      #  N 4
+     #  N 0
+     #  L[0]
      #'
      #
 
@@ -1269,7 +1072,7 @@ DEMONSTRATION
 
      unpack('H*',secsify( listify( ['2', 'hello', 4] ), {type => 'binary'}))
 
-     # 'a501500105410041054152524159a50102410568656c6c6fa50104'
+     # '0101500105010001054152524159010102010568656c6c6f010104'
      #
 
      ##################
@@ -1278,7 +1081,7 @@ DEMONSTRATION
 
      unpack('H*',secsify( listify( $test_data6 ), [type => 'binary']))
 
-     # 'a501500105410041054152524159a5034e2d19a90402000400b104000186a0'
+     # '010150010501000105415252415901034e2d190104020004000104000186a0'
      #
 
      ##################
@@ -1287,7 +1090,7 @@ DEMONSTRATION
 
      unpack('H*',secsify( listify( ['2', 'hello', 4] ), {type => 'binary', scalar => 1}))
 
-     # 'a501500105410041054152524159a402410568656c6c6fa404'
+     # '01015001050100010541525241590002010568656c6c6f0004'
      #
 
      ##################
@@ -1296,7 +1099,7 @@ DEMONSTRATION
 
      unpack('H*',secsify( listify( $test_data6 ), type => 'binary', scalar => 1))
 
-     # 'a501500105410041054152524159a5034e2d19a90402000400b0000186a0'
+     # '010150010501000105415252415901034e2d1901040200040000000186a0'
      #
 
      ##################
@@ -1330,26 +1133,7 @@ DEMONSTRATION
 
      secsify(neuterify (pack('H*',$big_secs2)))
 
-     # 'U1[1] 80
-     #U1[1] 2
-     #L[6]
-     #  A[0]
-     #  A[4] HASH
-     #  A[6] header
-     #  L[6]
-     #    A[11] Class::None
-     #    A[4] HASH
-     #    A[4] From
-     #    A[6] nobody
-     #    A[2] To
-     #    A[6] nobody
-     #  A[3] msg
-     #  L[4]
-     #    A[0]
-     #    A[5] ARRAY
-     #    A[5] hello
-     #    A[5] world
-     #'
+     # ''
      #
 
      ##################
@@ -1358,14 +1142,7 @@ DEMONSTRATION
 
      secsify(neuterify (pack('H*',$test_data7)))
 
-     # 'U1[1] 80
-     #L[5]
-     #  A[0]
-     #  A[5] ARRAY
-     #  U1[3] 78 45 25
-     #  U2[2] 512 1024
-     #  U4[1] 100000
-     #'
+     # ''
      #
 
      ##################
@@ -1377,7 +1154,7 @@ DEMONSTRATION
         while(chomp($event)) { };
      $event
 
-     # 'Format byte length size field is zero.'
+     # 'Unknown SECSII format, '
      #
 
      ##################
@@ -1387,7 +1164,7 @@ DEMONSTRATION
      $event = neuterify (pack('H*',$test_data17), scalar => 1)
      ref($event)
 
-     # 'ARRAY'
+     # ''
      #
 
      ##################
@@ -1396,14 +1173,7 @@ DEMONSTRATION
 
      secsify($event)
 
-     # 'U1[1] 80
-     #L[5]
-     #  A[0]
-     #  A[5] ARRAY
-     #  U1[3] 78 45 25
-     #  U2[2] 512 1024
-     #  U4 100000
-     #'
+     # ''
      #
 
      ##################
@@ -1510,7 +1280,6 @@ DEMONSTRATION
      #          2,
      #          4
      #        ]
-     #      Subroutine: Data::Secs2::transify 1.18
      #      ascii_secs:
      #      SECS object:
      #'L'
@@ -1523,6 +1292,7 @@ DEMONSTRATION
      #''
      #'A'
      #'world'
+     #      Subroutine: Data::Secs2::transify 1.22
      #'
      #
 
@@ -1641,6 +1411,13 @@ NOTES
         notice, this list of conditions and the following disclaimer in the
         documentation and/or other materials provided with the distribution.
 
+    3   Commercial installation of the binary or source must visually
+        present to the installer the above copyright notice, this list of
+        conditions intact, that the original source is available at
+        http://softwarediamonds.com and provide means for the installer to
+        actively accept the list of conditions; otherwise, a license fee
+        must be paid to Softwareware Diamonds.
+
     SOFTWARE DIAMONDS, http://www.softwarediamonds.com, PROVIDES THIS
     SOFTWARE 'AS IS' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT
     NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
@@ -1655,26 +1432,30 @@ NOTES
 
 SEE ALSO
     Data::SecsPack
+    =item SEMI
     Docs::Site_SVD::Data_Secs2
     Test::STDmaker
+NAME
+     Data::Secs2 - pack, unpack, format between Perl data and SEMI E5-94 nested data
+
 Title Page
      Software Version Description
 
      for
 
-      Data::Secs2 - pack, unpack, format, transform between Perl data and SEMI E5-94 nested data
+      Data::Secs2 - pack, unpack, format between Perl data and SEMI E5-94 nested data
 
-     Revision: D
+     Revision: E
 
-     Version: 0.06
+     Version: 0.07
 
-     Date: 2004/05/02
+     Date: 2004/05/11
 
      Prepared for: General Public 
 
      Prepared by:  SoftwareDiamonds.com E<lt>support@SoftwareDiamonds.comE<gt>
 
-     Copyright: copyright © 2003 2004 Software Diamonds
+     Copyright: copyright 2003 2004 Software Diamonds
 
      Classification: NONE
 
@@ -1694,7 +1475,7 @@ Title Page
 
   1.3 Document overview.
 
-    This document releases Data::Secs2 version 0.06 providing a description
+    This document releases Data::Secs2 version 0.07 providing a description
     of the inventory, installation instructions and other information
     necessary to utilize and track this release.
 
@@ -1706,7 +1487,7 @@ Title Page
 
     This document releases the file
 
-     Data-Secs2-0.06.tar.gz
+     Data-Secs2-0.07.tar.gz
 
     found at the following repository(s):
 
@@ -1717,7 +1498,7 @@ Title Page
     follows:
 
     Copyright.
-        copyright © 2003 2004 Software Diamonds
+        copyright 2003 2004 Software Diamonds
 
     Copyright holder contact.
          603 882-0846 E<lt> support@SoftwareDiamonds.com E<gt>
@@ -1735,6 +1516,13 @@ Title Page
             copyright notice, this list of conditions and the following
             disclaimer in the documentation and/or other materials provided
             with the distribution.
+
+        3   Commercial installation of the binary or source must visually
+            present to the installer the above copyright notice, this list
+            of conditions intact, that the original source is available at
+            http://softwarediamonds.com and provide means for the installer
+            to actively accept the list of conditions; otherwise, a license
+            fee must be paid to Softwareware Diamonds.
 
         SOFTWARE DIAMONDS, http://www.SoftwareDiamonds.com, PROVIDES THIS
         SOFTWARE 'AS IS' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING,
@@ -1756,20 +1544,20 @@ Title Page
 
      file                                                         version date       comment
      ------------------------------------------------------------ ------- ---------- ------------------------
-     lib/Docs/Site_SVD/Data_Secs2.pm                              0.06    2004/05/02 revised 0.05
-     MANIFEST                                                     0.06    2004/05/02 generated, replaces 0.05
-     Makefile.PL                                                  0.06    2004/05/02 generated, replaces 0.05
-     README                                                       0.06    2004/05/02 generated, replaces 0.05
-     lib/Data/Secs2.pm                                            1.19    2004/05/02 revised 1.18
-     t/Data/Secs2.d                                               0.05    2004/05/02 revised 0.04
-     t/Data/Secs2.pm                                              0.05    2004/05/02 revised 0.04
-     t/Data/Secs2.t                                               0.06    2004/05/02 revised 0.05
-     t/Data/File/Package.pm                                       1.16    2004/05/02 revised 1.15
-     t/Data/File/SmartNL.pm                                       1.14    2004/05/02 revised 1.13
-     t/Data/Text/Scrub.pm                                         1.12    2004/05/02 revised 1.11
-     t/Data/Test/Tech.pm                                          1.22    2004/05/02 revised 1.21
-     t/Data/Data/SecsPack.pm                                      0.04    2004/05/02 revised 0.03
-     t/Data/Data/Startup.pm                                       0.03    2004/05/02 new
+     lib/Docs/Site_SVD/Data_Secs2.pm                              0.07    2004/05/11 revised 0.06
+     MANIFEST                                                     0.07    2004/05/11 generated, replaces 0.06
+     Makefile.PL                                                  0.07    2004/05/11 generated, replaces 0.06
+     README                                                       0.07    2004/05/11 generated, replaces 0.06
+     lib/Data/Secs2.pm                                            1.22    2004/05/11 revised 1.19
+     t/Data/Secs2.d                                               0.06    2004/05/11 revised 0.05
+     t/Data/Secs2.pm                                              0.06    2004/05/11 revised 0.05
+     t/Data/Secs2.t                                               0.07    2004/05/11 revised 0.06
+     t/Data/File/Package.pm                                       1.17    2004/05/11 revised 1.16
+     t/Data/File/SmartNL.pm                                       1.15    2004/05/11 revised 1.14
+     t/Data/Text/Scrub.pm                                         1.13    2004/05/11 revised 1.12
+     t/Data/Test/Tech.pm                                          1.24    2004/05/11 revised 1.22
+     t/Data/Data/SecsPack.pm                                      0.07    2004/05/11 revised 0.04
+     t/Data/Data/Startup.pm                                       0.06    2004/05/11 revised 0.03
 
   3.3 Changes
 
@@ -1872,6 +1660,10 @@ Title Page
         scalar as an error message. This allows another way to output error
         messages beside optional "warns" and "dies".
 
+    Data-Secs2-0.07
+        The "secs_elementify" subroutine did not handle a numeric zero
+        properly. Added test for numeric zero and undef.
+
   3.4 Adaptation data.
 
     This installation requires that the installation site has the Perl
@@ -1904,12 +1696,12 @@ Title Page
           http://www.softwarediamonds/packages/
           http://www.perl.com/CPAN/authors/id/S/SO/SOFTDIA/
 
-        Right click on 'Data-Secs2-0.06.tar.gz' and download to a temporary
+        Right click on 'Data-Secs2-0.07.tar.gz' and download to a temporary
         installation directory. Enter the following where $make is 'nmake'
         for microsoft windows; otherwise 'make'.
 
-         gunzip Data-Secs2-0.06.tar.gz
-         tar -xf Data-Secs2-0.06.tar
+         gunzip Data-Secs2-0.07.tar.gz
+         tar -xf Data-Secs2-0.07.tar
          perl Makefile.PL
          $make test
          $make install
@@ -1921,7 +1713,7 @@ Title Page
          http://packages.softwarediamonds.com
 
     Prerequistes.
-         'Data::SecsPack' => '0.04',
+         'Data::SecsPack' => '0.06',
          'Data::Startup' => '0.02'
 
     Security, privacy, or safety precautions.

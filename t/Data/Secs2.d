@@ -7,8 +7,8 @@ use warnings;
 use warnings::register;
 
 use vars qw($VERSION $DATE);
-$VERSION = '0.05';   # automatically generated file
-$DATE = '2004/05/02';
+$VERSION = '0.06';   # automatically generated file
+$DATE = '2004/05/11';
 
 
 ##### Demonstration Script ####
@@ -195,207 +195,8 @@ my\ \$test_data6\ \=\ \[\ \[78\,45\,25\]\,\ \[512\,1024\]\,\ 100000\ \]\;\
 my\ \$test_data7\ \=\ \'a50150010541004105\'\ \.\ unpack\(\'H\*\'\,\'ARRAY\'\)\ \.\ \
 \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \'a5034e2d19\'\ \.\ \ \'a90402000400\'\ \.\ \'b104000186a0\'\;\
 \
-\#\#\#\#\#\#\#\
-\#\ multicell\ numberics\,\ Perl\ Secs\ Object\
-\#\
-my\ \$test_data8\ \=\
-\'U1\[1\]\ 80\
-L\[5\]\
-\ \ A\[0\]\
-\ \ A\[5\]\ ARRAY\
-\ \ U1\[3\]\ 78\ 45\ 25\
-\ \ U2\[2\]\ 512\ 1024\
-\ \ U4\[1\]\ 100000\
-\'\;\
-\
-\
-\#\#\#\#\#\#\#\
-\#\ Strict\ Perl\ numberics\,\ Perl\ Secs\ Object\
-\#\
-my\ \$test_data9\ \=\
-\'U1\[1\]\ 80\
-L\[5\]\
-\ \ A\[0\]\
-\ \ A\[5\]\ ARRAY\
-\ \ N\[3\]\ 78\ 45\ 25\
-\ \ N\[2\]\ 512\ 1024\
-\ \ N\ 100000\
-\'\;\
-\
-my\ \$test_data10\ \=\
-\'U1\[1\]\ 80\
-L\[3\]\
-\ \ A\[0\]\
-\ \ A\[5\]\ ARRAY\
-\ \ L\[5\]\
-\ \ \ \ A\[0\]\
-\ \ \ \ A\[5\]\ ARRAY\
-\ \ \ \ N\ 2\
-\ \ \ \ A\[5\]\ hello\
-\ \ \ \ N\ 4\
-\'\;\
-\
-my\ \$test_data11\ \=\
-\'U1\[1\]\ 80\
-L\[3\]\
-\ \ A\[0\]\
-\ \ A\[5\]\ ARRAY\
-\ \ L\[6\]\
-\ \ \ \ A\[0\]\
-\ \ \ \ A\[4\]\ HASH\
-\ \ \ \ A\[4\]\ body\
-\ \ \ \ A\[5\]\ hello\
-\ \ \ \ A\[6\]\ header\
-\ \ \ \ A\[9\]\ To\:\ world\
-\'\;\
-\
-my\ \$test_data12\ \=\
-\'U1\[1\]\ 80\
-L\[5\]\
-\ \ A\[0\]\
-\ \ A\[5\]\ ARRAY\
-\ \ N\ 2\
-\ \ L\[4\]\
-\ \ \ \ A\[0\]\
-\ \ \ \ A\[5\]\ ARRAY\
-\ \ \ \ A\[5\]\ hello\
-\ \ \ \ A\[5\]\ world\
-\ \ N\ 512\
-\'\;\
-\
-my\ \$test_data13\ \=\
-\'U1\[1\]\ 80\
-L\[4\]\
-\ \ A\[0\]\
-\ \ A\[5\]\ ARRAY\
-\ \ N\ 2\
-\ \ L\[6\]\
-\ \ \ \ A\[0\]\
-\ \ \ \ A\[4\]\ HASH\
-\ \ \ \ A\[6\]\ header\
-\ \ \ \ L\[6\]\
-\ \ \ \ \ \ A\[11\]\ Class\:\:None\
-\ \ \ \ \ \ A\[4\]\ HASH\
-\ \ \ \ \ \ A\[4\]\ From\
-\ \ \ \ \ \ A\[6\]\ nobody\
-\ \ \ \ \ \ A\[2\]\ To\
-\ \ \ \ \ \ A\[6\]\ nobody\
-\ \ \ \ A\[3\]\ msg\
-\ \ \ \ L\[4\]\
-\ \ \ \ \ \ A\[0\]\
-\ \ \ \ \ \ A\[5\]\ ARRAY\
-\ \ \ \ \ \ A\[5\]\ hello\
-\ \ \ \ \ \ A\[5\]\ world\
-\'\;\
-\
-my\ \$test_data14\ \=\
-\'U1\[1\]\ 80\
-L\[4\]\
-\ \ A\[0\]\
-\ \ A\[5\]\ ARRAY\
-\ \ L\[6\]\
-\ \ \ \ A\[0\]\
-\ \ \ \ A\[4\]\ HASH\
-\ \ \ \ A\[6\]\ header\
-\ \ \ \ L\[6\]\
-\ \ \ \ \ \ A\[11\]\ Class\:\:None\
-\ \ \ \ \ \ A\[4\]\ HASH\
-\ \ \ \ \ \ A\[4\]\ From\
-\ \ \ \ \ \ A\[6\]\ nobody\
-\ \ \ \ \ \ A\[2\]\ To\
-\ \ \ \ \ \ A\[6\]\ nobody\
-\ \ \ \ A\[3\]\ msg\
-\ \ \ \ L\[4\]\
-\ \ \ \ \ \ A\[0\]\
-\ \ \ \ \ \ A\[5\]\ ARRAY\
-\ \ \ \ \ \ A\[5\]\ hello\
-\ \ \ \ \ \ A\[5\]\ world\
-\ \ L\[6\]\
-\ \ \ \ A\[0\]\
-\ \ \ \ A\[4\]\ HASH\
-\ \ \ \ A\[6\]\ header\
-\ \ \ \ L\[3\]\
-\ \ \ \ \ \ A\[0\]\
-\ \ \ \ \ \ A\[5\]\ Index\
-\ \ \ \ \ \ N\ 16\
-\ \ \ \ A\[3\]\ msg\
-\ \ \ \ L\[3\]\
-\ \ \ \ \ \ A\[0\]\
-\ \ \ \ \ \ A\[5\]\ ARRAY\
-\ \ \ \ \ \ A\[4\]\ body\
-\'\;\
-\
-my\ \$test_data15\ \=\
-\'U1\[1\]\ 80\
-U1\[1\]\ 2\
-L\[6\]\
-\ \ A\[0\]\
-\ \ A\[4\]\ HASH\
-\ \ A\[6\]\ header\
-\ \ L\[6\]\
-\ \ \ \ A\[11\]\ Class\:\:None\
-\ \ \ \ A\[4\]\ HASH\
-\ \ \ \ A\[4\]\ From\
-\ \ \ \ A\[6\]\ nobody\
-\ \ \ \ A\[2\]\ To\
-\ \ \ \ A\[6\]\ nobody\
-\ \ A\[3\]\ msg\
-\ \ L\[4\]\
-\ \ \ \ A\[0\]\
-\ \ \ \ A\[5\]\ ARRAY\
-\ \ \ \ A\[5\]\ hello\
-\ \ \ \ A\[5\]\ world\
-\'\;\
-\
-my\ \$test_data16\ \=\
-\'U1\[1\]\ 80\
-L\[6\]\
-\ \ A\[0\]\
-\ \ A\[4\]\ HASH\
-\ \ A\[6\]\ header\
-\ \ L\[6\]\
-\ \ \ \ A\[11\]\ Class\:\:None\
-\ \ \ \ A\[4\]\ HASH\
-\ \ \ \ A\[4\]\ From\
-\ \ \ \ A\[6\]\ nobody\
-\ \ \ \ A\[2\]\ To\
-\ \ \ \ A\[6\]\ nobody\
-\ \ A\[3\]\ msg\
-\ \ L\[4\]\
-\ \ \ \ A\[0\]\
-\ \ \ \ A\[5\]\ ARRAY\
-\ \ \ \ A\[5\]\ hello\
-\ \ \ \ A\[5\]\ world\
-L\[6\]\
-\ \ A\[0\]\
-\ \ A\[4\]\ HASH\
-\ \ A\[6\]\ header\
-\ \ L\[3\]\
-\ \ \ \ A\[0\]\
-\ \ \ \ A\[5\]\ Index\
-\ \ \ \ U1\ 10\
-\ \ A\[3\]\ msg\
-\ \ L\[3\]\
-\ \ \ \ A\[0\]\
-\ \ \ \ A\[5\]\ ARRAY\
-\ \ \ \ A\[4\]\ body\
-\'\;\
-\
 my\ \$test_data17\ \=\ \'a50150010541004105\'\ \.\ unpack\(\'H\*\'\,\'ARRAY\'\)\ \.\ \
-\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \'a5034e2d19\'\ \.\ \ \'a90402000400\'\ \.\ \'b0000186a0\'\;\
-\
-\#\#\#\#\#\#\#\
-\#\ multicell\ numberics\,\ Perl\ Secs\ Object\
-\#\
-my\ \$test_data18\ \=\
-\'U1\[1\]\ 80\
-L\[5\]\
-\ \ A\[0\]\
-\ \ A\[5\]\ ARRAY\
-\ \ U1\[3\]\ 78\ 45\ 25\
-\ \ U2\[2\]\ 512\ 1024\
-\ \ U4\ 100000\
-\'\;"); # typed in command           
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \'a5034e2d19\'\ \.\ \ \'a90402000400\'\ \.\ \'b0000186a0\'\;"); # typed in command           
           use File::Package;
     my $fp = 'File::Package';
 
@@ -498,7 +299,10 @@ my $test_data6 = [ [78,45,25], [512,1024], 100000 ];
 my $test_data7 = 'a50150010541004105' . unpack('H*','ARRAY') . 
                  'a5034e2d19' .  'a90402000400' . 'b104000186a0';
 
-#######
+my $test_data17 = 'a50150010541004105' . unpack('H*','ARRAY') . 
+                 'a5034e2d19' .  'a90402000400' . 'b0000186a0';; # execution
+
+      #######
 # multicell numberics, Perl Secs Object
 #
 my $test_data8 =
@@ -684,8 +488,6 @@ L[6]
     A[4] body
 ';
 
-my $test_data17 = 'a50150010541004105' . unpack('H*','ARRAY') . 
-                 'a5034e2d19' .  'a90402000400' . 'b0000186a0';
 
 #######
 # multicell numberics, Perl Secs Object
@@ -698,6 +500,18 @@ L[5]
   U1[3] 78 45 25
   U2[2] 512 1024
   U4 100000
+';
+
+my $test_data19 =
+'U1[1] 80
+L[7]
+  A[0]
+  A[5] ARRAY
+  N 2
+  A[5] hello
+  N 4
+  N 0
+  L[0]
 ';; # execution
 
 print << "EOF";
@@ -732,8 +546,8 @@ print << "EOF";
  
 EOF
 
-demo( "secsify\(\ listify\(\ \[\'2\'\,\ \'hello\'\,\ 4\]\ \)\ \)", # typed in command           
-      secsify( listify( ['2', 'hello', 4] ) )); # execution
+demo( "secsify\(\ listify\(\ \[\'2\'\,\ \'hello\'\,\ 4\,\ 0\,\ undef\]\ \)\ \)", # typed in command           
+      secsify( listify( ['2', 'hello', 4, 0, undef] ) )); # execution
 
 
 print << "EOF";
