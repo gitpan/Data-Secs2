@@ -11,4 +11,5 @@ t/Data/File/SmartNL.pm
 t/Data/Text/Scrub.pm
 t/Data/Test/Tech.pm
 t/Data/Data/SecsPack.pm
+t/Data/Data/Str2Num.pm
 t/Data/Data/Startup.pm

@@ -10,26 +10,27 @@ use warnings;
 use warnings::register;
 
 use vars qw($VERSION $DATE $FILE );
-$VERSION = '0.08';
-$DATE = '2004/05/12';
+$VERSION = '0.09';
+$DATE = '2004/05/20';
 $FILE = __FILE__;
 
 use vars qw(%INVENTORY);
 %INVENTORY = (
-    'lib/Docs/Site_SVD/Data_Secs2.pm' => [qw(0.08 2004/05/12), 'revised 0.07'],
-    'MANIFEST' => [qw(0.08 2004/05/12), 'generated, replaces 0.07'],
-    'Makefile.PL' => [qw(0.08 2004/05/12), 'generated, replaces 0.07'],
-    'README' => [qw(0.08 2004/05/12), 'generated, replaces 0.07'],
-    'lib/Data/Secs2.pm' => [qw(1.23 2004/05/12), 'revised 1.22'],
+    'lib/Docs/Site_SVD/Data_Secs2.pm' => [qw(0.09 2004/05/20), 'revised 0.08'],
+    'MANIFEST' => [qw(0.09 2004/05/20), 'generated, replaces 0.08'],
+    'Makefile.PL' => [qw(0.09 2004/05/20), 'generated, replaces 0.08'],
+    'README' => [qw(0.09 2004/05/20), 'generated, replaces 0.08'],
+    'lib/Data/Secs2.pm' => [qw(1.25 2004/05/20), 'revised 1.23'],
     't/Data/Secs2.d' => [qw(0.06 2004/05/11), 'unchanged'],
     't/Data/Secs2.pm' => [qw(0.06 2004/05/11), 'unchanged'],
     't/Data/Secs2.t' => [qw(0.07 2004/05/11), 'unchanged'],
-    't/Data/File/Package.pm' => [qw(1.17 2004/05/12), 'unchanged'],
-    't/Data/File/SmartNL.pm' => [qw(1.15 2004/05/12), 'unchanged'],
-    't/Data/Text/Scrub.pm' => [qw(1.13 2004/05/12), 'unchanged'],
-    't/Data/Test/Tech.pm' => [qw(1.25 2004/05/12), 'revised 1.24'],
-    't/Data/Data/SecsPack.pm' => [qw(0.07 2004/05/12), 'unchanged'],
-    't/Data/Data/Startup.pm' => [qw(0.06 2004/05/12), 'unchanged'],
+    't/Data/File/Package.pm' => [qw(1.17 2004/05/20), 'unchanged'],
+    't/Data/File/SmartNL.pm' => [qw(1.16 2004/05/20), 'revised 1.15'],
+    't/Data/Text/Scrub.pm' => [qw(1.14 2004/05/20), 'revised 1.13'],
+    't/Data/Test/Tech.pm' => [qw(1.26 2004/05/20), 'revised 1.25'],
+    't/Data/Data/SecsPack.pm' => [qw(0.08 2004/05/20), 'revised 0.07'],
+    't/Data/Data/Str2Num.pm' => [qw(0.06 2004/05/20), 'new'],
+    't/Data/Data/Startup.pm' => [qw(0.07 2004/05/20), 'revised 0.06'],
 
 );
 
@@ -60,11 +61,11 @@ Docs::Site_SVD::Data_Secs2 - pack, unpack, format between Perl data and SEMI E5-
 
  Docs::Site_SVD::Data_Secs2 - pack, unpack, format between Perl data and SEMI E5-94 nested data
 
- Revision: F
+ Revision: G
 
- Version: 0.08
+ Version: 0.09
 
- Date: 2004/05/12
+ Date: 2004/05/20
 
  Prepared for: General Public 
 
@@ -93,7 +94,7 @@ no matter how many nests of arrays and hashes it contains.
 
 =head2 1.3 Document overview.
 
-This document releases Data::Secs2 version 0.08
+This document releases Data::Secs2 version 0.09
 providing a description of the inventory, installation
 instructions and other information necessary to
 utilize and track this release.
@@ -108,7 +109,7 @@ system file specification.
 
 This document releases the file 
 
- Data-Secs2-0.08.tar.gz
+ Data-Secs2-0.09.tar.gz
 
 found at the following repository(s):
 
@@ -195,20 +196,21 @@ consists of the following files:
 
  file                                                         version date       comment
  ------------------------------------------------------------ ------- ---------- ------------------------
- lib/Docs/Site_SVD/Data_Secs2.pm                              0.08    2004/05/12 revised 0.07
- MANIFEST                                                     0.08    2004/05/12 generated, replaces 0.07
- Makefile.PL                                                  0.08    2004/05/12 generated, replaces 0.07
- README                                                       0.08    2004/05/12 generated, replaces 0.07
- lib/Data/Secs2.pm                                            1.23    2004/05/12 revised 1.22
+ lib/Docs/Site_SVD/Data_Secs2.pm                              0.09    2004/05/20 revised 0.08
+ MANIFEST                                                     0.09    2004/05/20 generated, replaces 0.08
+ Makefile.PL                                                  0.09    2004/05/20 generated, replaces 0.08
+ README                                                       0.09    2004/05/20 generated, replaces 0.08
+ lib/Data/Secs2.pm                                            1.25    2004/05/20 revised 1.23
  t/Data/Secs2.d                                               0.06    2004/05/11 unchanged
  t/Data/Secs2.pm                                              0.06    2004/05/11 unchanged
  t/Data/Secs2.t                                               0.07    2004/05/11 unchanged
- t/Data/File/Package.pm                                       1.17    2004/05/12 unchanged
- t/Data/File/SmartNL.pm                                       1.15    2004/05/12 unchanged
- t/Data/Text/Scrub.pm                                         1.13    2004/05/12 unchanged
- t/Data/Test/Tech.pm                                          1.25    2004/05/12 revised 1.24
- t/Data/Data/SecsPack.pm                                      0.07    2004/05/12 unchanged
- t/Data/Data/Startup.pm                                       0.06    2004/05/12 unchanged
+ t/Data/File/Package.pm                                       1.17    2004/05/20 unchanged
+ t/Data/File/SmartNL.pm                                       1.16    2004/05/20 revised 1.15
+ t/Data/Text/Scrub.pm                                         1.14    2004/05/20 revised 1.13
+ t/Data/Test/Tech.pm                                          1.26    2004/05/20 revised 1.25
+ t/Data/Data/SecsPack.pm                                      0.08    2004/05/20 revised 0.07
+ t/Data/Data/Str2Num.pm                                       0.06    2004/05/20 new
+ t/Data/Data/Startup.pm                                       0.07    2004/05/20 revised 0.06
 
 
 =head2 3.3 Changes
@@ -336,6 +338,15 @@ The SEMI link does not work on. Changed to SEMI, http://www.semi.org.
 The new SVD =head1 NAME is masking out the code program module.
 Changed the SVD =head1 NAME so not same as code program module =head1 NAME
 
+=item Data-Secs2-0.09
+
+Change C<use Data::SecsPack> to C<require Data::SecsPack> so that it is not loaded
+unless using C<Data::Secs2> to pack and unpack SEMI E5 numbers.
+
+Move C<str2float> and C<str2int> from C<Data::SecsPack> to C<Data::Str2Num> so
+that the C<Data::Secs2> package and other packages may load them without loading
+the subroutines to pack and unpack numbers in the C<Data::SecsPack> subroutine.
+
 =back
 
 =head2 3.4 Adaptation data.
@@ -374,13 +385,13 @@ Enter one of the following repositories in a web browser:
   http://www.softwarediamonds/packages/
   http://www.perl.com/CPAN/authors/id/S/SO/SOFTDIA/
 
-Right click on 'Data-Secs2-0.08.tar.gz' and download to a temporary
+Right click on 'Data-Secs2-0.09.tar.gz' and download to a temporary
 installation directory.
 Enter the following where $make is 'nmake' for microsoft
 windows; otherwise 'make'.
 
- gunzip Data-Secs2-0.08.tar.gz
- tar -xf Data-Secs2-0.08.tar
+ gunzip Data-Secs2-0.09.tar.gz
+ tar -xf Data-Secs2-0.09.tar
  perl Makefile.PL
  $make test
  $make install
@@ -394,6 +405,7 @@ not install, download and install unxutils from
 =item Prerequistes.
 
  'Data::SecsPack' => '0.06',
+ 'Data::Str2Num' => '0.05',
  'Data::Startup' => '0.02'
 
 
@@ -471,11 +483,11 @@ Plain Old Documentation
 __DATA__
 
 DISTNAME: Data-Secs2^
-VERSION : 0.08^
+VERSION : 0.09^
 FREEZE: 1^
 PREVIOUS_DISTNAME:  ^
-PREVIOUS_RELEASE: 0.07^
-REVISION: F^
+PREVIOUS_RELEASE: 0.08^
+REVISION: G^
 
 AUTHOR  : SoftwareDiamonds.com E<lt>support@SoftwareDiamonds.comE<gt>^
 ABSTRACT: pack, unpack, format, transform between Perl data and SEMI E5-94 SECS-II nested data^
@@ -506,6 +518,7 @@ lib/File/SmartNL.pm => t/Data/File/SmartNL.pm
 lib/Text/Scrub.pm => t/Data/Text/Scrub.pm
 lib/Test/Tech.pm => t/Data/Test/Tech.pm
 lib/Data/SecsPack.pm => t/Data/Data/SecsPack.pm
+lib/Data/Str2Num.pm => t/Data/Data/Str2Num.pm
 lib/Data/Startup.pm => t/Data/Data/Startup.pm
 ^
 
@@ -514,6 +527,7 @@ REPLACE:
 
 PREREQ_PM:
 'Data::SecsPack' => '0.06',
+'Data::Str2Num' => '0.05',
 'Data::Startup' => '0.02'
 ^
 README_PODS: lib/Data/Secs2.pm^
@@ -644,6 +658,15 @@ Documentation woes.
 The SEMI link does not work on. Changed to SEMI, http://www.semi.org.
 The new SVD =head1 NAME is masking out the code program module.
 Changed the SVD =head1 NAME so not same as code program module =head1 NAME
+
+\=item Data-Secs2-0.09
+
+Change C<use Data::SecsPack> to C<require Data::SecsPack> so that it is not loaded
+unless using C<Data::Secs2> to pack and unpack SEMI E5 numbers.
+
+Move C<str2float> and C<str2int> from C<Data::SecsPack> to C<Data::Str2Num> so
+that the C<Data::Secs2> package and other packages may load them without loading
+the subroutines to pack and unpack numbers in the C<Data::SecsPack> subroutine.
 
 \=back
 
@@ -804,6 +827,14 @@ HTML:
 <p><br>
 ^
 ~-~
+
+
+
+
+
+
+
+
 
 
 
