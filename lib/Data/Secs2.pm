@@ -11,15 +11,15 @@ use warnings::register;
 use attributes;
 
 use vars qw($VERSION $DATE $FILE);
-$VERSION = '1.16';
-$DATE = '2004/04/13';
+$VERSION = '1.17';
+$DATE = '2004/04/17';
 $FILE = __FILE__;
 
 use vars qw(@ISA @EXPORT_OK);
 require Exporter;
 @ISA=('Exporter');
-@EXPORT_OK = qw(arrayify itemify listify neuterify scalarize 
-    secsify stringify transify vectorize);
+@EXPORT_OK = qw(arrayify listify neuterify numberify 
+    perlify secsify secs_elementify stringify textify transify);
 
 use Data::SecsPack;
 
@@ -64,7 +64,10 @@ sub arrayify
          push @array, $$var;
      }
      elsif($reftype eq 'REF') {
-         push @array, $$var;
+         push @array, $var;
+     }
+     elsif($reftype eq 'CODE') {
+         push @array, $var;
      }
      elsif($reftype eq 'GLOB') {
          push @array,(*$var{SCALAR},*$var{ARRAY},*$var{HASH},*$var{CODE},
@@ -86,10 +89,6 @@ my %format = (
   T  =>  0x24, #  Boolean
   A  =>  0x40, #  ASCII
   J  =>  0x44, #  JIS-8
- I8  =>  0x60, #  8-byte integer (signed)
- I1  =>  0x62, #  1-byte integer (unsigned)
- I2  =>  0x64, #  2-byte integer (unsigned)
- I4  =>  0x70, #  4-byte integer (unsigned)
  S8  =>  0x60, #  8-byte integer (unsigned)
  S1  =>  0x62, #  1-byte integer (unsigned)
  S2  =>  0x64, #  2-byte integer (unsigned)
@@ -102,90 +101,6 @@ my %format = (
  U4  =>  0xB0, #  4-byte integer (unsigned)
 );
 
-sub itemify
-{
-     my ($format, @elements) = @_;
-
-     my $error;
-     my $options = {};
-     if(ref($elements[-1]) eq 'ARRAY') {
-         my %options = @{pop @elements};
-         $options = \%options;
-     }
-     elsif( ref($elements[-1]) eq 'HASH' ) {
-         $options = pop @elements;
-     }
-
-     my $elements = $elements[0];
-     
-     my $length;
-     if(defined($options->{length}) && $options->{length}) {
-         $length =  $options->{length};
-     }
-     else {
-        my $bytes_per_element = 1;
-        if( $format =~ /(\d+)/ ) {
-            $bytes_per_element = $1;
-        }       
-        unless( $bytes_per_element ) {
-             $error = "No bytes per element\n";
-             return \$error;
-        }
-        $length = length($elements) / $bytes_per_element; 
-     }
-
-     my $string;
-     if($options->{type} eq 'ascii') {
-         $string = $options->{indent} . $format . '[' . $length . ']' ;
-         return $string unless $length; # do not get space after A[0]
-         if ($format =~ /[SUF]\d/ || $format eq 'T') {
-             if(ref($elements) eq 'ARRAY') {
-                 $string .= ' ' . (join ' ' , @$elements);
-             }
-             else {
-                 my $numbers = Data::SecsPack->unpack_num($format, $elements);
-                 return $numbers unless ref($numbers) eq 'ARRAY';
-                 $string .= ' ' . (join ' ' , @$numbers);
-             }
-         }
-         elsif ($format =~ /[AJB]/) {
-             $string .= ($elements =~ /\n/) ? "\n" : ' ';
-             $string .= $elements[0];
-         } 
-         elsif( $format !~ /[L]/ ) {
-             $error =  "Unknown format $format\n";
-             return \$error;
-         }
-     }
-     else {
-         my ($len_format,$len_num) = Data::SecsPack->pack_num('I', $length);
-         unless(defined($len_format) && $len_format =~ /^U/ ) {
-             $error =  "Element length number is not unsigned integer\n";
-             return \$error;
-         }
-         my $len_size = length($len_num);
-         unless($len_size < 4) {
-             $error = "Number of elements in item too big\n";
-             return \$error;
-         }
-         $string = pack ("C1",($format{$format}+$len_size)) . $len_num;
-         return $string if $format eq 'L' || $length == 0;
-         if ($format =~ /[SUF]\d/ || $format eq 'T') {
-             if(ref($elements) eq 'ARRAY') {
-                 ($format, my $number) = Data::SecsPack->pack_num($format, @$elements);
-                 if(defined($format)) {
-                     return $string . $elements;
-                 }
-                 else {
-                     $error = 'Could not pack number\n';
-                     return \$error;
-                 }
-             }
-         }        
-         $string .= $elements;
-     }
-     $string;
-}
 
 
 
@@ -193,12 +108,6 @@ sub itemify
 # This subroutine walks a nested data structure, and listify each level
 # into a perlified SECII message. The assumption is that the nested 
 # data structure consists of only references to Perl arrays, 
-# Perl arrays are not arrays in the traditional sense where arrays
-# are multi-dimensional. Perl arrays are always one dimemsion. The
-# Perl language gives the appearance of mulit-dimension by its
-# syntax which it converts to indexing into physical nested 
-# single dimensional arrays (all elements are not layed out
-# linear for a Perl multi-dimensional array syntax)
 #
 sub listify
 {
@@ -207,25 +116,25 @@ sub listify
      # This subroutine uses no object data; therefore,
      # drop any class or object.
      #
-     shift @_ if UNIVERSAL::isa($_[0],__PACKAGE__);
+     shift if UNIVERSAL::isa($_[0],__PACKAGE__);
 
      #########
      # Return an array, so going to walk the array, looking
      # for hash and array references to arrayify
      #
-     # Use a stack for the walk instead of recusing. Easier
+     # Use a stack for the walk instead of recursing. Easier
      # to maintain when the data is on a separate stack instead
      # of the call (return) stack and only the pertient data
      # is stored on the separate stack. The return stack does
-     # not grow. Instead the separate recure stack grows.
+     # not grow. Instead the separate recurse stack grows.
      #
      my %dups = ();
-     my @stack = ();
+     my @vars = ();
      my @index = ();
 
      #####
      # Perl format code
-     my @list = ('U1','P');  
+     my @secs_obj = ('U1','P');  
      my $i = 0;
      my @var = @_; # do not clobber @_ so make a copy
      my $var = \@var;
@@ -242,10 +151,9 @@ sub listify
              #
              $ref_dup = (ref($var->[$i])) ? "$var->[$i]"  : '';
              if( $dups{$ref_dup} ) {
-                 @dup_index = @{$dups{$ref_dup}};
-                 ($format,$num) = Data::SecsPack->pack_num('I',scalar @dup_index, @dup_index);
-                 ($format,$num) = ('U1','0') unless defined($format); # what else can we do
-                 push @list, ('L', '2', 'A', 'Index', $format, $num);
+                 ($format,$num) = Data::SecsPack->pack_num('I',$dups{$ref_dup});
+                 ($format,$num) = ('U1','') unless defined($format); # what else can we do
+                 push @secs_obj, ('L', '3', 'A', '', 'A', 'Index', $format, $num);
                  $i++;
                  next;
              }
@@ -264,7 +172,7 @@ sub listify
                  if($is_numeric) {
                      ($format,$num,$str) = Data::SecsPack->pack_num('I',@{$var->[$i]});
                      if(defined($format) && $str eq '') {
-                         push @list, $format, $num;
+                         push @secs_obj, $format, $num;
                          $i++;
                          next;
                      }
@@ -280,18 +188,40 @@ sub listify
              #
              if ($ref) {
 
-                 my @ref_index = (@index, $i);
-                 $dups{$ref_dup} = \@ref_index;
+                 $dups{$ref_dup} = (scalar @secs_obj); # element in @secs_obj
 
                  ########
-                 # Nest for 'ARRAY' reference to the arrayified underlying data data
+                 # Nest for an 'ARRAY' reference to the arrayified the refereceddata
                  #
+                 # The listify subroutine uses @vars stacks to nest. When listify finds
+                 # member of the current array that is a reference to another array,
+                 # listify stops working on the current array. It save the position
+                 # that it stop working by pushing a refenrence to the current array
+                 # and the position (index), $i of the array reference onto the @vars
+                 # stack. Listify will then start working on the new array. When all work
+                 # on the new array is listify will pop the old $var array reference
+                 # and array index $i off of the @vars stack and continue work on the
+                 # old array.
+                 #   
                  if($ref eq 'ARRAY' ) {
-                     push @stack, $var;
-                     push @index, $i;
+                  
+                     ####
+                     # Save info so listify can resume work on the old array
+                     # 
+                     push @vars, ($var,$i+1);
+
+                     ####
+                     # Start work on the new array
+                     # 
                      $var = $var->[$i];
                      $i = 0;
-                     push @list, ('L', scalar @$var);
+
+                     #####
+                     # Output a List element whose body is the number of
+                     # members in the new array that listify is starting
+                     # to work on.
+                     # 
+                     push @secs_obj, ('L', scalar @$var);
                      next;
                  }
              }
@@ -306,15 +236,15 @@ sub listify
                  #
                  ($format,$num) = Data::SecsPack->pack_num('I',$var->[$i]);
                  if(defined($format)) {
-                     push @list, $format, $num;
+                     push @secs_obj, $format, $num;
                  }
-
+ 
                  #####
                  # Else ascii  
                  else {
-                     push @list, 'A', $var->[$i];
+                     push @secs_obj, 'A', $var->[$i];
                  }
-
+ 
              }
              $i++;
          }
@@ -324,17 +254,15 @@ sub listify
          # working on any array whose work was interupted
          # to work on the current array.
          #
-         last unless @stack;   
-         $i = pop @index;
-         $i++;  
-         $var = pop @stack;
+         last unless @vars;
+         ($var,$i) = splice( @vars, -2, 2);
 
-    }
+     }
 
-    ########
-    # Listified unpacked SECSII message
-    # 
-    \@list;
+     ########
+     # Listified unpacked SECSII message
+     # 
+     \@secs_obj;
 
 }
 
@@ -388,6 +316,24 @@ my @bin_format = (
  'U2',   # 42 2-byte integer (unsigned)
    '',   # 43
  'U4',   # 44 4-byte integer (unsigned)
+   '',   # 45
+   '',   # 46
+   '',   # 47
+   '',   # 48
+   '',   # 49
+   '',   # 50
+   '',   # 51
+   '',   # 52
+   '',   # 53
+   '',   # 54
+   '',   # 55
+   '',   # 56
+   '',   # 57
+   '',   # 58
+   '',   # 59
+   '',   # 60
+   '',   # 61
+   '',   # 63
 );
 
 sub neuterify
@@ -414,24 +360,26 @@ sub neuterify
 
      #####
      # Data format code S - Secsii  P - Perl
-     my $format_code = 'S';
-     $format_code = $options->{format_code} if $options->{format_code};
+     my $obj_format_code = 'S';
+     $obj_format_code = $options->{obj_format_code} if $options->{obj_format_code};
 
-     my @format_item = unpack('C3',$binary_secs);
-     my @list;
-     if( $format_item[0] == 165 && $format_item[1] == 1 &&
-        ($format_item[2] == 80 || $format_item[2] == 83) ) {
-        @list = ();
-        if($options->{format_code}) {
-            substr($binary_secs,2,1) = $format_code;
+     my @secs_format_element = unpack('C3',$binary_secs);
+     my @secs_obj;
+
+     if(!$options->{add_obj_format_code} && $secs_format_element[0] == 165 
+         && $secs_format_element[1] == 1 &&
+         ($secs_format_element[2] == 80 || $secs_format_element[2] == 83)  ) {
+        @secs_obj = ();
+        if($options->{obj_format_code}) {
+            substr($binary_secs,2,1) = $obj_format_code;
         }
      }
      else {
-        @list = ('U1',$format_code);
+        @secs_obj = ('U1',$obj_format_code);
      }
 
      use integer;     
-     my ($format, $bytes_per_element, $length_size, $length, $length_num);
+     my ($format, $bytes_per_cell, $length_size, $length, $length_num);
      while($binary_secs) {
 
           #####
@@ -443,11 +391,11 @@ sub neuterify
           unless($format) {
              return("Unknown SECSII format\n");
           }
-          push @list,$format;
+          push @secs_obj,$format;
 
           #####
           # decode number of elements
-          $bytes_per_element = $format =~ /(\d)$/ ? $1 : 1;
+          $bytes_per_cell = $format =~ /(\d)$/ ? $1 : 1;
           $length = substr($binary_secs,0,$length_size);
           $binary_secs = substr($binary_secs,$length_size);
           $length_num = Data::SecsPack->unpack_num('U1', $length);
@@ -459,25 +407,25 @@ sub neuterify
           ######
           # Grab the elements
           if($format eq 'L') {
-              push @list,$length_num;
+              push @secs_obj,$length_num;
           }
           elsif($length_num) {
-              push @list,substr($binary_secs,0,$length_num);
+              push @secs_obj,substr($binary_secs,0,$length_num);
               $binary_secs = substr($binary_secs,$length_num);  
           }
           else {
-              push @list,'';
+              push @secs_obj,'';
           }        
      }
      no integer;
-     \@list;
+     \@secs_obj;
 }
 
 
 #####
 #
 #
-sub scalarize
+sub numberify
 {
      shift if UNIVERSAL::isa($_[0],__PACKAGE__);
      my ($i,$number,$format);
@@ -494,6 +442,171 @@ sub scalarize
 }
 
 
+#####
+#
+#
+sub perlify
+{
+     ######
+     # This subroutine uses no object data; therefore,
+     # drop any class or object.
+     #
+     shift if UNIVERSAL::isa($_[0],__PACKAGE__);
+
+     ########
+     # Listified unpacked SECSII message
+     # 
+     my ($secs_obj) = @_;
+
+     my @nested_stack = ();
+
+     my ($head, $body);
+     my ($class, $type);
+
+     #####
+     # Establish root array with a count that goes on
+     # until the $secs_obj is exhasted. 
+     #
+     my $new_var_p;
+     my $count = -1;
+     my @root_array = ('','ARRAY');
+     my $nested_var_p = \@root_array;
+     my (%dup,$position);
+
+     $head = $secs_obj->[0];
+     $body = $secs_obj->[1];
+     unless ($head eq 'U1' && ($body eq 'P' || 
+                ref($body) eq 'SCALAR' && $$body eq '80') ){
+         return "Not a Perl SECS object\n";
+     }
+
+     my $i = 2;
+     while($i < @{$secs_obj} ) {
+
+         $head = $secs_obj->[$i++];
+         $body = $secs_obj->[$i++];
+         if( $head eq 'L') {
+             return "Wrong format type for class\n" if 'A' ne $secs_obj->[$i++];
+             $class = $secs_obj->[$i++];
+             return "Wrong format type for type\n" if 'A' ne $secs_obj->[$i++];
+             $type = $secs_obj->[$i++];
+             return "No body for element\n" unless $i < @{$secs_obj};
+             if( $class eq '' && $type eq 'Index') {
+                 $head = $secs_obj->[$i++];
+                 unless( $head =~ /^U/  && $body == 3) {
+                      return "Perl index item has wrong format code\n";
+                 }
+                 $body = $secs_obj->[$i++];
+                 unless( $body eq 'ARRAY' ) {
+                     $body = Data::SecsPack->unpack_num( $head, $body );
+                     return $body unless ref($body) eq 'ARRAY';
+                 }
+                 return "Perl Index body must have only one cell\n" unless @$body == 1;
+                 $new_var_p = $dup{$body->[0]};
+                 push @$nested_var_p, $new_var_p;  
+                 $count--;
+             }
+             else {
+
+                 #######
+                 # The position $i - 6 is the index into @secs_obj of the
+                 # element $head 'L'. This is the position that appears in
+                 # Perl 'L', 3, 'A', '','A','Index',U1, $position Index
+                 # list element.
+                 # 
+                 $new_var_p = [$class,$type];
+                 push @nested_stack,$nested_var_p, $count-1, $i - 6;
+                 $nested_var_p = $new_var_p;
+                 $count = $body-2;
+             }
+         }     
+         elsif( $head =~ /^[AJB]/ ) {
+             push @$nested_var_p,$body;
+             $count--;
+         }
+         elsif($head =~ /^[TSUF]/ ) {
+
+             #######
+             # Note: PERL does not support multiple cell numbers.
+             # Thus, PERL Secs Object will either have a scalar number or a
+             # full blown '','ARRAY', one-cell-number,  ... one-cell-number
+             #
+             unless( ref($body) eq 'ARRAY' ) {
+                 $body = Data::SecsPack->unpack_num($head, $body);
+                 return $body unless ref($body) eq 'ARRAY'; # $body is error message
+                 return "Not a Perl one-cell-number\n" unless( @$body == 1);
+             }
+             push @$nested_var_p,${$body}[0];
+             $count--
+         }
+         else {
+             return "Unknown format type\n";
+         }
+
+         #####
+         # At the end of the current array, so go back
+         # working on any array whose work was interupted
+         # to work on the current array.
+         #
+         while(@nested_stack && $count <= 0) {
+             last unless $count == 0;
+             $new_var_p = perl_typify($nested_var_p);
+             ($nested_var_p, $count, $position) = splice(@nested_stack,-3,3);
+             push @$nested_var_p, $new_var_p;
+             $dup{$position} = $new_var_p;
+         }
+     }
+     $nested_var_p = perl_typify($nested_var_p);
+     @$nested_var_p;
+}
+
+
+######
+#
+#
+sub perl_typify
+{
+     my ($array) = (@_);
+  
+     my @array = @$array;
+     my $class = shift @array;
+     my $reftype = shift @array;
+     my $ref;
+
+     #####
+     # Add rest of the members to the canoncial array
+     # based on underlying data type
+     # 
+     if ( $reftype eq 'HASH') {
+         $ref = {@array};
+     }
+     elsif($reftype eq 'ARRAY') {
+         $ref = \@array;
+     }
+     elsif($reftype eq 'SCALAR') {
+         return "Bad scalar body\n" unless @array == 1;
+         $ref = \$array[0];
+     }
+     elsif($reftype eq 'REF') {
+         return "Bad ref body\n" unless @array == 1;
+         $ref = $array[0];
+     }
+     elsif($reftype eq 'CODE') {
+         return "Bad code body\n" unless @array == 1;
+         $ref = $array[0];
+     }
+     elsif($reftype eq 'GLOB') {
+         return "Bad glob body\n" unless @array == 8;
+         $ref = \@array;
+     }
+     else {
+         return "Unknown underlying data type\n";
+     }
+     $ref = bless $ref,$class if($class);
+     return($ref);
+}
+
+
 ####
 # Take the listify Perl structure and convert it to
 # a readable ASCII format.
@@ -502,7 +615,7 @@ sub secsify
 {
      shift @_ if UNIVERSAL::isa($_[0],__PACKAGE__);
 
-     my @list = @{shift @_};  # separate copy so do not clobber @_;
+     my @secs_obj = @{shift @_};  # separate copy so do not clobber @_;
      my $options = {};
      if( ref($_[0]) eq 'ARRAY' ) {
          my %options = @{$_[0]};
@@ -528,33 +641,33 @@ sub secsify
      my $string = '';
      my $item;
 
-     while (@list) {
+     while (@secs_obj) {
 
-         my $format = shift @list;
+         my $format = shift @secs_obj;
          if(@level && $level[-1] <= 0) {
              while (@level && $level[-1] <= 0) {pop @level};
              $options->{indent} = $spaces x scalar @level;
          }
          if ($format eq 'L') {
-             $options->{length} = shift @list;
+             $options->{length} = shift @secs_obj;
              unless($options->{length}) {
                  warn( "Unkown L length\n");
                  last;
              }
-             $string .= itemify( $format, $options );
+             $string .= secs_elementify( $format, $options );
              $level[-1] -= 1 if @level;
              push @level, $options->{length};
              $options->{indent} = $spaces x scalar(@level);
              $options->{length}=undef;
          }
          elsif ($format =~ /[IUF]\d+/) {
-             $item = itemify($format,shift @list, $options);
+             $item = secs_elementify($format,shift @secs_obj, $options);
              return $item if ref($item);
              $string .= $item;
              $level[-1] -= 1 if @level;
          }
          elsif ($format =~ /[AJBT]/) {
-             $item = itemify( $format, shift @list, $options);
+             $item = secs_elementify( $format, shift @secs_obj, $options);
              return $item if ref($item);
              $string .= $item;
              $level[-1] -= 1 if @level;
@@ -574,6 +687,93 @@ sub secsify
 
 }
 
+####
+# Used in this program module only by the secsify subroutine
+#
+sub secs_elementify
+{
+     my ($format, @cells) = @_;
+
+     my $error;
+     my $options = {};
+     if(ref($cells[-1]) eq 'ARRAY') {
+         my %options = @{pop @cells};
+         $options = \%options;
+     }
+     elsif( ref($cells[-1]) eq 'HASH' ) {
+         $options = pop @cells;
+     }
+
+     my $cells = $cells[0];
+     
+     my $length;
+     if(defined($options->{length}) && $options->{length}) {
+         $length =  $options->{length};
+     }
+     else {
+        my $bytes_per_cell = 1;
+        if( $format =~ /(\d+)/ ) {
+            $bytes_per_cell = $1;
+        }       
+        unless( $bytes_per_cell ) {
+             $error = "No bytes per element\n";
+             return \$error;
+        }
+        $length = length($cells) / $bytes_per_cell; 
+     }
+
+     my $body;
+     if($options->{type} eq 'ascii') {
+         $body = $options->{indent} . $format . '[' . $length . ']' ;
+         return $body unless $length; # do not get space after A[0]
+         if ($format =~ /[SUF]\d/ || $format eq 'T') {
+             if(ref($cells) eq 'ARRAY') {
+                 $body .= ' ' . (join ' ' , @$cells);
+             }
+             else {
+                 my $numbers = Data::SecsPack->unpack_num($format, $cells);
+                 return $numbers unless ref($numbers) eq 'ARRAY';
+                 $body .= ' ' . (join ' ' , @$numbers);
+             }
+         }
+         elsif ($format =~ /[AJB]/) {
+             $body .= ($cells =~ /\n/) ? "\n" : ' ';
+             $body .= $cells[0];
+         } 
+         elsif( $format !~ /[L]/ ) {
+             $error =  "Unknown format $format\n";
+             return \$error;
+         }
+     }
+     else {
+         my ($len_format,$len_num) = Data::SecsPack->pack_num('I', $length);
+         unless(defined($len_format) && $len_format =~ /^U/ ) {
+             $error =  "Element length number is not unsigned integer\n";
+             return \$error;
+         }
+         my $len_size = length($len_num);
+         unless($len_size < 4) {
+             $error = "Number of cells in the item is too big\n";
+             return \$error;
+         }
+         $body = pack ("C1",($format{$format}+$len_size)) . $len_num;
+         return $body if $format eq 'L' || $length == 0;
+         if ($format =~ /[SUF]\d/ || $format eq 'T') {
+             if(ref($cells) eq 'ARRAY') {
+                 ($format, my $number) = Data::SecsPack->pack_num($format, @$cells);
+                 if(defined($format)) {
+                     return $body . $cells;
+                 }
+                 else {
+                     $error = 'Could not pack number\n';
+                     return \$error;
+                 }
+             }
+         }        
+         $body .= $cells;
+     }
+     $body;
+}
 
 sub transify
 {
@@ -597,15 +797,23 @@ sub transify
          $options = \%options;
      }
 
-     my $format_code = 'S';
-     $format_code = $options->{format_code} if $options->{format_code};
-
      #####
      # Data format code S - Secsii  P - Perl
-     my @list = ('U1',$format_code);
-
+     my @secs_obj = ();
+     my $obj_format_code = 'S';
+     $obj_format_code = $options->{obj_format_code} if $options->{obj_format_code};
+     if(!$options->{add_obj_format_code} ) {
+         if($options->{obj_format_code}) {
+             $ascii_secs =~ s/^\s*U1\s*(80|83)\s*\n?//s;
+             push @secs_obj,('U1',$options->{obj_format_code});
+         }
+     }
+     else {
+         push @secs_obj,('U1',$options->{obj_format_code});
+     }
+    
      use integer;     
-     my ($format, $byte_code, $bytes_per_element, $length);
+     my ($format, $byte_code, $bytes_per_cell, $length);
      my (@open_list, $list_location, $list_close_char, $item_count, $counted_list);
      my ($open_char, $close_char, $esc_esc, $str);
      $list_close_char = '';
@@ -616,38 +824,14 @@ sub transify
      $ascii_secs =~ s/^\s*//s;
      while($ascii_secs) {
 
-          ######
-          # Try closing any open list 
-          if(($list_close_char && $ascii_secs =~ s/^\s*\Q$list_close_char\E//s) || 
-              ($counted_list && $counted_list <= $item_count) ) {
-              
-              if($list_close_char && $counted_list ==0) {
-                  $list[$list_location] = $item_count;
-              }
-              if(@open_list) {
-                  ($list_location,$list_close_char,$item_count,$counted_list) = @{$open_list[-1]};
-                  pop @open_list;
-              }
-              else {
-                  $list_close_char = '';
-                  $list_location = 0;
-                  $item_count = 0;
-                  $counted_list = 0;
-                  $close_char = '';
-              }
-              $ascii_secs =~ s/^\s*//s;
-              next;
-
-          }
-
           #####
           # Parse format code
           ($format,$byte_code) = ($1,$2) if $ascii_secs =~ s/^\s*(\S)(\d)?//;
           return "No format code\n\t$ascii_secs" unless($format);
-          $bytes_per_element = $byte_code;
-          $bytes_per_element = '' unless $bytes_per_element;
+          $bytes_per_cell = $byte_code;
+          $bytes_per_cell = '' unless $bytes_per_cell;
           $item_count++;
-          $bytes_per_element = 1 unless $bytes_per_element;
+          $bytes_per_cell = 1 unless $bytes_per_cell;
 
           ######
           # Look for number of elements in brackets jammed tight
@@ -671,23 +855,23 @@ sub transify
           if(defined $length) {
               if($format eq 'L') {
                   push @open_list,[$list_location,$list_close_char,$item_count,$counted_list] if $list_location;
-                  $list_location = scalar @list + 1;
+                  $list_location = scalar @secs_obj + 1;
                   $item_count = 0;
                   $counted_list = $length;
                   $list_close_char = '';
                   $close_char = '';
-                  push @list,$format,$length;
+                  push @secs_obj,$format,$length;
               }
 
               ####
               # Grab the length number of characters from input stream
               elsif($format =~ /^[JAB]$/) {
                   if(0 < $length) {
-                      push @list,$format,substr($ascii_secs,0,$length);
+                      push @secs_obj,$format,substr($ascii_secs,0,$length);
                       $ascii_secs = substr($ascii_secs,$length);
                   }
                   else {
-                      push @list,$format,'';  # length 0 
+                      push @secs_obj,$format,'';  # length 0 
                   }
               }
 
@@ -697,109 +881,133 @@ sub transify
                   if(0 < $length) {
                        ($ascii_secs, @integers) = Data::SecsPack->str2int($ascii_secs);
                        return "Wrong number of integers\n\t$ascii_secs" if($length != @integers);
-                       push @list, Data::SecsPack->pack_int("$format$byte_code",@integers);
+                       push @secs_obj, Data::SecsPack->pack_int("$format$byte_code",@integers);
                   }
                   else {
-                      push @list,$format,'';  # length 0 
+                      push @secs_obj,$format,'';  # length 0 
                   }
                  
               }
               else {
                   return "Unkown format $format\n";
               }
-              $ascii_secs =~ s/^\s*//s;
-              next;
+
+          }
+       
+          else {
+
+              ######
+              # Count the numbers
+              if( $format =~ /^[UTISF]$/ ) {
+                  ($format,$integer,$ascii_secs) = Data::SecsPack->pack_num("$format$byte_code",$ascii_secs);
+                  if(defined $format) {
+                      push @secs_obj,$format,$integer;
+                  }
+                  else {
+                      return "Integer could not be packed.";
+                  }
+              }
+
+              elsif( $format =~ /^[LAJB]$/ ) {
+
+                  ######
+                  # Otherwise, look for parentheses type enclosing.  
+                  # 
+                  $open_char = $1 if $ascii_secs =~ s/^\s*(\S)//;
+                  if($open_char eq '(') {
+                      $close_char = ')';
+                  }
+                  elsif($open_char eq '[') {
+                      $close_char = ']';
+                  }
+                  elsif($open_char eq '{') {
+                      $close_char = '}';
+                  }
+                  elsif($open_char eq '<') {
+                      $close_char = '>';
+                  }
+                  else {
+                      $close_char = $open_char;
+                  }
+
+                  ####
+                  # Need to save old list item count, list location, and start a new open list 
+                  if($format eq 'L') {
+
+                      ####
+                      # Note: For open list, there must be L at the even location. Does $list_location
+                      # for an open list must always be odd and never can be zero.
+                      push @open_list,[$list_location,$list_close_char,$item_count,$counted_list] if $list_location; 
+                      $list_location = scalar @secs_obj + 1;
+                      $item_count = 0;
+                      $counted_list = 0;
+                      $list_close_char = $close_char;
+                      $close_char = '';
+                     push @secs_obj,$format,0;
+                  }
+
+                  ####
+                  # Close a text string 
+                  else {
+
+                      $str = '';
+                      use integer;
+                      for(;;) { 
+                          unless($ascii_secs =~ s/(.*?)\Q$close_char\E//s) {
+                              return "No matching $close_char for $open_char\n\t$ascii_secs";
+                          }
+                          $str .= $1;
+                          ($esc_esc) = $str =~ /(\\+)$/;
+
+                          #####
+                          # close_char escaped 
+                          if($esc_esc && length($esc_esc) % 2) {
+                              $str .= $close_char;
+                          }
+
+                          else {
+                              last;
+                          }
+                      }                   
+                      no integer;
+                      $close_char = '';
+                      push @secs_obj,$format,$str;
+                  }
+              }
+              else  {
+                  return "Unkown format $format\n";
+              }
           }
 
           ######
-          # Count the numbers
-          if( $format =~ /^[UTISF]$/ ) {
-              ($format,$integer,$ascii_secs) = Data::SecsPack->pack_num("$format$byte_code",$ascii_secs);
-              if(defined $format) {
-                  push @list,$format,$integer;
+          # Try closing any open list 
+          while(($list_close_char && $ascii_secs =~ s/^\s*\Q$list_close_char\E//s) || 
+              ($counted_list && $counted_list <= $item_count) ) {
+              
+              if($list_close_char && $counted_list ==0) {
+                  $secs_obj[$list_location] = $item_count;
+              }
+              if(@open_list) {
+                  ($list_location,$list_close_char,$item_count,$counted_list) = @{$open_list[-1]};
+                  pop @open_list;
               }
               else {
-                  return "Integer could not be packed.";
-              }
-          }
-
-          elsif( $format =~ /^[LAJB]$/ ) {
-
-              ######
-              # Otherwise, look for parentheses type enclosing.  
-              # 
-              $open_char = $1 if $ascii_secs =~ s/^\s*(\S)//;
-              if($open_char eq '(') {
-                  $close_char = ')';
-              }
-              elsif($open_char eq '[') {
-                  $close_char = ']';
-              }
-              elsif($open_char eq '{') {
-                  $close_char = '}';
-              }
-              elsif($open_char eq '<') {
-                  $close_char = '>';
-              }
-              else {
-                  $close_char = $open_char;
-              }
-
-              ####
-              # Need to save old list item count, list location, and start a new open list 
-              if($format eq 'L') {
-
-                  ####
-                  # Note: For open list, there must be L at the even location. Does $list_location
-                  # for an open list must always be odd and never can be zero.
-                  push @open_list,[$list_location,$list_close_char,$item_count,$counted_list] if $list_location; 
-                  $list_location = scalar @list + 1;
+                  $list_close_char = '';
+                  $list_location = 0;
                   $item_count = 0;
                   $counted_list = 0;
-                  $list_close_char = $close_char;
                   $close_char = '';
-                  push @list,$format,0;
               }
-
-              ####
-              # Close a text string 
-              else {
-
-                  $str = '';
-                  use integer;
-                  for(;;) { 
-                      unless($ascii_secs =~ s/(.*?)\Q$close_char\E//s) {
-                          return "No matching $close_char for $open_char\n\t$ascii_secs";
-                      }
-                      $str .= $1;
-                      ($esc_esc) = $str =~ /(\\+)$/;
-
-                      #####
-                      # close_char escaped 
-                      if($esc_esc && length($esc_esc) % 2) {
-                          $str .= $close_char;
-                      }
-
-                      else {
-                          last;
-                      }
-                  }                   
-                  no integer;
-                  $close_char = '';
-                  push @list,$format,$str;
-              }
-          }
-          else  {
-              return "Unkown format $format\n";
           }
 
           $ascii_secs =~ s/^\s*//s;
+
      }
      no integer;
      my $open_lists = scalar @open_list;
      $open_lists++ if $counted_list || $list_close_char;
      return "There are $open_lists open lists.\n" if $open_lists;
-     \@list ;
+     \@secs_obj ;
 }
 
 #####
@@ -817,7 +1025,7 @@ sub stringify
 #####
 #
 #
-sub vectorize
+sub textify
 {
      shift if UNIVERSAL::isa($_[0],__PACKAGE__);
      my ($i,$number);
@@ -840,7 +1048,7 @@ __END__
 
 =head1 NAME
   
-Data::Secs2 - canoncial string for nested data
+Data::Secs2 - pack, unpack, format, transform from Perl data SEMI E5-94 nested data.
 
 =head1 SYNOPSIS
 
@@ -849,80 +1057,87 @@ Data::Secs2 - canoncial string for nested data
  #  
  use Data::Secs2 qw();
 
- @array  = arrayify( @var );
+ \@array  = arrayify( $ref );
 
- $string = itemify($format, @elements);
- $string = itemify($format, @elements, [@options]);
- $string = itemify($format, @elements, {optioins});
+ $body = secs_elementify($format, @cells);
+ $body = secs_elementify($format, @cells, [@options]);
+ $body = secs_elementify($format, @cells, {optioins});
 
- \@sec_list  = listify(@vars);
+ \@secs_obj  = listify(@vars);
 
- \@sec_list  = neuterify($binary_secs);
- \@sec_list  = neuterify($binary_secs, @options);
- \@sec_list  = neuterify($binary_secs, [@options]);
- \@sec_list  = neuterify($binary_secs, {@options});
+ \@secs_obj  = neuterify($binary_secs);
+ \@secs_obj  = neuterify($binary_secs, @options);
+ \@secs_obj  = neuterify($binary_secs, [@options]);
+ \@secs_obj  = neuterify($binary_secs, {@options});
 
- $error = scalarize( \@sec_list );
+ $error = numberify( \@secs_obj );
 
- $ascii_secs = secsify( \@sec_list);
- $ascii_secs = secsify( \@sec_list, @options);
- $ascii_secs = secsify( \@sec_list, [@options]);
- $ascii_secs = secsify( \@sec_list, {@options});
+ @vars  = perlify(\@secs_obj);
 
- $binary_secs = secsify( \@sec_list, type => 'binary');
- $binary_secs = secsify( \@sec_list, type => 'binary', @options);
- $binary_secs = secsify( \@sec_list, [type => 'binary',@options]);
- $binary_secs = secsify( \@sec_list, {type => 'binary',@options});
+ $ref  = perl_typify(\@array);
+
+ $ascii_secs = secsify( \@secs_obj);
+ $ascii_secs = secsify( \@secs_obj, @options);
+ $ascii_secs = secsify( \@secs_obj, [@options]);
+ $ascii_secs = secsify( \@secs_obj, {@options});
+
+ $binary_secs = secsify( \@secs_obj, type => 'binary');
+ $binary_secs = secsify( \@secs_obj, type => 'binary', @options);
+ $binary_secs = secsify( \@secs_obj, [type => 'binary',@options]);
+ $binary_secs = secsify( \@secs_obj, {type => 'binary',@options});
 
  $string = stringify( @arg );
 
- \@sec_list  = transify($acsii_secs);
- \@sec_list  = transify($acsii_secs, @options);
- \@sec_list  = transify($acsii_secs, [@options]);
- \@sec_list  = transify($acsii_secs, {@options});
+ \@secs_obj  = transify($acsii_secs);
+ \@secs_obj  = transify($acsii_secs, @options);
+ \@secs_obj  = transify($acsii_secs, [@options]);
+ \@secs_obj  = transify($acsii_secs, {@options});
 
- $error  = vectorize( \@sec_list );
+ $error  = textify( \@secs_obj );
 
  #####
  # Class interface
  #
  use Data::Secs2;
 
- @array  = Data::Secs2->arrayify( @var );
+ \@array  = Data::Secs2->arrayify( $ref );
 
- $string = Data::Secs2->itemify($format, @elements);
- $string = Data::Secs2->itemify($format, @elements, [@options]);
- $string = Data::Secs2->itemify($format, @elements, {optioins});
+ $body = Data::Secs2->secs_elementify($format, @cells);
+ $body = Data::Secs2->secs_elementify($format, @cells, [@options]);
+ $body = Data::Secs2->secs_elementify($format, @cells, {optioins});
 
- \@sec_list  = Data::Secs2->listify(@vars);
+ \@secs_obj  = Data::Secs2->listify(@vars);
 
- \@sec_list  = Data::Secs2->neuterify($binary_secs);
- \@sec_list  = Data::Secs2->neuterify($binary_secs, @options);
- \@sec_list  = Data::Secs2->neuterify($binary_secs, [@options]);
- \@sec_list  = Data::Secs2->neuterify($binary_secs, {@options});
+ \@secs_obj  = Data::Secs2->neuterify($binary_secs);
+ \@secs_obj  = Data::Secs2->neuterify($binary_secs, @options);
+ \@secs_obj  = Data::Secs2->neuterify($binary_secs, [@options]);
+ \@secs_obj  = Data::Secs2->neuterify($binary_secs, {@options});
 
- $error = Data::Secs2->scalarize( \@sec_list );
+ $error = Data::Secs2->numberify( \@secs_obj );
 
- $ascii_secs = Data::Secs2->secsify( \@sec_list);
- $ascii_secs = Data::Secs2->secsify( \@sec_list, @options);
- $ascii_secs = Data::Secs2->secsify( \@sec_list, [@options]);
- $ascii_secs = Data::Secs2->secsify( \@sec_list, {@options});
+ @vars  = Data::Secs2->perlify(\@secs_obj);
 
- $binary_secs = Data::Secs2->secsify( \@sec_list, type => 'binary');
- $binary_secs = Data::Secs2->secsify( \@sec_list, type => 'binary', @options);
- $binary_secs = Data::Secs2->secsify( \@sec_list, [type => 'binary',@options]);
- $binary_secs = Data::Secs2->secsify( \@sec_list, {type => 'binary',@options});
+ $ref  = Data::Secs2->perl_typify(\@array);
 
- $string = Data::Secs2->stringify( @arg );
+ $ascii_secs = Data::Secs2->secsify( \@secs_obj);
+ $ascii_secs = Data::Secs2->secsify( \@secs_obj, @options);
+ $ascii_secs = Data::Secs2->secsify( \@secs_obj, [@options]);
+ $ascii_secs = Data::Secs2->secsify( \@secs_obj, {@options});
 
- \@sec_list  = Data::Secs2->transify($acsii_secs);
- \@sec_list  = Data::Secs2->transify($acsii_secs, @options);
- \@sec_list  = Data::Secs2->transify($acsii_secs, [@options]);
- \@sec_list  = Data::Secs2->transify($acsii_secs, {@options});
+ $binary_secs = Data::Secs2->secsify( \@secs_obj, type => 'binary');
+ $binary_secs = Data::Secs2->secsify( \@secs_obj, type => 'binary', @options);
+ $binary_secs = Data::Secs2->secsify( \@secs_obj, [type => 'binary',@options]);
+ $binary_secs = Data::Secs2->secsify( \@secs_obj, {type => 'binary',@options});
 
- $error = Data::Secs2->vectorize( \@sec_list );
+ $body = Data::Secs2->stringify( @arg );
 
- 
+ \@secs_obj  = Data::Secs2->transify($acsii_secs);
+ \@secs_obj  = Data::Secs2->transify($acsii_secs, @options);
+ \@secs_obj  = Data::Secs2->transify($acsii_secs, [@options]);
+ \@secs_obj  = Data::Secs2->transify($acsii_secs, {@options});
+
+ $error = Data::Secs2->textify( \@secs_obj );
+
 =head1 DESCRIPTION
 
 The 'Data::SECS2' module provides a widely accepted
@@ -957,18 +1172,29 @@ In this new position he used the skills he learned
 at the Intel fab to secsify intelligence reports on Iraq's
 weopons of mass distruction.
  
-By using a well-known, widely-used standard 
-invented and publicized by the prime mister of England for
+By using a well-known, widely-used standard for
 packing and unpacking Perl nested data, 
-not only is this useful in a open nested operations
-such as comparing nested data, storing the packed
-data in a file, but also for transmitting data
-from one Perl site to another or between Perl
+not only is this standard essential in real-time communications in the factory
+between  equipment computers and operating systems and host computer
+and operating system
+but it has uses in snail-time computations.
+In snail-time the standard's data structure is usefull
+in a nested data operations such as comparing nested data, 
+storing the packed nested data in a file, 
+but also for transmitting nested data 
+from one Perl site to another or even between Perl
 and other programming languages.
 
-And do not forget the added benefit of SEMI secs humor
+And do not forget the added benefit of SEMI SECS humor
 and that the real originators of the SECS-II yielded
-and allowed Tony Blair to take illegal credit for SECS-II.
+and allowed Tony Blair to take illegal credit for 
+inventing SECS-II.
+After all the practical definition of politics is
+getting your own way. 
+Julius Ceasar invented the Julian calendar and the month of July,
+Augustus Ceasr the month of Auguest,
+Al Gore the information highway and
+Tony Blair not only SECS-II but SECS-I and High-Speed SECS.
 
 =head2 SECSII Format
 
@@ -981,7 +1207,7 @@ This industry standard is copyrighted and cannot be
 reproduced without violating the copyright.
 However for those who have brought the original hard media
 copy, there are robot help and Perl POD open source
-copyrighted versions of the SECII hard copy copyright version available.
+copyrighted versions of the SECII hard copy copyrighted version available.
 The base copyright is hard copy paper and PDF files available
 from
  
@@ -993,10 +1219,11 @@ from
  http://www.semiconductor-intl.org
  http://www.reed-electronics.com/semiconductor/
 
-The SEMI E4 SECS-I standard addresses transmitting SECSII messages from one machine to
-another machine (all most always host to equipment) serially via RS-232. And, there is
-another SECS standard for TCP/IP, the SEMI E37 standard,
-High-Speed SECS Message Services (HSMS) Generic Services.
+Other important SEMI standards address message transfer protocol of SECSII messages.
+They are the SEMI E4 SECS-I for transmitting SECSII messages from one machine to
+another machine via RS-232 and the SEMI E37 
+High-Speed SECS Message Services (HSMS) Generic Services
+for transmitting SECSII via TCP/IP.
 
 In order not to plagarize college students,
 credit must be given where credit is due.
@@ -1011,16 +1238,70 @@ In this new position he used the skills he learned
 at the Intel fab to secsify intelligence reports on Iraq's
 weopons of mass distruction.
  
-The SEMI E5 SECS-II standard is a method of forming listified packed
-messages from nested list data. 
-It consists of elements where each element is a format code, 
-number of elements followed by the elements. 
+The SEMI E5 SECS-II standard provides, among many other things,
+a standard method of forming packed nested list data.
+In accordance with SEMI E5 SECS-II transmitted information consists
+of items and lists.
+An item consists of the following: 
+
+=over
+
+=item 1
+
+an item header(IH) with a format code,
+and the number of bytes in the following body
+
+=item 2
+
+followed by the item body (IB) consisting of a number of elements. 
+
+=back
+
+A item (IB) may consist of zero bytes in which there are no body
+bytes for that item. As established by SEMI E5-94, 6.2.2,
+
+=over 4
+
+=item 
+
+consists of groups of data of the same representation
+in order to save repeated item headers
+
+=item integers
+
+Most Significant Byte (MS) sent first
+
+=item signed integers
+
+signed integers are two's complement, MSB sent first
+
+=item floating point numbers
+
+IEEE 754, sign bit sent first
+
+=item non-printing ASCII
+
+equipment specific
+
+=back
+
+As specified in E4-95 6.3, a list element consists of an
+ordered set of elements that are either an item element or a list element.
+Because a list element may contains a list element, and SEMI E5 places
+no restriction on the level of nesting, SECSII lists may
+be nested to theoretically to any level. 
+Practically nested is limited by machine resources. 
+A list has the same header format as an item, no body and the length
+number is the number of elements in the list instead of the number of
+bytes in the body. 
+
+The item and list header format codes are as in below Table 1 
 
                Table 1 Item Format Codes
 
  unpacked   binary  octal  hex   description
  ----------------------------------------
- L          000000   00    0x00  List (length in elements)
+ L          000000   00    0x00  LIST (length of elements, not bytes)
  B          001000   10    0x20  Binary
  T          001001   11    0x24  Boolean
  A          010000   20    0x40  ASCII
@@ -1036,31 +1317,19 @@ number of elements followed by the elements.
  U2         101010   52    0xA8  2-byte integer (unsigned)
  U4         101100   54    0xB0  4-byte integer (unsigned)
 
-Notes:
 
-=over 4
+Table 1 complies to SEMI E5-94 Table 1, p.94, with an unpack text 
+symbol and hex columns added. The hex column is the upper 
+Most Significant Bits (MSB) 6 bits
+of the format code in the SEMI E5-94 item header (IH) or list header (LH)
+with the the lower Least Significant BIt (LSB) set to zero.
 
-=item 1
- 
-ASCII  format - Non-printing characters are equipment specific
+Figure 1 below provides the layout for a SEMI E5-94 header 
+and complies to SEMI E5-94 Figure 2, p. 92, except Figure 1 
+renumbers the bits from 0 to 7 instead of  from 1 to 8.
 
-=item 2 
-
-Integer formats - most significant byte sent first
-
-=item 3
-
-floating formats - IEEE 753 with the byte containing the sign sent first.
-
-=back
-
-Nested lists are packed is a linear number of items where each
-item consists of a header followed by the elements in the item.
-The header is of the following format where the MS byte is always
-first when transmitting  the bytes linearally:
-
-
-          bits                                     MSB      LSB
+                              bits                                    
+   MSB                                                     LSB
    
     7        6       5       4       3       2      1       0
  +-------+-------+-------+-------+-------+-------+-------+-------+
@@ -1073,51 +1342,88 @@ first when transmitting  the bytes linearally:
  |                   LS length byte                              |
  +---------------------------------------------------------------+
 
-=head2 SECS List
+                Figure 1 Item and List Header
 
-A SECS list is a Perl list (array) based upon the
-SEMI E5-94 SECSII format.
-The list consists consecutive items where each item takes two positions
-in the list: the item header (IH) and  the item body (IB). 
-The item headers are always even number indices where the item bodies
-are odd number indices. 
-The IH is a format code as specified in the
+
+=head2 SECS Object
+
+This section establishes a formal definition of a SECS Object
+and introduces technical definitions that supercede Webster
+Dictionary definitions and only apply for the content of
+this Program Module for the following:
+SECS Object (SECS-OBJ), Element, Item Element (IE), 
+List Element (LE), Element Header (EH), Element Format Code (EFC),
+Element Body (EB) and Element Cells (EC).
+If any of the technical definitions appear to have sexual innuendos,
+it is entirely coincidental.  
+The definitions should applied only on their technical merits.
+Any other interperetation is totally unprofessional.
+
+A SECS Object is a Perl C<ARRAY> that mimics the
+SEMI E5-94 SECS-II, section 6, data structure where 
+SECS-II transmitted bytes are layed out in memory.
+The relation between between SEMI E5-94 "byte sent first" is that
+"bytes sent first" will have the lowest byte address.
+
+A SECS Object consists of consecutive ordered Elements stored
+as a Perl C<ARRAY>.
+Each Element takes two consistive positions
+in the Perl <ARRAY>: the Element Header and the Element Body. 
+The Element Headers positions are always even number indices where the Element Bodies
+positions are always odd number indices. 
+
+The EH consists of and only of a Element Format Code as specified in the
 Table 1 Item Format Codes unpack column.
-The IB for each format code is as follows:
+
+Elements may be either an Item Element or a List Element.
+The Element Body for a List Element is the sum of the
+nested List Elements and Item Elements in the List Element. 
+The Element Body for a Item Element is a group of Element Cells of the
+same data representation and bytes per Element Cell.
+The bytes in an body of an Item Element is, thus, the number of cells in the
+body times the bytes per Element Cell.
+The Element Body for each Element Format Code is as follows:
 
 =over 4
 
 =item L
  
-unpacked number
+Unpacked sum of nested Element Lists and Element Items in the Element List
 
 =item S U F T
 
-either scalarized array of numbers packed in accordance with SEMI E5-97
-or a vectorized reference to an array of numbers
+a number cells either as a numberified Perl C<SCALAR> packed in accordance with SEMI E5-94
+or a reference to textified (unpacked) Perl C<ARRAY> of numbers
 
-=item B A J
+=item A J
 
 unpacked string
 
+=item B
+
+packed numberified Perl C<SCALAR> of binary bytes or a reference
+to a Perl C<SCALLAR> of unpack textified binary in the hex
+'H*' Perl format
+
 =back
 
-The first item of a SECS list 
-is always a SECS list Format Code 
-wit a IH of U1 and a packed IB of either 'P' or 'S' depending
-upon whether the SECS list has information necessary to convert
-to Perl data structure, 'P', or not, 'S'.
+The first element of a SECS Object 
+is always a SECS Object Format Code C<U1>
+and a packed element body of either a
+numberfied  'P' or 'S', textified 80 or 83, depending
+upon whether the SECS Object has information necessary to convert
+to Perl data structure, 'P', or most remain as a SECS Object, 'S'.
 
 =head2 arrayify subroutine
 
- @array  = arrayify( @var );
+ \@array  = arrayify( $ref );
 
 The purpose of the C<arrayify> subroutine is
 to provide a canoncial array representation of 
 Perl reference types. When C<$var> is
-not a reference C<arrayify> subroutine passes
+not a reference, the C<arrayify> subroutine passes
 C<$var> through unchanged;
-otherewise the ref($var) is changed to
+otherewise, the ref($ref) is changed to
 a reference to a canoncial array where the
 first member is the the C<$var> class,
 the second member the underlying
@@ -1146,6 +1452,10 @@ the scalar
 
 the reference
 
+=item 'CODE'
+
+the reference
+
 =item 'GLOB'
 
 values of the C<GLOB> in the
@@ -1162,40 +1472,14 @@ following order:
 
 =back
 
-=head2 itemify subroutine
-
- $string = itemify($format, @elements);
- $string = itemify($format, @elements, [@options]);
- $string = itemify($format, @elements, {options});
-
-The C<itemify> subroutine is the low-level work horse
-for the C<secsify> subroutine that
-produces a SEMI SECSII item C<$string> from a Perl
-L<SECS list|Data::Secs2/SECS List>  item header C<$format> and item body C<@elements>.
-
-For {type => 'binary'}, $string is a complete packed
-SEMI E5-94 SECII item.
-For {type => 'ascii'} or no type option, the C<$string> 
-is the ascii unpacked SECSII item.
-
-An unpacked SECSII item consists of the unpacked format
-code from the Table 1 Item Format Codes, the number of
-elements in the item body enclosed in brackets, followed
-by the elements in the item body. 
-In accordance with SEMI E5-94, section 6, there will
-be no elements for format code 'L' or an element length
-of 0.
-
-In case of an error, the return is an reference 
-a error message.
 
 =head2 listify subroutine
 
- \@sec_list  = listify(@vars);
+ \@secs_obj  = listify(@vars);
 
 The listify subroutine takes a list of Perl variables, C<@arg>
 that may contain references to nested data and 
-converts it to a <L<SECS list|Data::Secs2/SECS List>  
+converts it to a <L<SECS Object|Data::Secs2/SECS Object>  
 that mimics a SECSII data structure of a linearized
 list of items.
 
@@ -1208,58 +1492,79 @@ Valid Perl underlying data types are: HASH ARRAY
 SCALAR REF GLOB.
 
 The return is either a reference to a  
-L<SECS list|Data::Secs2/L<SECS list|Data::Secs2/SECS List> > 
+L<SECS Object|Data::Secs2/L<SECS Object|Data::Secs2/SECS Object> > 
 or case of an error an error message.
-To determine an error from a L<SECS list|Data::Secs2/SECS List> ,
+To determine an error from a L<SECS Object|Data::Secs2/SECS Object> ,
 check if the return is a reference or
 a reference to an ARRAY.
 
 =head2 neuterify subroutine
 
- \@sec_list  = neuterify($binary_secs);
- \@sec_list  = neuterify($binary_secs, @options);
- \@sec_list  = neuterify($binary_secs, [@options]);
- \@sec_list  = neuterify($binary_secs, {@options});
+ \@secs_obj  = neuterify($binary_secs);
+ \@secs_obj  = neuterify($binary_secs, @options);
+ \@secs_obj  = neuterify($binary_secs, [@options]);
+ \@secs_obj  = neuterify($binary_secs, {@options});
 
 The C<neuterify> subroutine takes produces
-a C<@sec_list> from a SEMI E5-94 packed
+a C<@secs_obj> from a SEMI E5-94 packed
 data structure C<$binary_secs> and produces
-a C<@sec_list>.
+a SECS object C<@secs_obj>.
 
-The C<neuterify> subroutine uses option {format => 'P'}, 
-or {format => 'S'} as the value for the leading
-L<SECS list|Data::Secs2/SECS List>  U1 format byte.
-SEMI E5-94 SECII item.
+The C<neuterify> subroutine uses option C<{obj_format_code => 'P'}>, 
+or C<{obj_format_code => 'S'}> as the value for the leading
+L<SECS Object|Data::Secs2/SECS Object>  U1 format byte.
+SEMI E5-94 SECII item. If the C<neuterify> subroutine receives the
+option C<{add_obj_format_code}>, C<neuterify> will add the
+byte to the beginning of the packed data; otherwise, 
+C<neuterify> probes the leading byte of the packed data.
+If the probes shows the leading byte is a C<Secs Object Format Code>,
+C<neuterify> modifies the packed data byte; otherweise it adds the byte
+to the beginning of the packed data.
 
 The return is either a reference to a  
-L<SECS list|Data::Secs2/L<SECS list|Data::Secs2/SECS List> > 
+L<SECS Object|Data::Secs2/L<SECS Object|Data::Secs2/SECS Object> > 
 or case of an error an error message.
-To determine an error from a L<SECS list|Data::Secs2/SECS List> ,
+To determine an error from a L<SECS Object|Data::Secs2/SECS Object> ,
 check if the return is a reference or
 a reference to an ARRAY.
 
-=head2 scalarize subroutine
+=head2 numberify subroutine
 
- $error = scalarize( \@sec_list );
+ $error = numberify( \@secs_obj );
 
-The C<scalarize> subroutine ensures that
+The C<numberify> subroutine ensures that
 all the bodies in a
-L<SECS list|Data::Secs2/SECS List> 
+L<SECS Object|Data::Secs2/SECS Object> 
 for numeric items,
 format U, S, F, T, are scalar strings
-packed in accordance with SEMI E5-97.
+packed in accordance with SEMI E5-94.
+
+=head2 perlify subroutine
+
+ @vars = perlify( \@secs_obj );
+
+The C<perlify> subroutine converts a Perl SECS object into
+Perl variables.
+
+=head2 perl_typify subroutine
+
+ $ref  = perl_typify(\@array);
+
+The C<perl_typify> subroutine converts an C<@array> produced
+by the C<arrayify> subroutine from a C<$ref> back to a 
+C<$ref>.
 
 =head2 secsify subroutine
 
- $ascii_secs = secsify( \@sec_list);
- $ascii_secs = secsify( \@sec_list, @options);
- $ascii_secs = secsify( \@sec_list, [@options]);
- $ascii_secs = secsify( \@sec_list, {@options});
+ $ascii_secs = secsify( \@secs_obj);
+ $ascii_secs = secsify( \@secs_obj, @options);
+ $ascii_secs = secsify( \@secs_obj, [@options]);
+ $ascii_secs = secsify( \@secs_obj, {@options});
 
- $binary_secs = secsify( \@sec_list, type => 'binary');
- $binary_secs = secsify( \@sec_list, type => 'binary', @options);
- $binary_secs = secsify( \@sec_list, [type => 'binary',@options]);
- $binary_secs = secsify( \@sec_list, {type => 'binary',@options});
+ $binary_secs = secsify( \@secs_obj, type => 'binary');
+ $binary_secs = secsify( \@secs_obj, type => 'binary', @options);
+ $binary_secs = secsify( \@secs_obj, [type => 'binary',@options]);
+ $binary_secs = secsify( \@secs_obj, {type => 'binary',@options});
 
 The C<secsify> subroutine/method walks a data structure and
 converts all underlying array and hash references to arrays
@@ -1273,9 +1578,9 @@ will be listified into SECSII message as follows:
  OBJECT => 'L', $number-of-elements, 
            'A', $class,
            'A', $built-in-class,
-           @elements
+           @cells
 
- @elements may contain a Perlified OBJECT, REFERENCE or SCALAR)
+ @cells may contain a Perlified OBJECT, REFERENCE or SCALAR)
 
  INDEX OBJECT => 'L' '2', 'A' 'Index', 'U4', $number-of-indices, @indices 
  
@@ -1283,6 +1588,33 @@ will be listified into SECSII message as follows:
 
  SCALAR = 'A', $scalar  (Perl built-in class)
                 
+=head2 secs_elementify subroutine
+
+ $body = secs_elementify($format, @cells);
+ $body = secs_elementify($format, @cells, [@options]);
+ $body = secs_elementify($format, @cells, {options});
+
+The C<secs_elementify> subroutine is the low-level work horse
+for the C<secsify> subroutine that
+produces a SEMI SECSII item C<$body> from a Perl
+L<SECS Object|Data::Secs2/SECS Object>  item header C<$format> and item body C<@cells>.
+
+For {type => 'binary'}, $body is a complete packed
+SEMI E5-94 SECII item.
+For {type => 'ascii'} or no type option, the C<$body> 
+is the ascii unpacked SECSII item.
+
+An unpacked SECSII item consists of the unpacked format
+code from the Table 1 Item Format Codes, the number of
+elements in the item body enclosed in brackets, followed
+by the elements in the item body. 
+In accordance with SEMI E5-94, section 6, there will
+be no elements for format code 'L' or an element length
+of 0.
+
+In case of an error, the return is an reference 
+a error message.
+
 =head2 stringify subroutine
 
 The C<stringify> subroutined stringifies a Perl data structure
@@ -1290,14 +1622,14 @@ by applying the C<listify> and C<secify> subroutines.
 
 =head2 transify subroutine
 
- \@sec_list  = transify($acsii_secs);
- \@sec_list  = transify($acsii_secs, @options);
- \@sec_list  = transify($acsii_secs, [@options]);
- \@sec_list  = transify($acsii_secs, {@options});
+ \@secs_obj  = transify($acsii_secs);
+ \@secs_obj  = transify($acsii_secs, @options);
+ \@secs_obj  = transify($acsii_secs, [@options]);
+ \@secs_obj  = transify($acsii_secs, {@options});
 
 The C<transify> subroutine takes a free style
 text consisting of list of secsii items and
-converts it to L<SECS list|Data::Secs2/SECS List>.
+converts it to L<SECS Object|Data::Secs2/SECS Object>.
 The C<transify> subroutine is very liberal
 in what it accepts as valid input. 
 
@@ -1315,25 +1647,31 @@ after the 'L' format character or
 by enclosing parentheseses, bracketers or
 any other character.
 
-The C<transify> subroutine uses option {format => 'P'}, 
-or {format => 'S'} as the value for the leading
-L<SECS list|Data::Secs2/SECS List>  U1 format byte.
-SEMI E5-94 SECII item.
+The C<transify> subroutine uses option C<{obj_format_code => 'P'}>, 
+or C<{obj_format_code => 'S'}> as the value for the leading
+L<SECS Object|Data::Secs2/SECS Object>  U1 format byte.
+SEMI E5-94 SECII item. If the C<transify> subroutine receives the
+option C<{add_obj_format_code}>, C<transify> will add the
+a C<Secs Object Format Code> to the beginning of the C<@secs_obj>; otherwise, 
+C<transify> probes the leading C<@secs_obj>.
+If the probes shows the leading byte is a C<Secs Object Format Code>,
+C<transify> modifies the code; otherweise it a C<Secs Object Format Code>
+to the beginning of the C<@secs_obj>
 
 The return is either a reference to a  
-L<SECS list|Data::Secs2/L<SECS list|Data::Secs2/SECS List> > 
+L<SECS Object|Data::Secs2/L<SECS Object|Data::Secs2/SECS Object> > 
 or case of an error an error message.
-To determine an error from a L<SECS list|Data::Secs2/SECS List> ,
+To determine an error from a L<SECS Object|Data::Secs2/SECS Object> ,
 check if the return is a reference or
 a reference to an ARRAY.
 
-=head2 vectorize subroutine
+=head2 textify subroutine
 
- $error = vectorize( \@sec_list );
+ $error = textify( \@secs_obj );
 
-The C<vectorize> subroutine ensures that
+The C<textify> subroutine ensures that
 all the bodies in a
-L<SECS list|Data::Secs2/SECS List> 
+L<SECS Object|Data::Secs2/SECS Object> 
 for numeric items,
 format U, S, F, T, are references
 to an array of numbers.
@@ -1343,6 +1681,10 @@ to an array of numbers.
 The requirements are coming.
 
 =head1 DEMONSTRATION
+
+ #########
+ # perl Secs2.d
+ ###
 
  ~~~~~~ Demonstration overview ~~~~~
 
@@ -1361,17 +1703,104 @@ follow on the next lines. For example,
  =>     use File::Package;
  =>     my $fp = 'File::Package';
 
- =>     use Data::Secs2 qw(arrayify itemify listify neuterify scalarize secsify 
- =>         stringify  transify vectorize);
+ =>     use Data::Secs2 qw(arrayify listify neuterify numberify 
+ =>          perlify secsify secs_elementify stringify textify transify);
 
  =>     my $uut = 'Data::Secs2';
  =>     my $loaded;
- => $uut->import( 'stringify' )
- => stringify( 'string' )
- 'string'
 
- => stringify( 2 )
- 2
+ => my $test_data1 =
+ => 'U1[1] 80
+ => L[5]
+ =>   A[0]
+ =>   A[5] ARRAY
+ =>   U1[1] 2
+ =>   A[5] hello
+ =>   U1[1] 4
+ => ';
+
+ => my $test_data2 =
+ => 'U1[1] 80
+ => L[6]
+ =>   A[0]
+ =>   A[4] HASH
+ =>   A[4] body
+ =>   A[5] hello
+ =>   A[6] header
+ =>   A[9] To: world
+ => ';
+
+ => my $test_data3 =
+ => 'U1[1] 80
+ => U1[1] 2
+ => L[4]
+ =>   A[0]
+ =>   A[5] ARRAY
+ =>   A[5] hello
+ =>   A[5] world
+ => U2[1] 512
+ => ';
+
+ => my $test_data4 =
+ => 'U1[1] 80
+ => U1[1] 2
+ => L[6]
+ =>   A[0]
+ =>   A[4] HASH
+ =>   A[6] header
+ =>   L[6]
+ =>     A[11] Class::None
+ =>     A[4] HASH
+ =>     A[4] From
+ =>     A[6] nobody
+ =>     A[2] To
+ =>     A[6] nobody
+ =>   A[3] msg
+ =>   L[4]
+ =>     A[0]
+ =>     A[5] ARRAY
+ =>     A[5] hello
+ =>     A[5] world
+ => ';
+
+ => my $test_data5 =
+ => 'U1[1] 80
+ => L[6]
+ =>   A[0]
+ =>   A[4] HASH
+ =>   A[6] header
+ =>   L[6]
+ =>     A[11] Class::None
+ =>     A[4] HASH
+ =>     A[4] From
+ =>     A[6] nobody
+ =>     A[2] To
+ =>     A[6] nobody
+ =>   A[3] msg
+ =>   L[4]
+ =>     A[0]
+ =>     A[5] ARRAY
+ =>     A[5] hello
+ =>     A[5] world
+ => L[6]
+ =>   A[0]
+ =>   A[4] HASH
+ =>   A[6] header
+ =>   L[3]
+ =>     A[0]
+ =>     A[5] Index
+ =>     U1[1] 10
+ =>   A[3] msg
+ =>   L[3]
+ =>     A[0]
+ =>     A[5] ARRAY
+ =>     A[4] body
+ => ';
+
+ => ##################
+ => # stringify an array
+ => # 
+ => ###
 
  => stringify( '2', 'hello', 4 )
  'U1[1] 80
@@ -1380,15 +1809,10 @@ follow on the next lines. For example,
  U1[1] 4
  '
 
- => stringify( ['2', 'hello', 4] )
- 'U1[1] 80
- L[5]
-   A[0]
-   A[5] ARRAY
-   U1[1] 2
-   A[5] hello
-   U1[1] 4
- '
+ => ##################
+ => # stringify a hash reference
+ => # 
+ => ###
 
  => stringify( {header => 'To: world', body => 'hello'})
  'U1[1] 80
@@ -1401,6 +1825,11 @@ follow on the next lines. For example,
    A[9] To: world
  '
 
+ => ##################
+ => # ascii secsify lisfication of test_data1 an array reference
+ => # 
+ => ###
+
  => secsify( listify( ['2', 'hello', 4] ) )
  'U1[1] 80
  L[5]
@@ -1411,16 +1840,10 @@ follow on the next lines. For example,
    U1[1] 4
  '
 
- => secsify( listify( {header => 'To: world', body => 'hello'}) )
- 'U1[1] 80
- L[6]
-   A[0]
-   A[4] HASH
-   A[4] body
-   A[5] hello
-   A[6] header
-   A[9] To: world
- '
+ => ##################
+ => # ascii secsify lisfication of test_data3 - array with an array ref
+ => # 
+ => ###
 
  => secsify( listify( '2', ['hello', 'world'], 512 ) )
  'U1[1] 80
@@ -1434,7 +1857,57 @@ follow on the next lines. For example,
  '
 
  => my $obj = bless { To => 'nobody', From => 'nobody'}, 'Class::None'
- => secsify( listify( '2', { msg => ['hello', 'world'] , header => $obj } ) )
+ bless( {
+                  'From' => 'nobody',
+                  'To' => 'nobody'
+                }, 'Class::None' )
+
+ => ##################
+ => # ascii secsify lisfication of test_data5 - hash with nested hashes, arrays, common objects
+ => # 
+ => ###
+
+ =>     secsify( listify( {msg => ['hello', 'world'] , header => $obj }, 
+ =>      {msg => [ 'body' ], header => $obj} ) )
+ 'U1[1] 80
+ L[6]
+   A[0]
+   A[4] HASH
+   A[6] header
+   L[6]
+     A[11] Class::None
+     A[4] HASH
+     A[4] From
+     A[6] nobody
+     A[2] To
+     A[6] nobody
+   A[3] msg
+   L[4]
+     A[0]
+     A[5] ARRAY
+     A[5] hello
+     A[5] world
+ L[6]
+   A[0]
+   A[4] HASH
+   A[6] header
+   L[3]
+     A[0]
+     A[5] Index
+     U1[1] 10
+   A[3] msg
+   L[3]
+     A[0]
+     A[5] ARRAY
+     A[4] body
+ '
+
+ => ##################
+ => # ascii secsify listifcation perilification transfication of test_data4
+ => # 
+ => ###
+
+ => secsify( listify(perlify( transify($test_data4 ))) )
  'U1[1] 80
  U1[1] 2
  L[6]
@@ -1456,8 +1929,12 @@ follow on the next lines. For example,
      A[5] world
  '
 
- => secsify( listify( {msg => ['hello', 'world'] , header => $obj }, 
- =>                {msg => [ 'body' ], header => $obj} ) )
+ => ##################
+ => # ascii secsify listifcation perilification transfication of test_data5
+ => # 
+ => ###
+
+ => secsify( listify(perlify( transify($test_data5))) )
  'U1[1] 80
  L[6]
    A[0]
@@ -1480,9 +1957,10 @@ follow on the next lines. For example,
    A[0]
    A[4] HASH
    A[6] header
-   L[2]
+   L[3]
+     A[0]
      A[5] Index
-     U1[3] 2 0 3
+     U1[1] 10
    A[3] msg
    L[3]
      A[0]
@@ -1490,8 +1968,18 @@ follow on the next lines. For example,
      A[4] body
  '
 
+ => ##################
+ => # binary secsify an array reference
+ => # 
+ => ###
+
  => my $big_secs2 = unpack('H*',secsify( listify( ['2', 'hello', 4] ), {type => 'binary'}))
  'a501500105410041054152524159a50102410568656c6c6fa50104'
+
+ => ##################
+ => # neuterify a big secsii
+ => # 
+ => ###
 
  => secsify(neuterify (pack('H*',$big_secs2)))
  'U1[1] 80
@@ -1502,6 +1990,11 @@ follow on the next lines. For example,
    A[5] hello
    U1[1] 4
  '
+
+ => ##################
+ => # transify a free for all secsii input
+ => # 
+ => ###
 
  =>     my $ascii_secsii =
  => '
@@ -1520,15 +2013,20 @@ follow on the next lines. For example,
  => L 
  => (
  =>   A[0] A "HASH"  A /header/
- =>   L[2] A \'Index\' U1 2 0 3
+ =>   L[3] A[0] A \'Index\' U1 10
  =>   A  \'msg\'
  =>   L < A[0] A \'ARRAY\' A  \'body\' >
  => )
 
  => '
- => my $list = transify ($ascii_secsii, format_code => 'P');
+ => my $list = transify ($ascii_secsii, obj_format_code => 'P');
  => ref($list)
  'ARRAY'
+
+ => ##################
+ => # secsify transifed free style secs text
+ => # 
+ => ###
 
  => ref($list) ? secsify( $list ) : ''
  'U1[1] 80
@@ -1553,9 +2051,10 @@ follow on the next lines. For example,
    A[0]
    A[4] HASH
    A[6] header
-   L[2]
+   L[3]
+     A[0]
      A[5] Index
-     U1[3] 2 0 3
+     U1[1] 10
    A[3] msg
    L[3]
      A[0]
@@ -1563,8 +2062,18 @@ follow on the next lines. For example,
      A[4] body
  '
 
- => ref(my $number_list = listify( [ [78,45,25], [512,1024], 100000] ))
+ => ##################
+ => # listify a list of number arrays
+ => # 
+ => ###
+
+ => ref(my $number_list = listify( my $test_data6 = [ [78,45,25], [512,1024], 100000 ] ))
  'ARRAY'
+
+ => ##################
+ => # secify a listified list of number arrays
+ => # 
+ => ###
 
  => secsify($number_list)
  'U1[1] 80
@@ -1576,8 +2085,18 @@ follow on the next lines. For example,
    U4[1] 100000
  '
 
- => vectorize($number_list)
+ => ##################
+ => # textify listified list of number arrays
+ => # 
+ => ###
+
+ => textify($number_list)
  ''
+
+ => ##################
+ => # verify 1st textified item element body
+ => # 
+ => ###
 
  => [@{$number_list->[9]}]
  [
@@ -1586,31 +2105,109 @@ follow on the next lines. For example,
            25
          ]
 
+ => ##################
+ => # verify 2nd textified item element body
+ => # 
+ => ###
+
  => [@{$number_list->[11]}]
  [
            512,
            1024
          ]
 
+ => ##################
+ => # verify 3rd textified item element body
+ => # 
+ => ###
+
  => [@{$number_list->[13]}]
  [
            100000
          ]
 
- => scalarize($number_list)
+ => ##################
+ => # numberify listified list of number arrays
+ => # 
+ => ###
+
+ => numberify($number_list)
  ''
+
+ => ##################
+ => # verify 1st numberified item element body
+ => # 
+ => ###
 
  => unpack('H*', $number_list->[9])
  '4e2d19'
 
+ => ##################
+ => # verify 2nd numberified item element body
+ => # 
+ => ###
+
  => unpack('H*', $number_list->[11])
  '02000400'
+
+ => ##################
+ => # verify 3rd numberified item element body
+ => # 
+ => ###
 
  => unpack('H*', $number_list->[13])
  '000186a0'
 
 
 =head1 QUALITY ASSURANCE
+
+=head2 Test Report
+
+  => perl Secs2.t
+ 
+ 1..30
+ # Running under perl version 5.006001 for MSWin32
+ # Win32::BuildNumber 635
+ # Current time local: Sat Apr 17 00:44:51 2004
+ # Current time GMT:   Sat Apr 17 04:44:51 2004
+ # Using Test.pm version 1.24
+ # Test::Tech    : 1.2
+ # Data::Secs2   : 1.18
+ # Data::SecsPack: 0.02
+ # =cut 
+ ok 1 - UUT loaded as Part of Test::Tech 
+ ok 2 - stringify a scalar string 
+ ok 3 - stringify a scalar number 
+ ok 4 - stringify an array 
+ ok 5 - stringify a hash reference 
+ ok 6 - ascii secsify lisfication of test_data1 an array reference 
+ ok 7 - ascii secsify lisfication of test_data2 -  a hash reference 
+ ok 8 - ascii secsify lisfication of test_data3 - array with an array ref 
+ ok 9 - ascii secsify lisfication of test_data4 - array with nested hashes, arrays, objects 
+ ok 10 - ascii secsify lisfication of test_data5 - hash with nested hashes, arrays, common objects 
+ ok 11 - ascii secsify listifcation perilification transfication of test_data1 
+ ok 12 - ascii secsify listifcation perilification transfication of test_data2 
+ ok 13 - ascii secsify listifcation perilification transfication of test_data3 
+ ok 14 - ascii secsify listifcation perilification transfication of test_data4 
+ ok 15 - ascii secsify listifcation perilification transfication of test_data5 
+ ok 16 - binary secsify an array reference 
+ ok 17 - binary secsify array with nested hashes, arrays, objects 
+ ok 18 - neuterify a big secsii 
+ ok 19 - transify a free for all secsii input 
+ ok 20 - secsify transifed free style secs text 
+ ok 21 - listify a list of number arrays 
+ ok 22 - secify a listified list of number arrays 
+ ok 23 - textify listified list of number arrays 
+ ok 24 - verify 1st textified item element body 
+ ok 25 - verify 2nd textified item element body 
+ ok 26 - verify 3rd textified item element body 
+ ok 27 - numberify listified list of number arrays 
+ ok 28 - verify 1st numberified item element body 
+ ok 29 - verify 2nd numberified item element body 
+ ok 30 - verify 3rd numberified item element body 
+ # Passed : 30/30 100%
+ 
+=head2 Test Software Notes
 
 Running the test script 'Secs2.t' found in
 the "Data-Secs2-$VERSION.tar.gz" distribution file verifies
@@ -1783,7 +2380,7 @@ E<lt>support@SoftwareDiamonds.comE<gt>
 
 =head2 COPYRIGHT NOTICE
 
-Copyrighted (c) 2002 Software Diamonds
+Copyright © 2003 2004 Software Diamonds
 
 All Rights Reserved
 

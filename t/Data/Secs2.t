@@ -7,8 +7,8 @@ use warnings;
 use warnings::register;
 
 use vars qw($VERSION $DATE $FILE);
-$VERSION = '0.03';   # automatically generated file
-$DATE = '2004/04/13';
+$VERSION = '0.04';   # automatically generated file
+$DATE = '2004/04/17';
 $FILE = __FILE__;
 
 
@@ -78,8 +78,8 @@ BEGIN {
    # and the todo tests
    #
    require Test::Tech;
-   Test::Tech->import( qw(plan ok skip skip_tests tech_config finish) );
-   plan(tests => 26);
+   Test::Tech->import( qw(finish is_skip ok plan skip skip_tests tech_config) );
+   plan(tests => 30);
 
 }
 
@@ -136,11 +136,99 @@ use warnings;
     use File::Package;
     my $fp = 'File::Package';
 
-    use Data::Secs2 qw(arrayify itemify listify neuterify scalarize secsify 
-        stringify  transify vectorize);
+    use Data::Secs2 qw(arrayify listify neuterify numberify 
+         perlify secsify secs_elementify stringify textify transify);
 
     my $uut = 'Data::Secs2';
     my $loaded;
+
+my $test_data1 =
+'U1[1] 80
+L[5]
+  A[0]
+  A[5] ARRAY
+  U1[1] 2
+  A[5] hello
+  U1[1] 4
+';
+
+my $test_data2 =
+'U1[1] 80
+L[6]
+  A[0]
+  A[4] HASH
+  A[4] body
+  A[5] hello
+  A[6] header
+  A[9] To: world
+';
+
+my $test_data3 =
+'U1[1] 80
+U1[1] 2
+L[4]
+  A[0]
+  A[5] ARRAY
+  A[5] hello
+  A[5] world
+U2[1] 512
+';
+
+my $test_data4 =
+'U1[1] 80
+U1[1] 2
+L[6]
+  A[0]
+  A[4] HASH
+  A[6] header
+  L[6]
+    A[11] Class::None
+    A[4] HASH
+    A[4] From
+    A[6] nobody
+    A[2] To
+    A[6] nobody
+  A[3] msg
+  L[4]
+    A[0]
+    A[5] ARRAY
+    A[5] hello
+    A[5] world
+';
+
+my $test_data5 =
+'U1[1] 80
+L[6]
+  A[0]
+  A[4] HASH
+  A[6] header
+  L[6]
+    A[11] Class::None
+    A[4] HASH
+    A[4] From
+    A[6] nobody
+    A[2] To
+    A[6] nobody
+  A[3] msg
+  L[4]
+    A[0]
+    A[5] ARRAY
+    A[5] hello
+    A[5] world
+L[6]
+  A[0]
+  A[4] HASH
+  A[6] header
+  L[3]
+    A[0]
+    A[5] Index
+    U1[1] 10
+  A[3] msg
+  L[3]
+    A[0]
+    A[5] ARRAY
+    A[4] body
+';
 
 skip_tests( 1 ) unless ok(
       $loaded = $fp->is_package_loaded($uut), # actual results
@@ -178,20 +266,6 @@ U1[1] 4
 
 #  ok:  4
 
-ok(  stringify( ['2', 'hello', 4] ), # actual results
-     'U1[1] 80
-L[5]
-  A[0]
-  A[5] ARRAY
-  U1[1] 2
-  A[5] hello
-  U1[1] 4
-', # expected results
-     "",
-     "stringify an array reference");
-
-#  ok:  5
-
 ok(  stringify( {header => 'To: world', body => 'hello'}), # actual results
      'U1[1] 80
 L[6]
@@ -205,125 +279,88 @@ L[6]
      "",
      "stringify a hash reference");
 
-#  ok:  6
+#  ok:  5
 
 ok(  secsify( listify( ['2', 'hello', 4] ) ), # actual results
-     'U1[1] 80
-L[5]
-  A[0]
-  A[5] ARRAY
-  U1[1] 2
-  A[5] hello
-  U1[1] 4
-', # expected results
+     $test_data1, # expected results
      "",
-     "ascii secsify an array reference");
+     "ascii secsify lisfication of test_data1 an array reference");
+
+#  ok:  6
+
+ok(  secsify( listify( {header => 'To: world', body => 'hello'}) ), # actual results
+     $test_data2, # expected results
+     "",
+     "ascii secsify lisfication of test_data2 -  a hash reference");
 
 #  ok:  7
 
-ok(  secsify( listify( {header => 'To: world', body => 'hello'}) ), # actual results
-     'U1[1] 80
-L[6]
-  A[0]
-  A[4] HASH
-  A[4] body
-  A[5] hello
-  A[6] header
-  A[9] To: world
-', # expected results
+ok(  secsify( listify( '2', ['hello', 'world'], 512 ) ), # actual results
+     $test_data3, # expected results
      "",
-     "ascii secsify a hash reference");
+     "ascii secsify lisfication of test_data3 - array with an array ref");
 
 #  ok:  8
-
-ok(  secsify( listify( '2', ['hello', 'world'], 512 ) ), # actual results
-     'U1[1] 80
-U1[1] 2
-L[4]
-  A[0]
-  A[5] ARRAY
-  A[5] hello
-  A[5] world
-U2[1] 512
-', # expected results
-     "",
-     "ascii secsify array with an array ref");
-
-#  ok:  9
 
    # Perl code from C:
 my $obj = bless { To => 'nobody', From => 'nobody'}, 'Class::None';
 
 ok(  secsify( listify( '2', { msg => ['hello', 'world'] , header => $obj } ) ), # actual results
-     'U1[1] 80
-U1[1] 2
-L[6]
-  A[0]
-  A[4] HASH
-  A[6] header
-  L[6]
-    A[11] Class::None
-    A[4] HASH
-    A[4] From
-    A[6] nobody
-    A[2] To
-    A[6] nobody
-  A[3] msg
-  L[4]
-    A[0]
-    A[5] ARRAY
-    A[5] hello
-    A[5] world
-', # expected results
+     $test_data4, # expected results
      "",
-     "ascii secsify array with nested hashes, arrays, objects");
+     "ascii secsify lisfication of test_data4 - array with nested hashes, arrays, objects");
+
+#  ok:  9
+
+ok(      secsify( listify( {msg => ['hello', 'world'] , header => $obj }, 
+     {msg => [ 'body' ], header => $obj} ) ), # actual results
+     $test_data5, # expected results
+     "",
+     "ascii secsify lisfication of test_data5 - hash with nested hashes, arrays, common objects");
 
 #  ok:  10
 
-ok(  secsify( listify( {msg => ['hello', 'world'] , header => $obj }, 
-               {msg => [ 'body' ], header => $obj} ) ), # actual results
-     'U1[1] 80
-L[6]
-  A[0]
-  A[4] HASH
-  A[6] header
-  L[6]
-    A[11] Class::None
-    A[4] HASH
-    A[4] From
-    A[6] nobody
-    A[2] To
-    A[6] nobody
-  A[3] msg
-  L[4]
-    A[0]
-    A[5] ARRAY
-    A[5] hello
-    A[5] world
-L[6]
-  A[0]
-  A[4] HASH
-  A[6] header
-  L[2]
-    A[5] Index
-    U1[3] 2 0 3
-  A[3] msg
-  L[3]
-    A[0]
-    A[5] ARRAY
-    A[4] body
-', # expected results
+ok(  secsify( listify(perlify( transify($test_data1 ) ) ) ), # actual results
+     $test_data1, # expected results
      "",
-     "ascii secsify ref to a hash with nested hashes, arrays, common objects");
+     "ascii secsify listifcation perilification transfication of test_data1");
 
 #  ok:  11
+
+ok(  secsify( listify(perlify( transify($test_data2 ) ) ) ), # actual results
+     $test_data2, # expected results
+     "",
+     "ascii secsify listifcation perilification transfication of test_data2");
+
+#  ok:  12
+
+ok(  secsify( listify(perlify( transify($test_data3 )) ) ), # actual results
+     $test_data3, # expected results
+     "",
+     "ascii secsify listifcation perilification transfication of test_data3");
+
+#  ok:  13
+
+ok(  secsify( listify(perlify( transify($test_data4 ))) ), # actual results
+     $test_data4, # expected results
+     "",
+     "ascii secsify listifcation perilification transfication of test_data4");
+
+#  ok:  14
+
+ok(  secsify( listify(perlify( transify($test_data5))) ), # actual results
+     $test_data5, # expected results
+     "",
+     "ascii secsify listifcation perilification transfication of test_data5");
+
+#  ok:  15
 
 ok(  my $big_secs2 = unpack('H*',secsify( listify( ['2', 'hello', 4] ), {type => 'binary'})), # actual results
      'a50150010541004105' . unpack('H*','ARRAY') . 'a501024105' . unpack('H*','hello') . 'a50104', # expected results
      "",
      "binary secsify an array reference");
 
-#  ok:  12
+#  ok:  16
 
    # Perl code from C:
 $big_secs2 = 
@@ -355,33 +392,14 @@ ok(  unpack('H*',
      "",
      "binary secsify array with nested hashes, arrays, objects");
 
-#  ok:  13
+#  ok:  17
 
 ok(  secsify(neuterify (pack('H*',$big_secs2))), # actual results
-     'U1[1] 80
-U1[1] 2
-L[6]
-  A[0]
-  A[4] HASH
-  A[6] header
-  L[6]
-    A[11] Class::None
-    A[4] HASH
-    A[4] From
-    A[6] nobody
-    A[2] To
-    A[6] nobody
-  A[3] msg
-  L[4]
-    A[0]
-    A[5] ARRAY
-    A[5] hello
-    A[5] world
-', # expected results
+     $test_data4, # expected results
      "",
      "neuterify a big secsii");
 
-#  ok:  14
+#  ok:  18
 
    # Perl code from C:
     my $ascii_secsii =
@@ -401,7 +419,7 @@ L
 L 
 (
   A[0] A "HASH"  A /header/
-  L[2] A \'Index\' U1 2 0 3
+  L[3] A[0] A \'Index\' U1 10
   A  \'msg\'
   L < A[0] A \'ARRAY\' A  \'body\' >
 )
@@ -409,7 +427,7 @@ L
 ';
 
    # Perl code from C:
-my $list = transify ($ascii_secsii, format_code => 'P');
+my $list = transify ($ascii_secsii, obj_format_code => 'P');
 
 skip_tests( 1 ) unless ok(
       ref($list), # actual results
@@ -417,51 +435,21 @@ skip_tests( 1 ) unless ok(
       "$list",
       "transify a free for all secsii input"); 
 
-#  ok:  15
+#  ok:  19
 
 ok(  ref($list) ? secsify( $list ) : '', # actual results
-     'U1[1] 80
-L[6]
-  A[0]
-  A[4] HASH
-  A[6] header
-  L[6]
-    A[11] Class::None
-    A[4] HASH
-    A[4] From
-    A[6] nobody
-    A[2] To
-    A[6] nobody
-  A[3] msg
-  L[4]
-    A[0]
-    A[5] ARRAY
-    A[5] hello
-    A[5] world
-L[6]
-  A[0]
-  A[4] HASH
-  A[6] header
-  L[2]
-    A[5] Index
-    U1[3] 2 0 3
-  A[3] msg
-  L[3]
-    A[0]
-    A[5] ARRAY
-    A[4] body
-', # expected results
+     $test_data5, # expected results
      "",
      "secsify transifed free style secs text");
 
-#  ok:  16
+#  ok:  20
 
-ok(  ref(my $number_list = listify( [ [78,45,25], [512,1024], 100000] )), # actual results
+ok(  ref(my $number_list = listify( my $test_data6 = [ [78,45,25], [512,1024], 100000 ] )), # actual results
      'ARRAY', # expected results
      "",
      "listify a list of number arrays");
 
-#  ok:  17
+#  ok:  21
 
 ok(  secsify($number_list), # actual results
      'U1[1] 80
@@ -475,63 +463,63 @@ L[5]
      "",
      "secify a listified list of number arrays");
 
-#  ok:  18
+#  ok:  22
 
-ok(  vectorize($number_list), # actual results
+ok(  textify($number_list), # actual results
      '', # expected results
      "",
-     "vectorize listified list of number arrays");
+     "textify listified list of number arrays");
 
-#  ok:  19
+#  ok:  23
 
 ok(  [@{$number_list->[9]}], # actual results
      [78,45,25], # expected results
      "",
-     "verify 1st vectorized array");
+     "verify 1st textified item element body");
 
-#  ok:  20
+#  ok:  24
 
 ok(  [@{$number_list->[11]}], # actual results
      [512,1024], # expected results
      "",
-     "verify 2nd vectorized array");
+     "verify 2nd textified item element body");
 
-#  ok:  21
+#  ok:  25
 
 ok(  [@{$number_list->[13]}], # actual results
      [100000], # expected results
      "",
-     "verify 3rd vectorized array");
+     "verify 3rd textified item element body");
 
-#  ok:  22
+#  ok:  26
 
-ok(  scalarize($number_list), # actual results
+ok(  numberify($number_list), # actual results
      '', # expected results
      "",
-     "scalarize listified list of number arrays");
+     "numberify listified list of number arrays");
 
-#  ok:  23
+#  ok:  27
 
 ok(  unpack('H*', $number_list->[9]), # actual results
      '4e2d19', # expected results
      "",
-     "verify 1st scalarized array");
+     "verify 1st numberified item element body");
 
-#  ok:  24
+#  ok:  28
 
 ok(  unpack('H*', $number_list->[11]), # actual results
      '02000400', # expected results
      "",
-     "verify 2nd scalarized array");
+     "verify 2nd numberified item element body");
 
-#  ok:  25
+#  ok:  29
 
 ok(  unpack('H*', $number_list->[13]), # actual results
      '000186a0', # expected results
      "",
-     "verify 3rd scalarized array");
+     "verify 3rd numberified item element body");
 
-#  ok:  26
+#  ok:  30
 
 
 =head1 comment out

@@ -7,8 +7,8 @@ use warnings;
 use warnings::register;
 
 use vars qw($VERSION $DATE);
-$VERSION = '0.02';   # automatically generated file
-$DATE = '2004/04/13';
+$VERSION = '0.03';   # automatically generated file
+$DATE = '2004/04/17';
 
 
 ##### Demonstration Script ####
@@ -41,7 +41,7 @@ BEGIN {
     use Cwd;
     use File::Spec;
     use FindBin;
-    use Test::Tech qw(tech_config plan demo skip_tests);
+    use Test::Tech qw(demo is_skip plan skip_tests tech_config );
 
     ########
     # The working directory for this script file is the directory where
@@ -100,75 +100,327 @@ MSG
 demo( "\ \ \ \ use\ File\:\:Package\;\
 \ \ \ \ my\ \$fp\ \=\ \'File\:\:Package\'\;\
 \
-\ \ \ \ use\ Data\:\:Secs2\ qw\(arrayify\ itemify\ listify\ neuterify\ scalarize\ secsify\ \
-\ \ \ \ \ \ \ \ stringify\ \ transify\ vectorize\)\;\
+\ \ \ \ use\ Data\:\:Secs2\ qw\(arrayify\ listify\ neuterify\ numberify\ \
+\ \ \ \ \ \ \ \ \ perlify\ secsify\ secs_elementify\ stringify\ textify\ transify\)\;\
 \
 \ \ \ \ my\ \$uut\ \=\ \'Data\:\:Secs2\'\;\
-\ \ \ \ my\ \$loaded\;"); # typed in command           
+\ \ \ \ my\ \$loaded\;\
+\
+my\ \$test_data1\ \=\
+\'U1\[1\]\ 80\
+L\[5\]\
+\ \ A\[0\]\
+\ \ A\[5\]\ ARRAY\
+\ \ U1\[1\]\ 2\
+\ \ A\[5\]\ hello\
+\ \ U1\[1\]\ 4\
+\'\;\
+\
+my\ \$test_data2\ \=\
+\'U1\[1\]\ 80\
+L\[6\]\
+\ \ A\[0\]\
+\ \ A\[4\]\ HASH\
+\ \ A\[4\]\ body\
+\ \ A\[5\]\ hello\
+\ \ A\[6\]\ header\
+\ \ A\[9\]\ To\:\ world\
+\'\;\
+\
+my\ \$test_data3\ \=\
+\'U1\[1\]\ 80\
+U1\[1\]\ 2\
+L\[4\]\
+\ \ A\[0\]\
+\ \ A\[5\]\ ARRAY\
+\ \ A\[5\]\ hello\
+\ \ A\[5\]\ world\
+U2\[1\]\ 512\
+\'\;\
+\
+my\ \$test_data4\ \=\
+\'U1\[1\]\ 80\
+U1\[1\]\ 2\
+L\[6\]\
+\ \ A\[0\]\
+\ \ A\[4\]\ HASH\
+\ \ A\[6\]\ header\
+\ \ L\[6\]\
+\ \ \ \ A\[11\]\ Class\:\:None\
+\ \ \ \ A\[4\]\ HASH\
+\ \ \ \ A\[4\]\ From\
+\ \ \ \ A\[6\]\ nobody\
+\ \ \ \ A\[2\]\ To\
+\ \ \ \ A\[6\]\ nobody\
+\ \ A\[3\]\ msg\
+\ \ L\[4\]\
+\ \ \ \ A\[0\]\
+\ \ \ \ A\[5\]\ ARRAY\
+\ \ \ \ A\[5\]\ hello\
+\ \ \ \ A\[5\]\ world\
+\'\;\
+\
+my\ \$test_data5\ \=\
+\'U1\[1\]\ 80\
+L\[6\]\
+\ \ A\[0\]\
+\ \ A\[4\]\ HASH\
+\ \ A\[6\]\ header\
+\ \ L\[6\]\
+\ \ \ \ A\[11\]\ Class\:\:None\
+\ \ \ \ A\[4\]\ HASH\
+\ \ \ \ A\[4\]\ From\
+\ \ \ \ A\[6\]\ nobody\
+\ \ \ \ A\[2\]\ To\
+\ \ \ \ A\[6\]\ nobody\
+\ \ A\[3\]\ msg\
+\ \ L\[4\]\
+\ \ \ \ A\[0\]\
+\ \ \ \ A\[5\]\ ARRAY\
+\ \ \ \ A\[5\]\ hello\
+\ \ \ \ A\[5\]\ world\
+L\[6\]\
+\ \ A\[0\]\
+\ \ A\[4\]\ HASH\
+\ \ A\[6\]\ header\
+\ \ L\[3\]\
+\ \ \ \ A\[0\]\
+\ \ \ \ A\[5\]\ Index\
+\ \ \ \ U1\[1\]\ 10\
+\ \ A\[3\]\ msg\
+\ \ L\[3\]\
+\ \ \ \ A\[0\]\
+\ \ \ \ A\[5\]\ ARRAY\
+\ \ \ \ A\[4\]\ body\
+\'\;"); # typed in command           
           use File::Package;
     my $fp = 'File::Package';
 
-    use Data::Secs2 qw(arrayify itemify listify neuterify scalarize secsify 
-        stringify  transify vectorize);
+    use Data::Secs2 qw(arrayify listify neuterify numberify 
+         perlify secsify secs_elementify stringify textify transify);
 
     my $uut = 'Data::Secs2';
-    my $loaded;; # execution
+    my $loaded;
 
-demo( "\$uut\-\>import\(\ \'stringify\'\ \)"); # typed in command           
-      $uut->import( 'stringify' ); # execution
+my $test_data1 =
+'U1[1] 80
+L[5]
+  A[0]
+  A[5] ARRAY
+  U1[1] 2
+  A[5] hello
+  U1[1] 4
+';
 
-demo( "stringify\(\ \'string\'\ \)", # typed in command           
-      stringify( 'string' )); # execution
+my $test_data2 =
+'U1[1] 80
+L[6]
+  A[0]
+  A[4] HASH
+  A[4] body
+  A[5] hello
+  A[6] header
+  A[9] To: world
+';
 
+my $test_data3 =
+'U1[1] 80
+U1[1] 2
+L[4]
+  A[0]
+  A[5] ARRAY
+  A[5] hello
+  A[5] world
+U2[1] 512
+';
 
-demo( "stringify\(\ 2\ \)", # typed in command           
-      stringify( 2 )); # execution
+my $test_data4 =
+'U1[1] 80
+U1[1] 2
+L[6]
+  A[0]
+  A[4] HASH
+  A[6] header
+  L[6]
+    A[11] Class::None
+    A[4] HASH
+    A[4] From
+    A[6] nobody
+    A[2] To
+    A[6] nobody
+  A[3] msg
+  L[4]
+    A[0]
+    A[5] ARRAY
+    A[5] hello
+    A[5] world
+';
 
+my $test_data5 =
+'U1[1] 80
+L[6]
+  A[0]
+  A[4] HASH
+  A[6] header
+  L[6]
+    A[11] Class::None
+    A[4] HASH
+    A[4] From
+    A[6] nobody
+    A[2] To
+    A[6] nobody
+  A[3] msg
+  L[4]
+    A[0]
+    A[5] ARRAY
+    A[5] hello
+    A[5] world
+L[6]
+  A[0]
+  A[4] HASH
+  A[6] header
+  L[3]
+    A[0]
+    A[5] Index
+    U1[1] 10
+  A[3] msg
+  L[3]
+    A[0]
+    A[5] ARRAY
+    A[4] body
+';; # execution
+
+print << 'EOF';
+
+ => ##################
+ => # stringify an array
+ => # 
+ => ###
+
+EOF
 
 demo( "stringify\(\ \'2\'\,\ \'hello\'\,\ 4\ \)", # typed in command           
       stringify( '2', 'hello', 4 )); # execution
 
 
-demo( "stringify\(\ \[\'2\'\,\ \'hello\'\,\ 4\]\ \)", # typed in command           
-      stringify( ['2', 'hello', 4] )); # execution
+print << 'EOF';
 
+ => ##################
+ => # stringify a hash reference
+ => # 
+ => ###
+
+EOF
 
 demo( "stringify\(\ \{header\ \=\>\ \'To\:\ world\'\,\ body\ \=\>\ \'hello\'\}\)", # typed in command           
       stringify( {header => 'To: world', body => 'hello'})); # execution
 
 
+print << 'EOF';
+
+ => ##################
+ => # ascii secsify lisfication of test_data1 an array reference
+ => # 
+ => ###
+
+EOF
+
 demo( "secsify\(\ listify\(\ \[\'2\'\,\ \'hello\'\,\ 4\]\ \)\ \)", # typed in command           
       secsify( listify( ['2', 'hello', 4] ) )); # execution
 
 
-demo( "secsify\(\ listify\(\ \{header\ \=\>\ \'To\:\ world\'\,\ body\ \=\>\ \'hello\'\}\)\ \)", # typed in command           
-      secsify( listify( {header => 'To: world', body => 'hello'}) )); # execution
+print << 'EOF';
 
+ => ##################
+ => # ascii secsify lisfication of test_data3 - array with an array ref
+ => # 
+ => ###
+
+EOF
 
 demo( "secsify\(\ listify\(\ \'2\'\,\ \[\'hello\'\,\ \'world\'\]\,\ 512\ \)\ \)", # typed in command           
       secsify( listify( '2', ['hello', 'world'], 512 ) )); # execution
 
 
-demo( "my\ \$obj\ \=\ bless\ \{\ To\ \=\>\ \'nobody\'\,\ From\ \=\>\ \'nobody\'\}\,\ \'Class\:\:None\'"); # typed in command           
-      my $obj = bless { To => 'nobody', From => 'nobody'}, 'Class::None'; # execution
-
-demo( "secsify\(\ listify\(\ \'2\'\,\ \{\ msg\ \=\>\ \[\'hello\'\,\ \'world\'\]\ \,\ header\ \=\>\ \$obj\ \}\ \)\ \)", # typed in command           
-      secsify( listify( '2', { msg => ['hello', 'world'] , header => $obj } ) )); # execution
+demo( "my\ \$obj\ \=\ bless\ \{\ To\ \=\>\ \'nobody\'\,\ From\ \=\>\ \'nobody\'\}\,\ \'Class\:\:None\'", # typed in command           
+      my $obj = bless { To => 'nobody', From => 'nobody'}, 'Class::None'); # execution
 
 
-demo( "secsify\(\ listify\(\ \{msg\ \=\>\ \[\'hello\'\,\ \'world\'\]\ \,\ header\ \=\>\ \$obj\ \}\,\ \
-\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \{msg\ \=\>\ \[\ \'body\'\ \]\,\ header\ \=\>\ \$obj\}\ \)\ \)", # typed in command           
-      secsify( listify( {msg => ['hello', 'world'] , header => $obj }, 
-               {msg => [ 'body' ], header => $obj} ) )); # execution
+print << 'EOF';
 
+ => ##################
+ => # ascii secsify lisfication of test_data5 - hash with nested hashes, arrays, common objects
+ => # 
+ => ###
+
+EOF
+
+demo( "\ \ \ \ secsify\(\ listify\(\ \{msg\ \=\>\ \[\'hello\'\,\ \'world\'\]\ \,\ header\ \=\>\ \$obj\ \}\,\ \
+\ \ \ \ \ \{msg\ \=\>\ \[\ \'body\'\ \]\,\ header\ \=\>\ \$obj\}\ \)\ \)", # typed in command           
+          secsify( listify( {msg => ['hello', 'world'] , header => $obj }, 
+     {msg => [ 'body' ], header => $obj} ) )); # execution
+
+
+print << 'EOF';
+
+ => ##################
+ => # ascii secsify listifcation perilification transfication of test_data4
+ => # 
+ => ###
+
+EOF
+
+demo( "secsify\(\ listify\(perlify\(\ transify\(\$test_data4\ \)\)\)\ \)", # typed in command           
+      secsify( listify(perlify( transify($test_data4 ))) )); # execution
+
+
+print << 'EOF';
+
+ => ##################
+ => # ascii secsify listifcation perilification transfication of test_data5
+ => # 
+ => ###
+
+EOF
+
+demo( "secsify\(\ listify\(perlify\(\ transify\(\$test_data5\)\)\)\ \)", # typed in command           
+      secsify( listify(perlify( transify($test_data5))) )); # execution
+
+
+print << 'EOF';
+
+ => ##################
+ => # binary secsify an array reference
+ => # 
+ => ###
+
+EOF
 
 demo( "my\ \$big_secs2\ \=\ unpack\(\'H\*\'\,secsify\(\ listify\(\ \[\'2\'\,\ \'hello\'\,\ 4\]\ \)\,\ \{type\ \=\>\ \'binary\'\}\)\)", # typed in command           
       my $big_secs2 = unpack('H*',secsify( listify( ['2', 'hello', 4] ), {type => 'binary'}))); # execution
 
 
+print << 'EOF';
+
+ => ##################
+ => # neuterify a big secsii
+ => # 
+ => ###
+
+EOF
+
 demo( "secsify\(neuterify\ \(pack\(\'H\*\'\,\$big_secs2\)\)\)", # typed in command           
       secsify(neuterify (pack('H*',$big_secs2)))); # execution
 
+
+print << 'EOF';
+
+ => ##################
+ => # transify a free for all secsii input
+ => # 
+ => ###
+
+EOF
 
 demo( "\ \ \ \ my\ \$ascii_secsii\ \=\
 \'\
@@ -187,7 +439,7 @@ L\
 L\ \
 \(\
 \ \ A\[0\]\ A\ \"HASH\"\ \ A\ \/header\/\
-\ \ L\[2\]\ A\ \\\'Index\\\'\ U1\ 2\ 0\ 3\
+\ \ L\[3\]\ A\[0\]\ A\ \\\'Index\\\'\ U1\ 10\
 \ \ A\ \ \\\'msg\\\'\
 \ \ L\ \<\ A\[0\]\ A\ \\\'ARRAY\\\'\ A\ \ \\\'body\\\'\ \>\
 \)\
@@ -210,59 +462,158 @@ L
 L 
 (
   A[0] A "HASH"  A /header/
-  L[2] A \'Index\' U1 2 0 3
+  L[3] A[0] A \'Index\' U1 10
   A  \'msg\'
   L < A[0] A \'ARRAY\' A  \'body\' >
 )
 
 '; # execution
 
-demo( "my\ \$list\ \=\ transify\ \(\$ascii_secsii\,\ format_code\ \=\>\ \'P\'\)\;"); # typed in command           
-      my $list = transify ($ascii_secsii, format_code => 'P');; # execution
+demo( "my\ \$list\ \=\ transify\ \(\$ascii_secsii\,\ obj_format_code\ \=\>\ \'P\'\)\;"); # typed in command           
+      my $list = transify ($ascii_secsii, obj_format_code => 'P');; # execution
 
 demo( "ref\(\$list\)", # typed in command           
       ref($list)); # execution
 
 
+print << 'EOF';
+
+ => ##################
+ => # secsify transifed free style secs text
+ => # 
+ => ###
+
+EOF
+
 demo( "ref\(\$list\)\ \?\ secsify\(\ \$list\ \)\ \:\ \'\'", # typed in command           
       ref($list) ? secsify( $list ) : ''); # execution
 
 
-demo( "ref\(my\ \$number_list\ \=\ listify\(\ \[\ \[78\,45\,25\]\,\ \[512\,1024\]\,\ 100000\]\ \)\)", # typed in command           
-      ref(my $number_list = listify( [ [78,45,25], [512,1024], 100000] ))); # execution
+print << 'EOF';
 
+ => ##################
+ => # listify a list of number arrays
+ => # 
+ => ###
+
+EOF
+
+demo( "ref\(my\ \$number_list\ \=\ listify\(\ my\ \$test_data6\ \=\ \[\ \[78\,45\,25\]\,\ \[512\,1024\]\,\ 100000\ \]\ \)\)", # typed in command           
+      ref(my $number_list = listify( my $test_data6 = [ [78,45,25], [512,1024], 100000 ] ))); # execution
+
+
+print << 'EOF';
+
+ => ##################
+ => # secify a listified list of number arrays
+ => # 
+ => ###
+
+EOF
 
 demo( "secsify\(\$number_list\)", # typed in command           
       secsify($number_list)); # execution
 
 
-demo( "vectorize\(\$number_list\)", # typed in command           
-      vectorize($number_list)); # execution
+print << 'EOF';
 
+ => ##################
+ => # textify listified list of number arrays
+ => # 
+ => ###
+
+EOF
+
+demo( "textify\(\$number_list\)", # typed in command           
+      textify($number_list)); # execution
+
+
+print << 'EOF';
+
+ => ##################
+ => # verify 1st textified item element body
+ => # 
+ => ###
+
+EOF
 
 demo( "\[\@\{\$number_list\-\>\[9\]\}\]", # typed in command           
       [@{$number_list->[9]}]); # execution
 
 
+print << 'EOF';
+
+ => ##################
+ => # verify 2nd textified item element body
+ => # 
+ => ###
+
+EOF
+
 demo( "\[\@\{\$number_list\-\>\[11\]\}\]", # typed in command           
       [@{$number_list->[11]}]); # execution
 
+
+print << 'EOF';
+
+ => ##################
+ => # verify 3rd textified item element body
+ => # 
+ => ###
+
+EOF
 
 demo( "\[\@\{\$number_list\-\>\[13\]\}\]", # typed in command           
       [@{$number_list->[13]}]); # execution
 
 
-demo( "scalarize\(\$number_list\)", # typed in command           
-      scalarize($number_list)); # execution
+print << 'EOF';
 
+ => ##################
+ => # numberify listified list of number arrays
+ => # 
+ => ###
+
+EOF
+
+demo( "numberify\(\$number_list\)", # typed in command           
+      numberify($number_list)); # execution
+
+
+print << 'EOF';
+
+ => ##################
+ => # verify 1st numberified item element body
+ => # 
+ => ###
+
+EOF
 
 demo( "unpack\(\'H\*\'\,\ \$number_list\-\>\[9\]\)", # typed in command           
       unpack('H*', $number_list->[9])); # execution
 
 
+print << 'EOF';
+
+ => ##################
+ => # verify 2nd numberified item element body
+ => # 
+ => ###
+
+EOF
+
 demo( "unpack\(\'H\*\'\,\ \$number_list\-\>\[11\]\)", # typed in command           
       unpack('H*', $number_list->[11])); # execution
 
+
+print << 'EOF';
+
+ => ##################
+ => # verify 3rd numberified item element body
+ => # 
+ => ###
+
+EOF
 
 demo( "unpack\(\'H\*\'\,\ \$number_list\-\>\[13\]\)", # typed in command           
       unpack('H*', $number_list->[13])); # execution

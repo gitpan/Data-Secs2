@@ -1,5 +1,6 @@
 NAME
-    Data::Secs2 - canoncial string for nested data
+    Data::Secs2 - pack, unpack, format, transform from Perl data SEMI E5-94
+    nested data.
 
 SYNOPSIS
      #####
@@ -7,78 +8,86 @@ SYNOPSIS
      #  
      use Data::Secs2 qw();
 
-     @array  = arrayify( @var );
+     \@array  = arrayify( $ref );
 
-     $string = itemify($format, @elements);
-     $string = itemify($format, @elements, [@options]);
-     $string = itemify($format, @elements, {optioins});
+     $body = secs_elementify($format, @cells);
+     $body = secs_elementify($format, @cells, [@options]);
+     $body = secs_elementify($format, @cells, {optioins});
 
-     \@sec_list  = listify(@vars);
+     \@secs_obj  = listify(@vars);
 
-     \@sec_list  = neuterify($binary_secs);
-     \@sec_list  = neuterify($binary_secs, @options);
-     \@sec_list  = neuterify($binary_secs, [@options]);
-     \@sec_list  = neuterify($binary_secs, {@options});
+     \@secs_obj  = neuterify($binary_secs);
+     \@secs_obj  = neuterify($binary_secs, @options);
+     \@secs_obj  = neuterify($binary_secs, [@options]);
+     \@secs_obj  = neuterify($binary_secs, {@options});
 
-     $error = scalarize( \@sec_list );
+     $error = numberify( \@secs_obj );
 
-     $ascii_secs = secsify( \@sec_list);
-     $ascii_secs = secsify( \@sec_list, @options);
-     $ascii_secs = secsify( \@sec_list, [@options]);
-     $ascii_secs = secsify( \@sec_list, {@options});
+     @vars  = perlify(\@secs_obj);
 
-     $binary_secs = secsify( \@sec_list, type => 'binary');
-     $binary_secs = secsify( \@sec_list, type => 'binary', @options);
-     $binary_secs = secsify( \@sec_list, [type => 'binary',@options]);
-     $binary_secs = secsify( \@sec_list, {type => 'binary',@options});
+     $ref  = perl_typify(\@array);
+
+     $ascii_secs = secsify( \@secs_obj);
+     $ascii_secs = secsify( \@secs_obj, @options);
+     $ascii_secs = secsify( \@secs_obj, [@options]);
+     $ascii_secs = secsify( \@secs_obj, {@options});
+
+     $binary_secs = secsify( \@secs_obj, type => 'binary');
+     $binary_secs = secsify( \@secs_obj, type => 'binary', @options);
+     $binary_secs = secsify( \@secs_obj, [type => 'binary',@options]);
+     $binary_secs = secsify( \@secs_obj, {type => 'binary',@options});
 
      $string = stringify( @arg );
 
-     \@sec_list  = transify($acsii_secs);
-     \@sec_list  = transify($acsii_secs, @options);
-     \@sec_list  = transify($acsii_secs, [@options]);
-     \@sec_list  = transify($acsii_secs, {@options});
+     \@secs_obj  = transify($acsii_secs);
+     \@secs_obj  = transify($acsii_secs, @options);
+     \@secs_obj  = transify($acsii_secs, [@options]);
+     \@secs_obj  = transify($acsii_secs, {@options});
 
-     $error  = vectorize( \@sec_list );
+     $error  = textify( \@secs_obj );
 
      #####
      # Class interface
      #
      use Data::Secs2;
 
-     @array  = Data::Secs2->arrayify( @var );
+     \@array  = Data::Secs2->arrayify( $ref );
 
-     $string = Data::Secs2->itemify($format, @elements);
-     $string = Data::Secs2->itemify($format, @elements, [@options]);
-     $string = Data::Secs2->itemify($format, @elements, {optioins});
+     $body = Data::Secs2->secs_elementify($format, @cells);
+     $body = Data::Secs2->secs_elementify($format, @cells, [@options]);
+     $body = Data::Secs2->secs_elementify($format, @cells, {optioins});
 
-     \@sec_list  = Data::Secs2->listify(@vars);
+     \@secs_obj  = Data::Secs2->listify(@vars);
 
-     \@sec_list  = Data::Secs2->neuterify($binary_secs);
-     \@sec_list  = Data::Secs2->neuterify($binary_secs, @options);
-     \@sec_list  = Data::Secs2->neuterify($binary_secs, [@options]);
-     \@sec_list  = Data::Secs2->neuterify($binary_secs, {@options});
+     \@secs_obj  = Data::Secs2->neuterify($binary_secs);
+     \@secs_obj  = Data::Secs2->neuterify($binary_secs, @options);
+     \@secs_obj  = Data::Secs2->neuterify($binary_secs, [@options]);
+     \@secs_obj  = Data::Secs2->neuterify($binary_secs, {@options});
 
-     $error = Data::Secs2->scalarize( \@sec_list );
+     $error = Data::Secs2->numberify( \@secs_obj );
 
-     $ascii_secs = Data::Secs2->secsify( \@sec_list);
-     $ascii_secs = Data::Secs2->secsify( \@sec_list, @options);
-     $ascii_secs = Data::Secs2->secsify( \@sec_list, [@options]);
-     $ascii_secs = Data::Secs2->secsify( \@sec_list, {@options});
+     @vars  = Data::Secs2->perlify(\@secs_obj);
 
-     $binary_secs = Data::Secs2->secsify( \@sec_list, type => 'binary');
-     $binary_secs = Data::Secs2->secsify( \@sec_list, type => 'binary', @options);
-     $binary_secs = Data::Secs2->secsify( \@sec_list, [type => 'binary',@options]);
-     $binary_secs = Data::Secs2->secsify( \@sec_list, {type => 'binary',@options});
+     $ref  = Data::Secs2->perl_typify(\@array);
 
-     $string = Data::Secs2->stringify( @arg );
+     $ascii_secs = Data::Secs2->secsify( \@secs_obj);
+     $ascii_secs = Data::Secs2->secsify( \@secs_obj, @options);
+     $ascii_secs = Data::Secs2->secsify( \@secs_obj, [@options]);
+     $ascii_secs = Data::Secs2->secsify( \@secs_obj, {@options});
 
-     \@sec_list  = Data::Secs2->transify($acsii_secs);
-     \@sec_list  = Data::Secs2->transify($acsii_secs, @options);
-     \@sec_list  = Data::Secs2->transify($acsii_secs, [@options]);
-     \@sec_list  = Data::Secs2->transify($acsii_secs, {@options});
+     $binary_secs = Data::Secs2->secsify( \@secs_obj, type => 'binary');
+     $binary_secs = Data::Secs2->secsify( \@secs_obj, type => 'binary', @options);
+     $binary_secs = Data::Secs2->secsify( \@secs_obj, [type => 'binary',@options]);
+     $binary_secs = Data::Secs2->secsify( \@secs_obj, {type => 'binary',@options});
 
-     $error = Data::Secs2->vectorize( \@sec_list );
+     $body = Data::Secs2->stringify( @arg );
+
+     \@secs_obj  = Data::Secs2->transify($acsii_secs);
+     \@secs_obj  = Data::Secs2->transify($acsii_secs, @options);
+     \@secs_obj  = Data::Secs2->transify($acsii_secs, [@options]);
+     \@secs_obj  = Data::Secs2->transify($acsii_secs, {@options});
+
+     $error = Data::Secs2->textify( \@secs_obj );
 
 DESCRIPTION
     The 'Data::SECS2' module provides a widely accepted method of packing
@@ -107,16 +116,23 @@ DESCRIPTION
     learned at the Intel fab to secsify intelligence reports on Iraq's
     weopons of mass distruction.
 
-    By using a well-known, widely-used standard invented and publicized by
-    the prime mister of England for packing and unpacking Perl nested data,
-    not only is this useful in a open nested operations such as comparing
-    nested data, storing the packed data in a file, but also for
-    transmitting data from one Perl site to another or between Perl and
-    other programming languages.
+    By using a well-known, widely-used standard for packing and unpacking
+    Perl nested data, not only is this standard essential in real-time
+    communications in the factory between equipment computers and operating
+    systems and host computer and operating system but it has uses in
+    snail-time computations. In snail-time the standard's data structure is
+    usefull in a nested data operations such as comparing nested data,
+    storing the packed nested data in a file, but also for transmitting
+    nested data from one Perl site to another or even between Perl and other
+    programming languages.
 
-    And do not forget the added benefit of SEMI secs humor and that the real
+    And do not forget the added benefit of SEMI SECS humor and that the real
     originators of the SECS-II yielded and allowed Tony Blair to take
-    illegal credit for SECS-II.
+    illegal credit for inventing SECS-II. After all the practical definition
+    of politics is getting your own way. Julius Ceasar invented the Julian
+    calendar and the month of July, Augustus Ceasr the month of Auguest, Al
+    Gore the information highway and Tony Blair not only SECS-II but SECS-I
+    and High-Speed SECS.
 
   SECSII Format
 
@@ -126,8 +142,9 @@ DESCRIPTION
     smile. This industry standard is copyrighted and cannot be reproduced
     without violating the copyright. However for those who have brought the
     original hard media copy, there are robot help and Perl POD open source
-    copyrighted versions of the SECII hard copy copyright version available.
-    The base copyright is hard copy paper and PDF files available from
+    copyrighted versions of the SECII hard copy copyrighted version
+    available. The base copyright is hard copy paper and PDF files available
+    from
 
      Semiconductor Equipment and Materials International
      805 East Middlefield Road,
@@ -137,11 +154,11 @@ DESCRIPTION
      http://www.semiconductor-intl.org
      http://www.reed-electronics.com/semiconductor/
 
-    The SEMI E4 SECS-I standard addresses transmitting SECSII messages from
-    one machine to another machine (all most always host to equipment)
-    serially via RS-232. And, there is another SECS standard for TCP/IP, the
-    SEMI E37 standard, High-Speed SECS Message Services (HSMS) Generic
-    Services.
+    Other important SEMI standards address message transfer protocol of
+    SECSII messages. They are the SEMI E4 SECS-I for transmitting SECSII
+    messages from one machine to another machine via RS-232 and the SEMI E37
+    High-Speed SECS Message Services (HSMS) Generic Services for
+    transmitting SECSII via TCP/IP.
 
     In order not to plagarize college students, credit must be given where
     credit is due. Tony Blair, when he was a college intern at Intel Fab 4,
@@ -153,15 +170,50 @@ DESCRIPTION
     the Intel fab to secsify intelligence reports on Iraq's weopons of mass
     distruction.
 
-    The SEMI E5 SECS-II standard is a method of forming listified packed
-    messages from nested list data. It consists of elements where each
-    element is a format code, number of elements followed by the elements.
+    The SEMI E5 SECS-II standard provides, among many other things, a
+    standard method of forming packed nested list data. In accordance with
+    SEMI E5 SECS-II transmitted information consists of items and lists. An
+    item consists of the following:
+
+    1   an item header(IH) with a format code, and the number of bytes in
+        the following body
+
+    2   followed by the item body (IB) consisting of a number of elements.
+
+    A item (IB) may consist of zero bytes in which there are no body bytes
+    for that item. As established by SEMI E5-94, 6.2.2,
+
+        consists of groups of data of the same representation in order to
+        save repeated item headers
+
+    integers
+        Most Significant Byte (MS) sent first
+
+    signed integers
+        signed integers are two's complement, MSB sent first
+
+    floating point numbers
+        IEEE 754, sign bit sent first
+
+    non-printing ASCII
+        equipment specific
+
+    As specified in E4-95 6.3, a list element consists of an ordered set of
+    elements that are either an item element or a list element. Because a
+    list element may contains a list element, and SEMI E5 places no
+    restriction on the level of nesting, SECSII lists may be nested to
+    theoretically to any level. Practically nested is limited by machine
+    resources. A list has the same header format as an item, no body and the
+    length number is the number of elements in the list instead of the
+    number of bytes in the body.
+
+    The item and list header format codes are as in below Table 1
 
                    Table 1 Item Format Codes
 
      unpacked   binary  octal  hex   description
      ----------------------------------------
-     L          000000   00    0x00  List (length in elements)
+     L          000000   00    0x00  LIST (length of elements, not bytes)
      B          001000   10    0x20  Binary
      T          001001   11    0x24  Boolean
      A          010000   20    0x40  ASCII
@@ -177,21 +229,18 @@ DESCRIPTION
      U2         101010   52    0xA8  2-byte integer (unsigned)
      U4         101100   54    0xB0  4-byte integer (unsigned)
 
-    Notes:
+    Table 1 complies to SEMI E5-94 Table 1, p.94, with an unpack text symbol
+    and hex columns added. The hex column is the upper Most Significant Bits
+    (MSB) 6 bits of the format code in the SEMI E5-94 item header (IH) or
+    list header (LH) with the the lower Least Significant BIt (LSB) set to
+    zero.
 
-    1   ASCII format - Non-printing characters are equipment specific
+    Figure 1 below provides the layout for a SEMI E5-94 header and complies
+    to SEMI E5-94 Figure 2, p. 92, except Figure 1 renumbers the bits from 0
+    to 7 instead of from 1 to 8.
 
-    2   Integer formats - most significant byte sent first
-
-    3   floating formats - IEEE 753 with the byte containing the sign sent
-        first.
-
-    Nested lists are packed is a linear number of items where each item
-    consists of a header followed by the elements in the item. The header is
-    of the following format where the MS byte is always first when
-    transmitting the bytes linearally:
-
-              bits                                     MSB      LSB
+                                  bits                                    
+       MSB                                                     LSB
    
         7        6       5       4       3       2      1       0
      +-------+-------+-------+-------+-------+-------+-------+-------+
@@ -204,40 +253,72 @@ DESCRIPTION
      |                   LS length byte                              |
      +---------------------------------------------------------------+
 
-  SECS List
+                    Figure 1 Item and List Header
 
-    A SECS list is a Perl list (array) based upon the SEMI E5-94 SECSII
-    format. The list consists consecutive items where each item takes two
-    positions in the list: the item header (IH) and the item body (IB). The
-    item headers are always even number indices where the item bodies are
-    odd number indices. The IH is a format code as specified in the Table 1
-    Item Format Codes unpack column. The IB for each format code is as
-    follows:
+  SECS Object
 
-    L   unpacked number
+    This section establishes a formal definition of a SECS Object and
+    introduces technical definitions that supercede Webster Dictionary
+    definitions and only apply for the content of this Program Module for
+    the following: SECS Object (SECS-OBJ), Element, Item Element (IE), List
+    Element (LE), Element Header (EH), Element Format Code (EFC), Element
+    Body (EB) and Element Cells (EC). If any of the technical definitions
+    appear to have sexual innuendos, it is entirely coincidental. The
+    definitions should applied only on their technical merits. Any other
+    interperetation is totally unprofessional.
+
+    A SECS Object is a Perl "ARRAY" that mimics the SEMI E5-94 SECS-II,
+    section 6, data structure where SECS-II transmitted bytes are layed out
+    in memory. The relation between between SEMI E5-94 "byte sent first" is
+    that "bytes sent first" will have the lowest byte address.
+
+    A SECS Object consists of consecutive ordered Elements stored as a Perl
+    "ARRAY". Each Element takes two consistive positions in the Perl
+    <ARRAY>: the Element Header and the Element Body. The Element Headers
+    positions are always even number indices where the Element Bodies
+    positions are always odd number indices.
+
+    The EH consists of and only of a Element Format Code as specified in the
+    Table 1 Item Format Codes unpack column.
+
+    Elements may be either an Item Element or a List Element. The Element
+    Body for a List Element is the sum of the nested List Elements and Item
+    Elements in the List Element. The Element Body for a Item Element is a
+    group of Element Cells of the same data representation and bytes per
+    Element Cell. The bytes in an body of an Item Element is, thus, the
+    number of cells in the body times the bytes per Element Cell. The
+    Element Body for each Element Format Code is as follows:
+
+    L   Unpacked sum of nested Element Lists and Element Items in the
+        Element List
 
     S U F T
-        either scalarized array of numbers packed in accordance with SEMI
-        E5-97 or a vectorized reference to an array of numbers
+        a number cells either as a numberified Perl "SCALAR" packed in
+        accordance with SEMI E5-94 or a reference to textified (unpacked)
+        Perl "ARRAY" of numbers
 
-    B A J
-        unpacked string
+    A J unpacked string
 
-    The first item of a SECS list is always a SECS list Format Code wit a IH
-    of U1 and a packed IB of either 'P' or 'S' depending upon whether the
-    SECS list has information necessary to convert to Perl data structure,
-    'P', or not, 'S'.
+    B   packed numberified Perl "SCALAR" of binary bytes or a reference to a
+        Perl "SCALLAR" of unpack textified binary in the hex 'H*' Perl
+        format
+
+    The first element of a SECS Object is always a SECS Object Format Code
+    "U1" and a packed element body of either a numberfied 'P' or 'S',
+    textified 80 or 83, depending upon whether the SECS Object has
+    information necessary to convert to Perl data structure, 'P', or most
+    remain as a SECS Object, 'S'.
 
   arrayify subroutine
 
-     @array  = arrayify( @var );
+     \@array  = arrayify( $ref );
 
     The purpose of the "arrayify" subroutine is to provide a canoncial array
-    representation of Perl reference types. When "$var" is not a reference
-    "arrayify" subroutine passes "$var" through unchanged; otherewise the
-    ref($var) is changed to a reference to a canoncial array where the first
-    member is the the "$var" class, the second member the underlying data
-    type. If ref($var) and the underlying type type are the same, then
+    representation of Perl reference types. When "$var" is not a reference,
+    the "arrayify" subroutine passes "$var" through unchanged; otherewise,
+    the ref($ref) is changed to a reference to a canoncial array where the
+    first member is the the "$var" class, the second member the underlying
+    data type. If ref($var) and the underlying type type are the same, then
     "$var" is classless and the first member is the empty string ''. The
     rest of the members of the canonical array, based on the underlying data
     type, are as follows:
@@ -254,6 +335,9 @@ DESCRIPTION
     'REF'
         the reference
 
+    'CODE'
+        the reference
+
     'GLOB'
         values of the "GLOB" in the following order:
 
@@ -266,34 +350,12 @@ DESCRIPTION
          *$var{PACKAGE},
          "*$var"
 
-  itemify subroutine
-
-     $string = itemify($format, @elements);
-     $string = itemify($format, @elements, [@options]);
-     $string = itemify($format, @elements, {options});
-
-    The "itemify" subroutine is the low-level work horse for the "secsify"
-    subroutine that produces a SEMI SECSII item "$string" from a Perl SECS
-    list item header "$format" and item body "@elements".
-
-    For {type => 'binary'}, $string is a complete packed SEMI E5-94 SECII
-    item. For {type => 'ascii'} or no type option, the "$string" is the
-    ascii unpacked SECSII item.
-
-    An unpacked SECSII item consists of the unpacked format code from the
-    Table 1 Item Format Codes, the number of elements in the item body
-    enclosed in brackets, followed by the elements in the item body. In
-    accordance with SEMI E5-94, section 6, there will be no elements for
-    format code 'L' or an element length of 0.
-
-    In case of an error, the return is an reference a error message.
-
   listify subroutine
 
-     \@sec_list  = listify(@vars);
+     \@secs_obj  = listify(@vars);
 
     The listify subroutine takes a list of Perl variables, "@arg" that may
-    contain references to nested data and converts it to a <SECS list that
+    contain references to nested data and converts it to a <SECS Object that
     mimics a SECSII data structure of a linearized list of items.
 
     Information is included to recontruct Perl hashes, arrays and objects by
@@ -302,47 +364,68 @@ DESCRIPTION
     item is the Perl underlying data type. Valid Perl underlying data types
     are: HASH ARRAY SCALAR REF GLOB.
 
-    The return is either a reference to a SECS list or case of an error an
-    error message. To determine an error from a SECS list , check if the
+    The return is either a reference to a SECS Object or case of an error an
+    error message. To determine an error from a SECS Object , check if the
     return is a reference or a reference to an ARRAY.
 
   neuterify subroutine
 
-     \@sec_list  = neuterify($binary_secs);
-     \@sec_list  = neuterify($binary_secs, @options);
-     \@sec_list  = neuterify($binary_secs, [@options]);
-     \@sec_list  = neuterify($binary_secs, {@options});
+     \@secs_obj  = neuterify($binary_secs);
+     \@secs_obj  = neuterify($binary_secs, @options);
+     \@secs_obj  = neuterify($binary_secs, [@options]);
+     \@secs_obj  = neuterify($binary_secs, {@options});
 
-    The "neuterify" subroutine takes produces a "@sec_list" from a SEMI
-    E5-94 packed data structure "$binary_secs" and produces a "@sec_list".
+    The "neuterify" subroutine takes produces a "@secs_obj" from a SEMI
+    E5-94 packed data structure "$binary_secs" and produces a SECS object
+    "@secs_obj".
 
-    The "neuterify" subroutine uses option {format => 'P'}, or {format =>
-    'S'} as the value for the leading SECS list U1 format byte. SEMI E5-94
-    SECII item.
+    The "neuterify" subroutine uses option "{obj_format_code =" 'P'}>, or
+    "{obj_format_code =" 'S'}> as the value for the leading SECS Object U1
+    format byte. SEMI E5-94 SECII item. If the "neuterify" subroutine
+    receives the option "{add_obj_format_code}", "neuterify" will add the
+    byte to the beginning of the packed data; otherwise, "neuterify" probes
+    the leading byte of the packed data. If the probes shows the leading
+    byte is a "Secs Object Format Code", "neuterify" modifies the packed
+    data byte; otherweise it adds the byte to the beginning of the packed
+    data.
 
-    The return is either a reference to a SECS list or case of an error an
-    error message. To determine an error from a SECS list , check if the
+    The return is either a reference to a SECS Object or case of an error an
+    error message. To determine an error from a SECS Object , check if the
     return is a reference or a reference to an ARRAY.
 
-  scalarize subroutine
+  numberify subroutine
 
-     $error = scalarize( \@sec_list );
+     $error = numberify( \@secs_obj );
 
-    The "scalarize" subroutine ensures that all the bodies in a SECS list
+    The "numberify" subroutine ensures that all the bodies in a SECS Object
     for numeric items, format U, S, F, T, are scalar strings packed in
-    accordance with SEMI E5-97.
+    accordance with SEMI E5-94.
+
+  perlify subroutine
+
+     @vars = perlify( \@secs_obj );
+
+    The "perlify" subroutine converts a Perl SECS object into Perl
+    variables.
+
+  perl_typify subroutine
+
+     $ref  = perl_typify(\@array);
+
+    The "perl_typify" subroutine converts an "@array" produced by the
+    "arrayify" subroutine from a "$ref" back to a "$ref".
 
   secsify subroutine
 
-     $ascii_secs = secsify( \@sec_list);
-     $ascii_secs = secsify( \@sec_list, @options);
-     $ascii_secs = secsify( \@sec_list, [@options]);
-     $ascii_secs = secsify( \@sec_list, {@options});
+     $ascii_secs = secsify( \@secs_obj);
+     $ascii_secs = secsify( \@secs_obj, @options);
+     $ascii_secs = secsify( \@secs_obj, [@options]);
+     $ascii_secs = secsify( \@secs_obj, {@options});
 
-     $binary_secs = secsify( \@sec_list, type => 'binary');
-     $binary_secs = secsify( \@sec_list, type => 'binary', @options);
-     $binary_secs = secsify( \@sec_list, [type => 'binary',@options]);
-     $binary_secs = secsify( \@sec_list, {type => 'binary',@options});
+     $binary_secs = secsify( \@secs_obj, type => 'binary');
+     $binary_secs = secsify( \@secs_obj, type => 'binary', @options);
+     $binary_secs = secsify( \@secs_obj, [type => 'binary',@options]);
+     $binary_secs = secsify( \@secs_obj, {type => 'binary',@options});
 
     The "secsify" subroutine/method walks a data structure and converts all
     underlying array and hash references to arrays by applying the
@@ -356,9 +439,9 @@ DESCRIPTION
      OBJECT => 'L', $number-of-elements, 
                'A', $class,
                'A', $built-in-class,
-               @elements
+               @cells
 
-     @elements may contain a Perlified OBJECT, REFERENCE or SCALAR)
+     @cells may contain a Perlified OBJECT, REFERENCE or SCALAR)
 
      INDEX OBJECT => 'L' '2', 'A' 'Index', 'U4', $number-of-indices, @indices 
  
@@ -366,6 +449,28 @@ DESCRIPTION
 
      SCALAR = 'A', $scalar  (Perl built-in class)
                 
+  secs_elementify subroutine
+
+     $body = secs_elementify($format, @cells);
+     $body = secs_elementify($format, @cells, [@options]);
+     $body = secs_elementify($format, @cells, {options});
+
+    The "secs_elementify" subroutine is the low-level work horse for the
+    "secsify" subroutine that produces a SEMI SECSII item "$body" from a
+    Perl SECS Object item header "$format" and item body "@cells".
+
+    For {type => 'binary'}, $body is a complete packed SEMI E5-94 SECII
+    item. For {type => 'ascii'} or no type option, the "$body" is the ascii
+    unpacked SECSII item.
+
+    An unpacked SECSII item consists of the unpacked format code from the
+    Table 1 Item Format Codes, the number of elements in the item body
+    enclosed in brackets, followed by the elements in the item body. In
+    accordance with SEMI E5-94, section 6, there will be no elements for
+    format code 'L' or an element length of 0.
+
+    In case of an error, the return is an reference a error message.
+
   stringify subroutine
 
     The "stringify" subroutined stringifies a Perl data structure by
@@ -373,14 +478,14 @@ DESCRIPTION
 
   transify subroutine
 
-     \@sec_list  = transify($acsii_secs);
-     \@sec_list  = transify($acsii_secs, @options);
-     \@sec_list  = transify($acsii_secs, [@options]);
-     \@sec_list  = transify($acsii_secs, {@options});
+     \@secs_obj  = transify($acsii_secs);
+     \@secs_obj  = transify($acsii_secs, @options);
+     \@secs_obj  = transify($acsii_secs, [@options]);
+     \@secs_obj  = transify($acsii_secs, {@options});
 
     The "transify" subroutine takes a free style text consisting of list of
-    secsii items and converts it to SECS list. The "transify" subroutine is
-    very liberal in what it accepts as valid input.
+    secsii items and converts it to SECS Object. The "transify" subroutine
+    is very liberal in what it accepts as valid input.
 
     The number of body elements may be supplied either as enclosed in
     brackets of a "comma" after the unpacked format code. Text strings may
@@ -391,19 +496,25 @@ DESCRIPTION
     a comma after the 'L' format character or by enclosing parentheseses,
     bracketers or any other character.
 
-    The "transify" subroutine uses option {format => 'P'}, or {format =>
-    'S'} as the value for the leading SECS list U1 format byte. SEMI E5-94
-    SECII item.
+    The "transify" subroutine uses option "{obj_format_code =" 'P'}>, or
+    "{obj_format_code =" 'S'}> as the value for the leading SECS Object U1
+    format byte. SEMI E5-94 SECII item. If the "transify" subroutine
+    receives the option "{add_obj_format_code}", "transify" will add the a
+    "Secs Object Format Code" to the beginning of the "@secs_obj";
+    otherwise, "transify" probes the leading "@secs_obj". If the probes
+    shows the leading byte is a "Secs Object Format Code", "transify"
+    modifies the code; otherweise it a "Secs Object Format Code" to the
+    beginning of the "@secs_obj"
 
-    The return is either a reference to a SECS list or case of an error an
-    error message. To determine an error from a SECS list , check if the
+    The return is either a reference to a SECS Object or case of an error an
+    error message. To determine an error from a SECS Object , check if the
     return is a reference or a reference to an ARRAY.
 
-  vectorize subroutine
+  textify subroutine
 
-     $error = vectorize( \@sec_list );
+     $error = textify( \@secs_obj );
 
-    The "vectorize" subroutine ensures that all the bodies in a SECS list
+    The "textify" subroutine ensures that all the bodies in a SECS Object
     for numeric items, format U, S, F, T, are references to an array of
     numbers.
 
@@ -411,6 +522,10 @@ REQUIREMENTS
     The requirements are coming.
 
 DEMONSTRATION
+     #########
+     # perl Secs2.d
+     ###
+
      ~~~~~~ Demonstration overview ~~~~~
 
     Perl code begins with the prompt
@@ -428,17 +543,104 @@ DEMONSTRATION
      =>     use File::Package;
      =>     my $fp = 'File::Package';
 
-     =>     use Data::Secs2 qw(arrayify itemify listify neuterify scalarize secsify 
-     =>         stringify  transify vectorize);
+     =>     use Data::Secs2 qw(arrayify listify neuterify numberify 
+     =>          perlify secsify secs_elementify stringify textify transify);
 
      =>     my $uut = 'Data::Secs2';
      =>     my $loaded;
-     => $uut->import( 'stringify' )
-     => stringify( 'string' )
-     'string'
 
-     => stringify( 2 )
-     2
+     => my $test_data1 =
+     => 'U1[1] 80
+     => L[5]
+     =>   A[0]
+     =>   A[5] ARRAY
+     =>   U1[1] 2
+     =>   A[5] hello
+     =>   U1[1] 4
+     => ';
+
+     => my $test_data2 =
+     => 'U1[1] 80
+     => L[6]
+     =>   A[0]
+     =>   A[4] HASH
+     =>   A[4] body
+     =>   A[5] hello
+     =>   A[6] header
+     =>   A[9] To: world
+     => ';
+
+     => my $test_data3 =
+     => 'U1[1] 80
+     => U1[1] 2
+     => L[4]
+     =>   A[0]
+     =>   A[5] ARRAY
+     =>   A[5] hello
+     =>   A[5] world
+     => U2[1] 512
+     => ';
+
+     => my $test_data4 =
+     => 'U1[1] 80
+     => U1[1] 2
+     => L[6]
+     =>   A[0]
+     =>   A[4] HASH
+     =>   A[6] header
+     =>   L[6]
+     =>     A[11] Class::None
+     =>     A[4] HASH
+     =>     A[4] From
+     =>     A[6] nobody
+     =>     A[2] To
+     =>     A[6] nobody
+     =>   A[3] msg
+     =>   L[4]
+     =>     A[0]
+     =>     A[5] ARRAY
+     =>     A[5] hello
+     =>     A[5] world
+     => ';
+
+     => my $test_data5 =
+     => 'U1[1] 80
+     => L[6]
+     =>   A[0]
+     =>   A[4] HASH
+     =>   A[6] header
+     =>   L[6]
+     =>     A[11] Class::None
+     =>     A[4] HASH
+     =>     A[4] From
+     =>     A[6] nobody
+     =>     A[2] To
+     =>     A[6] nobody
+     =>   A[3] msg
+     =>   L[4]
+     =>     A[0]
+     =>     A[5] ARRAY
+     =>     A[5] hello
+     =>     A[5] world
+     => L[6]
+     =>   A[0]
+     =>   A[4] HASH
+     =>   A[6] header
+     =>   L[3]
+     =>     A[0]
+     =>     A[5] Index
+     =>     U1[1] 10
+     =>   A[3] msg
+     =>   L[3]
+     =>     A[0]
+     =>     A[5] ARRAY
+     =>     A[4] body
+     => ';
+
+     => ##################
+     => # stringify an array
+     => # 
+     => ###
 
      => stringify( '2', 'hello', 4 )
      'U1[1] 80
@@ -447,15 +649,10 @@ DEMONSTRATION
      U1[1] 4
      '
 
-     => stringify( ['2', 'hello', 4] )
-     'U1[1] 80
-     L[5]
-       A[0]
-       A[5] ARRAY
-       U1[1] 2
-       A[5] hello
-       U1[1] 4
-     '
+     => ##################
+     => # stringify a hash reference
+     => # 
+     => ###
 
      => stringify( {header => 'To: world', body => 'hello'})
      'U1[1] 80
@@ -468,6 +665,11 @@ DEMONSTRATION
        A[9] To: world
      '
 
+     => ##################
+     => # ascii secsify lisfication of test_data1 an array reference
+     => # 
+     => ###
+
      => secsify( listify( ['2', 'hello', 4] ) )
      'U1[1] 80
      L[5]
@@ -478,16 +680,10 @@ DEMONSTRATION
        U1[1] 4
      '
 
-     => secsify( listify( {header => 'To: world', body => 'hello'}) )
-     'U1[1] 80
-     L[6]
-       A[0]
-       A[4] HASH
-       A[4] body
-       A[5] hello
-       A[6] header
-       A[9] To: world
-     '
+     => ##################
+     => # ascii secsify lisfication of test_data3 - array with an array ref
+     => # 
+     => ###
 
      => secsify( listify( '2', ['hello', 'world'], 512 ) )
      'U1[1] 80
@@ -501,7 +697,57 @@ DEMONSTRATION
      '
 
      => my $obj = bless { To => 'nobody', From => 'nobody'}, 'Class::None'
-     => secsify( listify( '2', { msg => ['hello', 'world'] , header => $obj } ) )
+     bless( {
+                      'From' => 'nobody',
+                      'To' => 'nobody'
+                    }, 'Class::None' )
+
+     => ##################
+     => # ascii secsify lisfication of test_data5 - hash with nested hashes, arrays, common objects
+     => # 
+     => ###
+
+     =>     secsify( listify( {msg => ['hello', 'world'] , header => $obj }, 
+     =>      {msg => [ 'body' ], header => $obj} ) )
+     'U1[1] 80
+     L[6]
+       A[0]
+       A[4] HASH
+       A[6] header
+       L[6]
+         A[11] Class::None
+         A[4] HASH
+         A[4] From
+         A[6] nobody
+         A[2] To
+         A[6] nobody
+       A[3] msg
+       L[4]
+         A[0]
+         A[5] ARRAY
+         A[5] hello
+         A[5] world
+     L[6]
+       A[0]
+       A[4] HASH
+       A[6] header
+       L[3]
+         A[0]
+         A[5] Index
+         U1[1] 10
+       A[3] msg
+       L[3]
+         A[0]
+         A[5] ARRAY
+         A[4] body
+     '
+
+     => ##################
+     => # ascii secsify listifcation perilification transfication of test_data4
+     => # 
+     => ###
+
+     => secsify( listify(perlify( transify($test_data4 ))) )
      'U1[1] 80
      U1[1] 2
      L[6]
@@ -523,8 +769,12 @@ DEMONSTRATION
          A[5] world
      '
 
-     => secsify( listify( {msg => ['hello', 'world'] , header => $obj }, 
-     =>                {msg => [ 'body' ], header => $obj} ) )
+     => ##################
+     => # ascii secsify listifcation perilification transfication of test_data5
+     => # 
+     => ###
+
+     => secsify( listify(perlify( transify($test_data5))) )
      'U1[1] 80
      L[6]
        A[0]
@@ -547,9 +797,10 @@ DEMONSTRATION
        A[0]
        A[4] HASH
        A[6] header
-       L[2]
+       L[3]
+         A[0]
          A[5] Index
-         U1[3] 2 0 3
+         U1[1] 10
        A[3] msg
        L[3]
          A[0]
@@ -557,8 +808,18 @@ DEMONSTRATION
          A[4] body
      '
 
+     => ##################
+     => # binary secsify an array reference
+     => # 
+     => ###
+
      => my $big_secs2 = unpack('H*',secsify( listify( ['2', 'hello', 4] ), {type => 'binary'}))
      'a501500105410041054152524159a50102410568656c6c6fa50104'
+
+     => ##################
+     => # neuterify a big secsii
+     => # 
+     => ###
 
      => secsify(neuterify (pack('H*',$big_secs2)))
      'U1[1] 80
@@ -569,6 +830,11 @@ DEMONSTRATION
        A[5] hello
        U1[1] 4
      '
+
+     => ##################
+     => # transify a free for all secsii input
+     => # 
+     => ###
 
      =>     my $ascii_secsii =
      => '
@@ -587,15 +853,20 @@ DEMONSTRATION
      => L 
      => (
      =>   A[0] A "HASH"  A /header/
-     =>   L[2] A \'Index\' U1 2 0 3
+     =>   L[3] A[0] A \'Index\' U1 10
      =>   A  \'msg\'
      =>   L < A[0] A \'ARRAY\' A  \'body\' >
      => )
 
      => '
-     => my $list = transify ($ascii_secsii, format_code => 'P');
+     => my $list = transify ($ascii_secsii, obj_format_code => 'P');
      => ref($list)
      'ARRAY'
+
+     => ##################
+     => # secsify transifed free style secs text
+     => # 
+     => ###
 
      => ref($list) ? secsify( $list ) : ''
      'U1[1] 80
@@ -620,9 +891,10 @@ DEMONSTRATION
        A[0]
        A[4] HASH
        A[6] header
-       L[2]
+       L[3]
+         A[0]
          A[5] Index
-         U1[3] 2 0 3
+         U1[1] 10
        A[3] msg
        L[3]
          A[0]
@@ -630,8 +902,18 @@ DEMONSTRATION
          A[4] body
      '
 
-     => ref(my $number_list = listify( [ [78,45,25], [512,1024], 100000] ))
+     => ##################
+     => # listify a list of number arrays
+     => # 
+     => ###
+
+     => ref(my $number_list = listify( my $test_data6 = [ [78,45,25], [512,1024], 100000 ] ))
      'ARRAY'
+
+     => ##################
+     => # secify a listified list of number arrays
+     => # 
+     => ###
 
      => secsify($number_list)
      'U1[1] 80
@@ -643,8 +925,18 @@ DEMONSTRATION
        U4[1] 100000
      '
 
-     => vectorize($number_list)
+     => ##################
+     => # textify listified list of number arrays
+     => # 
+     => ###
+
+     => textify($number_list)
      ''
+
+     => ##################
+     => # verify 1st textified item element body
+     => # 
+     => ###
 
      => [@{$number_list->[9]}]
      [
@@ -653,30 +945,108 @@ DEMONSTRATION
                25
              ]
 
+     => ##################
+     => # verify 2nd textified item element body
+     => # 
+     => ###
+
      => [@{$number_list->[11]}]
      [
                512,
                1024
              ]
 
+     => ##################
+     => # verify 3rd textified item element body
+     => # 
+     => ###
+
      => [@{$number_list->[13]}]
      [
                100000
              ]
 
-     => scalarize($number_list)
+     => ##################
+     => # numberify listified list of number arrays
+     => # 
+     => ###
+
+     => numberify($number_list)
      ''
+
+     => ##################
+     => # verify 1st numberified item element body
+     => # 
+     => ###
 
      => unpack('H*', $number_list->[9])
      '4e2d19'
 
+     => ##################
+     => # verify 2nd numberified item element body
+     => # 
+     => ###
+
      => unpack('H*', $number_list->[11])
      '02000400'
+
+     => ##################
+     => # verify 3rd numberified item element body
+     => # 
+     => ###
 
      => unpack('H*', $number_list->[13])
      '000186a0'
 
 QUALITY ASSURANCE
+  Test Report
+
+      => perl Secs2.t
+ 
+     1..30
+     # Running under perl version 5.006001 for MSWin32
+     # Win32::BuildNumber 635
+     # Current time local: Sat Apr 17 00:44:51 2004
+     # Current time GMT:   Sat Apr 17 04:44:51 2004
+     # Using Test.pm version 1.24
+     # Test::Tech    : 1.2
+     # Data::Secs2   : 1.18
+     # Data::SecsPack: 0.02
+     # =cut 
+     ok 1 - UUT loaded as Part of Test::Tech 
+     ok 2 - stringify a scalar string 
+     ok 3 - stringify a scalar number 
+     ok 4 - stringify an array 
+     ok 5 - stringify a hash reference 
+     ok 6 - ascii secsify lisfication of test_data1 an array reference 
+     ok 7 - ascii secsify lisfication of test_data2 -  a hash reference 
+     ok 8 - ascii secsify lisfication of test_data3 - array with an array ref 
+     ok 9 - ascii secsify lisfication of test_data4 - array with nested hashes, arrays, objects 
+     ok 10 - ascii secsify lisfication of test_data5 - hash with nested hashes, arrays, common objects 
+     ok 11 - ascii secsify listifcation perilification transfication of test_data1 
+     ok 12 - ascii secsify listifcation perilification transfication of test_data2 
+     ok 13 - ascii secsify listifcation perilification transfication of test_data3 
+     ok 14 - ascii secsify listifcation perilification transfication of test_data4 
+     ok 15 - ascii secsify listifcation perilification transfication of test_data5 
+     ok 16 - binary secsify an array reference 
+     ok 17 - binary secsify array with nested hashes, arrays, objects 
+     ok 18 - neuterify a big secsii 
+     ok 19 - transify a free for all secsii input 
+     ok 20 - secsify transifed free style secs text 
+     ok 21 - listify a list of number arrays 
+     ok 22 - secify a listified list of number arrays 
+     ok 23 - textify listified list of number arrays 
+     ok 24 - verify 1st textified item element body 
+     ok 25 - verify 2nd textified item element body 
+     ok 26 - verify 3rd textified item element body 
+     ok 27 - numberify listified list of number arrays 
+     ok 28 - verify 1st numberified item element body 
+     ok 29 - verify 2nd numberified item element body 
+     ok 30 - verify 3rd numberified item element body 
+     # Passed : 30/30 100%
+ 
+  Test Software Notes
+
     Running the test script 'Secs2.t' found in the
     "Data-Secs2-$VERSION.tar.gz" distribution file verifies the requirements
     for this module.
@@ -766,7 +1136,7 @@ NOTES
 
   COPYRIGHT NOTICE
 
-    Copyrighted (c) 2002 Software Diamonds
+    Copyright © 2003 2004 Software Diamonds
 
     All Rights Reserved
 
@@ -808,19 +1178,19 @@ Title Page
 
      for
 
-      File::FileUtil - Generic file utilites developed originally for Test::STDmaker and ExtUtils::SVDmaker
+      Data::Secs2 - pack, unpack, format, transform between Perl data and SEMI E5-94 nested data
 
-     Revision: B
+     Revision: C
 
-     Version: 0.03
+     Version: 0.04
 
-     Date: 2004/04/13
+     Date: 2004/04/17
 
      Prepared for: General Public 
 
      Prepared by:  SoftwareDiamonds.com E<lt>support@SoftwareDiamonds.comE<gt>
 
-     Copyright: copyright © 2003 Software Diamonds
+     Copyright: copyright © 2003 2004 Software Diamonds
 
      Classification: NONE
 
@@ -840,7 +1210,7 @@ Title Page
 
   1.3 Document overview.
 
-    This document releases Data::Secs2 version 0.03 providing a description
+    This document releases Data::Secs2 version 0.04 providing a description
     of the inventory, installation instructions and other information
     necessary to utilize and track this release.
 
@@ -852,7 +1222,7 @@ Title Page
 
     This document releases the file
 
-     Data-Secs2-0.03.tar.gz
+     Data-Secs2-0.04.tar.gz
 
     found at the following repository(s):
 
@@ -863,7 +1233,7 @@ Title Page
     follows:
 
     Copyright.
-        copyright © 2003 Software Diamonds
+        copyright © 2003 2004 Software Diamonds
 
     Copyright holder contact.
          603 882-0846 E<lt>support@SoftwareDiamonds.comE<gt>
@@ -902,19 +1272,19 @@ Title Page
 
      file                                                         version date       comment
      ------------------------------------------------------------ ------- ---------- ------------------------
-     lib/Docs/Site_SVD/Data_Secs2.pm                              0.03    2004/04/13 revised 0.02
-     MANIFEST                                                     0.03    2004/04/13 generated, replaces 0.02
-     Makefile.PL                                                  0.03    2004/04/13 generated, replaces 0.02
-     README                                                       0.03    2004/04/13 generated, replaces 0.02
-     lib/Data/Secs2.pm                                            1.16    2004/04/13 revised 1.15
-     t/Data/Secs2.d                                               0.02    2004/04/13 revised 0.01
-     t/Data/Secs2.pm                                              0.02    2004/04/13 revised 0.01
-     t/Data/Secs2.t                                               0.03    2004/04/13 revised 0.02
-     t/Data/File/Package.pm                                       1.15    2004/04/13 new
-     t/Data/File/SmartNL.pm                                       1.13    2004/04/13 new
-     t/Data/Text/Scrub.pm                                         1.11    2004/04/13 new
-     t/Data/Test/Tech.pm                                          1.17    2004/04/13 new
-     t/Data/Data/SecsPack.pm                                      0.02    2004/04/13 new
+     lib/Docs/Site_SVD/Data_Secs2.pm                              0.04    2004/04/17 revised 0.03
+     MANIFEST                                                     0.04    2004/04/17 generated, replaces 0.03
+     Makefile.PL                                                  0.04    2004/04/17 generated, replaces 0.03
+     README                                                       0.04    2004/04/17 generated, replaces 0.03
+     lib/Data/Secs2.pm                                            1.17    2004/04/17 revised 1.16
+     t/Data/Secs2.d                                               0.03    2004/04/17 revised 0.02
+     t/Data/Secs2.pm                                              0.03    2004/04/17 revised 0.02
+     t/Data/Secs2.t                                               0.04    2004/04/17 revised 0.03
+     t/Data/File/Package.pm                                       1.16    2004/04/17 unchanged
+     t/Data/File/SmartNL.pm                                       1.13    2004/04/17 unchanged
+     t/Data/Text/Scrub.pm                                         1.11    2004/04/17 unchanged
+     t/Data/Test/Tech.pm                                          1.2     2004/04/17 revised 1.17
+     t/Data/Data/SecsPack.pm                                      0.02    2004/04/17 unchanged
 
   3.3 Changes
 
@@ -924,7 +1294,7 @@ Title Page
         Originated
 
     Data-Secs2-0.01
-        Abandoned Data::Dumper in favor of SEMI E35, SECS-II, standard for
+        Abandoned Data::Dumper in favor of SEMI E35, SECS-II standard for
         stringifying Perl data.
 
     Data-Secs2-0.02
@@ -937,6 +1307,11 @@ Title Page
         Test::STDmaker by moving the test library from tlib to t/Data, the
         same directory as the test script and deleting the test library
         File::TestPath program module.
+
+        Greater expanded the subroutines to the following: arrayify,
+        itemify, listify, neuterify, scalarize, secsify, stringify,
+        transify, vectorize. Added descriptions and tests for the new
+        functions.
 
   3.4 Adaptation data.
 
@@ -970,12 +1345,12 @@ Title Page
           http://www.softwarediamonds/packages/
           http://www.perl.com/CPAN-local/authors/id/S/SO/SOFTDIA/
 
-        Right click on 'Data-Secs2-0.03.tar.gz' and download to a temporary
+        Right click on 'Data-Secs2-0.04.tar.gz' and download to a temporary
         installation directory. Enter the following where $make is 'nmake'
         for microsoft windows; otherwise 'make'.
 
-         gunzip Data-Secs2-0.03.tar.gz
-         tar -xf Data-Secs2-0.03.tar
+         gunzip Data-Secs2-0.04.tar.gz
+         tar -xf Data-Secs2-0.04.tar
          perl Makefile.PL
          $make test
          $make install

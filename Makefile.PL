@@ -23,7 +23,7 @@ my $tests = join ' ',unix2os('t/Data/Secs2.t');
 WriteMakefile(
     NAME => 'Data::Secs2',
     DISTNAME => 'Data-Secs2',
-    VERSION  => '0.03',
+    VERSION  => '0.04',
     dist     => {COMPRESS => 'gzip',
                 'gz' => 'gz'},
     test     => {TESTS => $tests},
@@ -32,7 +32,7 @@ WriteMakefile(
 
     ($] >= 5.005 ?     
         (AUTHOR    => 'SoftwareDiamonds.com E<lt>support@SoftwareDiamonds.comE<gt>',
-        ABSTRACT  => 'Generic file utilities originally developed to support Test::STDmaker', ) : ()),
+        ABSTRACT  => 'pack, unpack, format, transform between Perl data and SEMI E5-94 SECS-II nested data', ) : ()),
 );
 
 

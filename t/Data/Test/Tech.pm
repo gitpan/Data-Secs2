@@ -13,14 +13,14 @@ use Test ();   # do not import the "Test" subroutines
 use Data::Secs2 qw(stringify);
 
 use vars qw($VERSION $DATE $FILE);
-$VERSION = '1.17';
-$DATE = '2004/04/13';
+$VERSION = '1.2';
+$DATE = '2004/04/17';
 $FILE = __FILE__;
 
 use vars qw(@ISA @EXPORT_OK);
 require Exporter;
 @ISA=('Exporter');
-@EXPORT_OK = qw(tech_config plan ok skip skip_tests stringify demo finish);
+@EXPORT_OK = qw(demo finish is_skip ok plan skip skip_tests stringify tech_config);
 
 #######
 # For subroutine interface keep all data hidden in a local hash of private object
@@ -82,6 +82,55 @@ sub new
 
 }
  
+######
+# Demo
+#
+sub demo
+{
+   use Data::Dumper;
+
+   ######
+   # This subroutine uses no object data; therefore,
+   # drop any class or object.
+   #
+   shift @_ if UNIVERSAL::isa($_[0],__PACKAGE__);
+
+   my ($quoted_expression, @expression) = @_;
+
+   #######
+   # A demo trys to simulate someone typing expresssions
+   # at a console.
+   #
+
+   #########
+   # Print quoted expression so that see the non-executed
+   # expression. The extra space is so when pasted into
+   # a POD, the POD will process the line as code.
+   #
+   $quoted_expression =~ s/(\n+)/$1 => /g;
+   print $Test::TESTOUT ' => ' . $quoted_expression . "\n";   
+
+   ########
+   # @data is the result of the script executing the 
+   # quoted expression.
+   #
+   # The demo output most likely will end up in a pod. 
+   # The the process of running the generated script
+   # will execute the setup. Thus the input is the
+   # actual results. Putting a space in front of it
+   # tells the POD that it is code.
+   #
+   return unless @expression;
+  
+   $Data::Dumper::Terse = 1;
+   my $data = Dumper(@expression);
+   $data =~ s/(\n+)/$1 /g;
+   $data =~ s/\\\\/\\/g;
+   $data =~ s/\\'/'/g;
+
+   print $Test::TESTOUT ' ' . $data . "\n" ;
+
+}
 
 #####
 # Restore the Test:: moduel variable back to where they were when found
@@ -96,16 +145,14 @@ sub finish
     my $missing = $self->{last_test} + 1;
     $self->{test_name} = '';
     while($missing <= $self->{num_tests}) {
-        if($self->{Skip_Diag}) {
-            print $Test::TESTOUT "not ok $missing Not Performed # missing\n";
-            if( 1.20 < $Test::VERSION ) {
-                print $Test::TESTERR "# Test $missing got:\n";
-                print $Test::TESTERR "# Expected: (Missing. $self->{Skip_Diag})\n";
-            }
-            else {
-                print $Test::TESTOUT "# Test $missing got:\n";
-                print $Test::TESTOUT "# Expected: (Missing. $self->{Skip_Diag})\n";
-            }
+        print $Test::TESTOUT "not ok $missing Not Performed # missing $self->{Skip_Diag}\n";
+        if( 1.20 < $Test::VERSION ) {
+            print $Test::TESTERR "# Test $missing got: (Missing)\n";
+            print $Test::TESTERR "# Expected: (Missing)\n";
+        }
+        else {
+            print $Test::TESTOUT "# Test $missing got: (Missing)\n";
+            print $Test::TESTOUT "# Expected: (Missing)\n";
         }
         push @{$self->{missed}}, $missing++;
     }
@@ -156,6 +203,65 @@ sub DESTORY
 
 
 
+
+######
+#
+#
+sub is_skip
+{
+   my $self = (UNIVERSAL::isa($_[0],__PACKAGE__) && ref($_[0])) ? shift @_ : $tech_p;
+   return ($self->{Skip_Tests}, $self->{Skip_Diag}) if wantarray;
+   $self->{Skip_Tests};
+   
+}
+
+######
+# Cover function for &Test::ok that adds capability to test 
+# complex data structures.
+#
+sub ok
+{
+
+   ######
+   # If no object, use the default $tech_p object.
+   #
+   my $self = (UNIVERSAL::isa($_[0],__PACKAGE__) && ref($_[0])) ? shift @_ : $tech_p;
+
+   my ($diagnostic,$name) = ('',''); 
+   my $options = {};
+   if( ref($_[-1]) ) {
+       $options = pop @_;
+       if( ref($options) eq 'ARRAY') {
+           my %options = @$options;
+           $options = \%options;
+       }
+       elsif( ref($options) ne 'HASH') {
+           $options = {};
+       }
+   }
+   $diagnostic = $options->{diagnostic} if defined $options->{diagnostic};
+   $name = $options->{name} if defined $options->{name};
+
+   my ($actual_result, $expected_result, $diagnostic_in, $name_in) = @_;
+
+
+   ######### 
+   # Fill in undefined inputs
+   #
+   $diagnostic = $diagnostic_in if defined $diagnostic_in;
+   $name = $name_in if defined $name_in;
+   $diagnostic = $name unless defined $diagnostic;
+   $self->{test_name} = $name;  # used by tied handle Test::Tech::Output
+
+   if($self->{Skip_Tests}) { # skip rest of tests switch
+       &Test::skip( 1, '', '', $self->{Skip_Diag});
+       return 1; 
+   }
+
+   &Test::ok(stringify($actual_result), stringify($expected_result), $diagnostic);
+
+}
+
 ######
 # Cover function for &Test::plan that sets the proper 'Test::TestLevel'
 # and outputs some info on the current site
@@ -201,71 +307,12 @@ EOF
    print $Test::TESTOUT <<"EOF";
 # Test::Tech    : $VERSION
 # Data::Secs2   : $Data::Secs2::VERSION
+# Data::SecsPack: $Data::SecsPack::VERSION
 # =cut 
 EOF
 
    1
 }
-
-
-######
-# Cover function for &Test::ok that adds capability to test 
-# complex data structures.
-#
-sub ok
-{
-
-   ######
-   # If no object, use the default $tech_p object.
-   #
-   my $self = (UNIVERSAL::isa($_[0],__PACKAGE__) && ref($_[0])) ? shift @_ : $tech_p;
-
-   my ($diagnostic,$name) = ('',''); 
-   my $options = {};
-   if( ref($_[-1]) ) {
-       $options = pop @_;
-       if( ref($options) eq 'ARRAY') {
-           my %options = @$options;
-           $options = \%options;
-       }
-       elsif( ref($options) ne 'HASH') {
-           $options = {};
-       }
-   }
-   $diagnostic = $options->{diagnostic} if defined $options->{diagnostic};
-   $name = $options->{name} if defined $options->{name};
-
-   my ($actual_result, $expected_result, $diagnostic_in, $name_in) = @_;
-
-
-   ######### 
-   # Fill in undefined inputs
-   #
-   $diagnostic = $diagnostic_in if defined $diagnostic_in;
-   $name = $name_in if defined $name_in;
-   $diagnostic = $name unless defined $diagnostic;
-   $self->{test_name} = $name;  # used by tied handle Test::Tech::Output
-
-   if($self->{Skip_Tests}) { # skip rest of tests switch
-       &Test::skip( 1, 0, '');
-       if($self->{Skip_Diag}) {
-           my $test_number = $Test::ntest - 1;
-           if( 1.20 < $Test::VERSION ) {
-               print $Test::TESTERR "# Test $test_number got:\n";
-               print $Test::TESTERR "# Expected: ($self->{Skip_Diag})\n";
-           }
-           else {
-               print $Test::TESTOUT "# Test $test_number got:\n";
-               print $Test::TESTOUT "# Expected: ($self->{Skip_Diag})\n";
-           }
-       }
-       return 1; 
-   }
-
-   &Test::ok(stringify($actual_result), stringify($expected_result), $diagnostic);
-
-}
-
 
 ######
 #
@@ -301,18 +348,7 @@ sub skip
    $self->{test_name} = $name;  # used by tied handle Test::Tech::Output
 
    if($self->{Skip_Tests}) {  # skip rest of tests switch
-       &Test::skip( 1, 0, '');
-       if($self->{Skip_Diag}) {
-           my $test_number = $Test::ntest - 1;
-           if( 1.20 < $Test::VERSION ) {
-               print $Test::TESTERR "# Test $test_number got:\n";
-               print $Test::TESTERR "# Expected: ($self->{Skip_Diag})\n";
-           }
-           else {
-               print $Test::TESTOUT "# Test $test_number got:\n";
-               print $Test::TESTOUT "# Expected: ($self->{Skip_Diag})\n";
-           }
-       }
+       &Test::skip( 1, '', '', $self->{Skip_Diag});
        return 1; 
    }
   
@@ -338,8 +374,13 @@ sub skip_tests
    $self->{Skip_Tests} = $value;
    $diagnostic = 'Test not performed because of previous failure.' unless defined $diagnostic;
    $self->{Skip_Diag} = $value ? $diagnostic : '';
-   $result;   
+   $result;
+   
 }
+
+
+
+
 
 
 #######
@@ -415,55 +456,6 @@ sub tech_config
 
 
 
-######
-# Demo
-#
-sub demo
-{
-   use Data::Dumper;
-
-   ######
-   # This subroutine uses no object data; therefore,
-   # drop any class or object.
-   #
-   shift @_ if UNIVERSAL::isa($_[0],__PACKAGE__);
-
-   my ($quoted_expression, @expression) = @_;
-
-   #######
-   # A demo trys to simulate someone typing expresssions
-   # at a console.
-   #
-
-   #########
-   # Print quoted expression so that see the non-executed
-   # expression. The extra space is so when pasted into
-   # a POD, the POD will process the line as code.
-   #
-   $quoted_expression =~ s/(\n+)/$1 => /g;
-   print $Test::TESTOUT ' => ' . $quoted_expression . "\n";   
-
-   ########
-   # @data is the result of the script executing the 
-   # quoted expression.
-   #
-   # The demo output most likely will end up in a pod. 
-   # The the process of running the generated script
-   # will execute the setup. Thus the input is the
-   # actual results. Putting a space in front of it
-   # tells the POD that it is code.
-   #
-   return unless @expression;
-  
-   $Data::Dumper::Terse = 1;
-   my $data = Dumper(@expression);
-   $data =~ s/(\n+)/$1 /g;
-   $data =~ s/\\\\/\\/g;
-   $data =~ s/\\'/'/g;
-
-   print $Test::TESTOUT ' ' . $data . "\n" ;
-
-}
 
 
 ########
@@ -495,7 +487,9 @@ sub PRINT
     my $buf = join(defined $, ? $, : '',@_);
     $buf .= $\ if defined $\;
     my $test_name = $self->{tech}->{test_name};
+    my $skip_diag = $self->{tech}->{Skip_Diag};
     $buf =~ s/(ok \d+)/$1 - $test_name /g if($test_name);
+    $buf =~ s/(# skip.*?)(\s*|\n)/$1 - $skip_diag$2/ig if $skip_diag;
     $self->stats($buf);
     my $handle = $self->{test_out};
     print $handle $buf;
@@ -558,11 +552,17 @@ Test::Tech - adds skip_tests and test data structures capabilities to the "Test"
  #
  # (use for &Test::plan, &Test::ok, &Test::skip drop in)
  #  
- use Test::Tech qw(plan ok skip skip_tests tech_config stringify demo);
+ use Test::Tech qw(demo finish is_skip ok plan skip skip_tests stringify tech_config);
 
- $new_value  = tech_config( $key, $old_value);
 
- $success = plan(@args);
+
+ demo($quoted_expression, @expression)
+
+ (@stats) = finish( );
+ $num_passed = finish( );
+
+ $skip_on = is_skip( );
+ ($skip_on, $skip_diag) = is_skip( );
 
  $test_ok = ok($actual_results, $expected_results, [@options]);
  $test_ok = ok($actual_results, $expected_results, {@options});
@@ -571,6 +571,8 @@ Test::Tech - adds skip_tests and test data structures capabilities to the "Test"
  $test_ok = ok($actual_results, $expected_results, $diagnostic, $test_name, [@options]);
  $test_ok = ok($actual_results, $expected_results, $diagnostic, $test_name, {@options});
 
+ $success = plan(@args);
+
  $test_ok = skip($skip_test, $actual_results,  $expected_results, [@options]);
  $test_ok = skip($skip_test, $actual_results,  $expected_results, {@options});
  $test_ok = skip($skip_test, $actual_results,  $expected_results, $diagnostic, [@options]);
@@ -578,24 +580,30 @@ Test::Tech - adds skip_tests and test data structures capabilities to the "Test"
  $test_ok = skip($skip_test, $actual_results,  $expected_results, $diagnostic, $test_name, [@options]);
  $test_ok = skip($skip_test, $actual_results,  $expected_results, $diagnostic, $test_name, {@options});
 
- $state = skip_tests( $on_off, $skip_diagnostic);
- $state = skip_tests( $on_off );
- $state = skip_tests( );
+ $skip_on = skip_tests( $on_off, $skip_diagnostic);
+ $skip_on = skip_tests( $on_off );
+ $skip_on = skip_tests( );
 
  $string = stringify( $var, @options); # imported from Data::Secs2
- $string = $tech->stringify($var, [@options]);
- $string = $tech->stringify($var, {@options});
+ $string = stringify($var, [@options]);
+ $string = stringify($var, {@options});
 
- (@stats) = finish( );
- $num_passed = finish( );
+ $new_value  = tech_config( $key, $old_value);
 
- demo($quoted_expression, @expression)
 
 
  #####
  # Object Interface
  # 
  $tech = new Test::Tech;
+
+ $tech->demo($quoted_expression, @expression)
+
+ (@stats) = $tech->finish( );
+ $num_passed = $tech->finish( );
+
+ $skip_on = $tech->is_skip( );
+ ($skip_on, $skip_diag) = $tech->is_skip( );
 
  $test_ok = $tech->ok($actual_results, $expected_results, [@options]);
  $test_ok = $tech->ok($actual_results, $expected_results, {@options]};
@@ -613,6 +621,7 @@ Test::Tech - adds skip_tests and test data structures capabilities to the "Test"
 
  $state  = $tech->skip_tests( );
  $state  = $tech->skip_tests( $on_off );
+
  $state = skip_tests( $on_off, $skip_diagnostic );
 
  $string = $tech->stringify($var); # imported from Data::Secs2
@@ -621,11 +630,6 @@ Test::Tech - adds skip_tests and test data structures capabilities to the "Test"
  $string = $tech->stringify($var, {@options});
 
  $new_value = $tech->tech_config($key, $old_value);
-
- (@stats) = $tech->finish( );
- $num_passed = $tech->finish( );
-
- $tech->demo($quoted_expression, @expression)
 
 =head1 DESCRIPTION
 
@@ -677,150 +681,23 @@ session using the methods under test
 
 =back
 
-=head2 plan subroutine
+=head2 demo subroutine
 
- $success = plan(@args);
+ demo($quoted_expression, @expression)
 
-The I<plan> subroutine is a cover method for &Test::plan.
-The I<@args> are passed unchanged to &Test::plan.
-All arguments are options. Valid options are as follows:
+The demo subroutine/method provides a session like out.
+The '$quoted_express' is printed out as typed in from
+the keyboard.
+The '@expression' is executed and printed out as the
+results of '$quoted_expression'.
 
-=over 4
-
-=item tests
-
-The number of tests. For example
-
- tests => 14,
-
-=item todo
-
-An array of test that will fail. For example
-
- todo => [3,4]
-
-=item onfail
-
-A subroutine that the I<Test> module will
-execute on a failure. For example,
-
- onfail => sub { warn "CALL 911!" } 
-
-=back
-
-=head2 ok subroutine
-
- $test_ok = ok($actual_results, $expected_results, $diagnostic, $test_name, [@options]);
- $test_ok = ok($actual_results, $expected_results, $diagnostic, $test_name, {@options});
-
-The $diagnostic, $test_name, [@options], and {@options} inputs are optional.
-The $actual_results and $expected_results inputs may be references to
-any type of data structures.  The @options is a hash input that will
-process the 'diagnostic' key the same as the $diagnostic input and the
-'name' key the same as the $test_name input.
-
-The I<ok> method is a cover function for the &Test::ok subroutine
-that extends the &Test::ok routine as follows:
-
-=over 4
-
-=item *
-
-Prints out the I<$test_name> to provide an English identification
-of the test. The $test_name appears as either "ok $test_num - $name" or
-"not ok $test_num - $name".
-
-=item *
-
-The I<ok> subroutine passes referenced inputs
-I<$actual_results> and I<$expectet_results> through 
-L<Data::Secs2::stringify() subroutine|Data::Secs2/stringify subroutine>.
-The I<ok> method then uses &Test::ok to compare the text results
-from L<Data::Secs2::stringify() subroutine|Data::Secs2/stringify subroutine>.
-
-=item *
-
-The I<ok> subroutine method passes variables that are not a reference
-directly to &Test::ok unchanged.
-
-=item *
-
-Responses to a flag set by the L<skip_tests subroutine|Test::Tech/skip_tests> subroutine
-and skips the test completely.
-
-=back
-
-=head2 skip subroutine
-
- $test_ok = skip($actual_results, $expected_results, $diagnostic $test_name, [@options]);
- $test_ok = skip($actual_results, $expected_results, $diagnostic $test_name, {@options});
-
-The $diagnostic, $test_name, [@options], and {@options} inputs are optional.
-The $actual_results and $expected_results inputs may be references to
-any type of data structures.  The @options is a hash input that will
-process the 'diagnostic' key the same as the $diagnostic input and the
-'name' key the same as the $test_name input.
-
-The I<skip> subroutine is a cover function for the &Test::skip subroutine
-that extends the &Test::skip the same as the 
-L<ok subroutine|Test::Tech/ok> subroutine extends
-the I<&Test::ok> subroutine.
-
-=head2 skip_tests method
-
- $state = skip_tests( $on_off );
- $state = skip_tests( );
-
-The I<skip_tests> subroutine sets a flag that causes the
-I<ok> and the I<skip> methods to skip testing.
-
-=head2 stringify subroutine
-
- $string = stringify( $var );
-
-The I<stringify> subroutine will stringify I<$var> using
-the "L<Data::Secs2::stringify subroutine|Data::Secs2/stringify subroutine>" 
-module only if I<$var> is a reference;
-otherwise, it leaves it unchanged.
-
-=head2 tech_config subroutine
-
- $old_value = tech_config( $dot_index, $new_value );
-
-The I<tech_config> subroutine reads and writes the
-below configuration variables
-
- dot index              contents           mode
- --------------------   --------------     --------
- Test.ntest             $Test::ntest       read only 
- Test.TESTOUT           $Test::TESTOUT     read write
- Test.TestLevel         $Test::TestLevel   read write
- Test.ONFAIL            $Test::ONFAIL      read write
- Test.TESTERR           $Test::TESTERR     read write
- Skip_Tests             # boolean          read write
- 
-The I<tech_config> subroutine always returns the
-I<$old_value> of I<$dot_index> and only writes
-the contents if I<$new_value> is defined.
-
-The 'SCALAR' and 'ARRAY' references are transparent.
-The I<tech_config> subroutine, when it senses that
-the I<$dot_index> is for a 'SCALAR' and 'ARRAY' reference,
-will read or write the contents instead of the reference.
-
-The The I<tech_config> subroutine will read 'HASH" references
-but will never change them. 
-
-The variables for the top level 'Dumper' I<$dot_index> are
-established by "L<Data::Dumper|Data::Dumper>" module;
-for the top level 'Test', the "L<Test|Test>" module.
 
 =head2 finish subroutine
 
  (@stats) = $tech->finish( );
  $num_passed = $tech->finish( );
 
-The C<finish() subroutine/method restores changes made
+The C<finish()> subroutine/method restores changes made
 to the C<Test> module module made by the 
 C<tech_config> subroutine/method or directly.
 
@@ -885,21 +762,162 @@ reference to the failed test steps
 
 =back
 
-=head2 demo subroutine
+=head2 is_skip
 
- demo($quoted_expression, @expression)
+ $skip_on = is_skip( );
+ ($skip_on, $skip_diag) = is_skip( );
 
-The demo subroutine/method provides a session like out.
-The '$quoted_express' is printed out as typed in from
-the keyboard.
-The '@expression' is executed and printed out as the
-results of '$quoted_expression'.
+Returns the object data set by the C<set_tests> subroutine.
+
+=head2 ok subroutine
+
+ $test_ok = ok($actual_results, $expected_results, $diagnostic, $test_name, [@options]);
+ $test_ok = ok($actual_results, $expected_results, $diagnostic, $test_name, {@options});
+
+The $diagnostic, $test_name, [@options], and {@options} inputs are optional.
+The $actual_results and $expected_results inputs may be references to
+any type of data structures.  The @options is a hash input that will
+process the 'diagnostic' key the same as the $diagnostic input and the
+'name' key the same as the $test_name input.
+
+The I<ok> method is a cover function for the &Test::ok subroutine
+that extends the &Test::ok routine as follows:
+
+=over 4
+
+=item *
+
+Prints out the I<$test_name> to provide an English identification
+of the test. The $test_name appears as either "ok $test_num - $name" or
+"not ok $test_num - $name".
+
+=item *
+
+The I<ok> subroutine passes referenced inputs
+I<$actual_results> and I<$expectet_results> through 
+L<Data::Secs2::stringify() subroutine|Data::Secs2/stringify subroutine>.
+The I<ok> method then uses &Test::ok to compare the text results
+from L<Data::Secs2::stringify() subroutine|Data::Secs2/stringify subroutine>.
+
+=item *
+
+The I<ok> subroutine method passes variables that are not a reference
+directly to &Test::ok unchanged.
+
+=item *
+
+Responses to a flag set by the L<skip_tests subroutine|Test::Tech/skip_tests> subroutine
+and skips the test completely.
+
+=back
+
+=head2 skip subroutine
+
+ $test_ok = skip($actual_results, $expected_results, $diagnostic $test_name, [@options]);
+ $test_ok = skip($actual_results, $expected_results, $diagnostic $test_name, {@options});
+
+The $diagnostic, $test_name, [@options], and {@options} inputs are optional.
+The $actual_results and $expected_results inputs may be references to
+any type of data structures.  The @options is a hash input that will
+process the 'diagnostic' key the same as the $diagnostic input and the
+'name' key the same as the $test_name input.
+
+The I<skip> subroutine is a cover function for the &Test::skip subroutine
+that extends the &Test::skip the same as the 
+L<ok subroutine|Test::Tech/ok> subroutine extends
+the I<&Test::ok> subroutine.
+
+=head2 plan subroutine
+
+ $success = plan(@args);
+
+The I<plan> subroutine is a cover method for &Test::plan.
+The I<@args> are passed unchanged to &Test::plan.
+All arguments are options. Valid options are as follows:
+
+=over 4
+
+=item tests
+
+The number of tests. For example
+
+ tests => 14,
+
+=item todo
+
+An array of test that will fail. For example
+
+ todo => [3,4]
+
+=item onfail
+
+A subroutine that the I<Test> module will
+execute on a failure. For example,
+
+ onfail => sub { warn "CALL 911!" } 
+
+=back
+
+
+=head2 skip_tests method
+
+ $skip_on = skip_tests( $on_off );
+ $skip_on = skip_tests( );
+
+The I<skip_tests> subroutine sets a flag that causes the
+I<ok> and the I<skip> methods to skip testing.
+
+=head2 stringify subroutine
+
+ $string = stringify( $var );
+
+The I<stringify> subroutine will stringify I<$var> using
+the "L<Data::Secs2::stringify subroutine|Data::Secs2/stringify subroutine>" 
+module only if I<$var> is a reference;
+otherwise, it leaves it unchanged.
+
+=head2 tech_config subroutine
+
+ $old_value = tech_config( $dot_index, $new_value );
+
+The I<tech_config> subroutine reads and writes the
+below configuration variables
+
+ dot index              contents           mode
+ --------------------   --------------     --------
+ Test.ntest             $Test::ntest       read only 
+ Test.TESTOUT           $Test::TESTOUT     read write
+ Test.TestLevel         $Test::TestLevel   read write
+ Test.ONFAIL            $Test::ONFAIL      read write
+ Test.TESTERR           $Test::TESTERR     read write
+ Skip_Tests             # boolean          read write
+ 
+The I<tech_config> subroutine always returns the
+I<$old_value> of I<$dot_index> and only writes
+the contents if I<$new_value> is defined.
+
+The 'SCALAR' and 'ARRAY' references are transparent.
+The I<tech_config> subroutine, when it senses that
+the I<$dot_index> is for a 'SCALAR' and 'ARRAY' reference,
+will read or write the contents instead of the reference.
+
+The The I<tech_config> subroutine will read 'HASH" references
+but will never change them. 
+
+The variables for the top level 'Dumper' I<$dot_index> are
+established by "L<Data::Dumper|Data::Dumper>" module;
+for the top level 'Test', the "L<Test|Test>" module.
+
 
 =head1 REQUIREMENTS
 
 Coming soon.
 
 =head1 DEMONSTRATION
+
+ #########
+ # perl Tech.d
+ ###
 
  ~~~~~~ Demonstration overview ~~~~~
 
@@ -936,8 +954,8 @@ follow on the next lines. For example,
  use warnings;
  use warnings::register;
  use vars qw($VERSION $DATE);
- $VERSION = '0.11';
- $DATE = '2004/04/08';
+ $VERSION = '0.13';
+ $DATE = '2004/04/15';
 
  BEGIN {
     use FindBin;
@@ -985,7 +1003,7 @@ follow on the next lines. For example,
        6, # expected results
        '','Skipped tests');
 
- #  zyw featureUnder development, i.e todo
+ #  zyw feature Under development, i.e todo
  ok( #  ok:  4
      $x*$y*2, # actual results
      6, # expected results
@@ -1031,8 +1049,19 @@ follow on the next lines. For example,
 
  '
 
+ => ##################
+ => # Run test script techA0.t using Test 1.15
+ => # 
+ => ###
+
  =>     my $actual_results = `perl techA0.t`;
  =>     $snl->fout('tech1.txt', $actual_results);
+
+ => ##################
+ => # Run test script techA0.t using Test 1.15
+ => # 
+ => ###
+
  => $s->scrub_probe($s->scrub_file_line($actual_results))
  '1..8 todo 4 8;
  ok 1 - Test version 
@@ -1044,12 +1073,8 @@ follow on the next lines. For example,
  not ok 5 - Failed test that skips the rest 
  # Test 5 got: '5' (xxxx.t at line 000)
  #   Expected: '6'
- ok 6 - A test to skip  # skip
- # Test 6 got:
- # Expected: (Test not performed because of previous failure.)
- ok 7 - A not skip to skip  # skip
- # Test 7 got:
- # Expected: (Test not performed because of previous failure.)
+ ok 6 - A test to skip  # skip - Test not performed because of previous failure.
+ ok 7 - A not skip to skip  # skip - Test not performed because of previous failure.
  ok 8 - Stop skipping tests. Todo Test that Passes  # (xxxx.t at line 000 TODO?!)
  ok 9 - Unplanned pass test 
  # Extra  : 9
@@ -1068,8 +1093,8 @@ follow on the next lines. For example,
  use warnings::register;
 
  use vars qw($VERSION $DATE);
- $VERSION = '0.12';
- $DATE = '2004/04/08';
+ $VERSION = '0.13';
+ $DATE = '2004/04/13';
 
  BEGIN {
     use FindBin;
@@ -1133,23 +1158,22 @@ follow on the next lines. For example,
 
  '
 
+ => ##################
+ => # Run test script techC0.t using Test 1.24
+ => # 
+ => ###
+
  =>     $actual_results = `perl techC0.t`;
  =>     $snl->fout('tech1.txt', $actual_results);
  => $s->scrub_probe($s->scrub_file_line($actual_results))
  '1..2 todo 1;
  ok 1 - Todo test that passes  # (xxxx.t at line 000 TODO?!)
  not ok 2 - Test that fails 
- # Test 2 got: 'L[4]
-   A[0]
-   A[5] ARRAY
-   U1[1] 5
-   U1[1] 6
+ # Test 2 got: 'U1[1] 80
+ U1[2] 5 6
  ' (xxxx.t at line 000)
- #   Expected: 'L[4]
-   A[0]
-   A[5] ARRAY
-   U1[1] 6
-   U1[1] 5
+ #   Expected: 'U1[1] 80
+ U1[2] 6 5
  '
  # Failed : 2
  # Passed : 1/2 50%
@@ -1165,8 +1189,8 @@ follow on the next lines. For example,
  use warnings::register;
 
  use vars qw($VERSION $DATE);
- $VERSION = '0.07';
- $DATE = '2004/04/08';
+ $VERSION = '0.08';
+ $DATE = '2004/04/13';
 
  BEGIN {
     use FindBin;
@@ -1184,8 +1208,8 @@ follow on the next lines. For example,
     unshift @INC, File::Spec->catdir ( cwd(), 'V001024'); 
 
     require Test::Tech;
-    Test::Tech->import( qw(plan ok skip skip_tests tech_config finish) );
-    plan(tests => 8, todo => [4, 8]);
+    Test::Tech->import( qw(finish is_skip plan ok skip skip_tests tech_config ) );
+    plan(tests => 10, todo => [4, 8]);
  }
 
  END {
@@ -1229,10 +1253,22 @@ follow on the next lines. For example,
      [diagnostic => 'Should Turn on Skip Test', 
       name => 'Failed test that skips the rest']); 
 
+ my ($skip_on, $skip_diag) = is_skip();
+
  ok( #  ok:  6 
      $x + $y + $x, # actual results
      9, # expected results
      '', 'A test to skip');
+
+ ok( #  ok:  7 
+     skip_tests(0), # actual results
+     1, # expected results
+     '', 'Turn off skip');
+
+ ok( #  ok:  8 
+     [$skip_on, $skip_diag], # actual results
+     [1,'Skip test on'], # expected results
+     '', 'Skip flag');
 
  finish() # pick up stats
 
@@ -1248,10 +1284,15 @@ follow on the next lines. For example,
 
  '
 
+ => ##################
+ => # Run test script techE0.t using Test 1.24
+ => # 
+ => ###
+
  =>     $actual_results = `perl techE0.t`;
  =>     $snl->fout('tech1.txt', $actual_results);
  => $s->scrub_probe($s->scrub_file_line($actual_results))
- '1..8 todo 4 8;
+ '1..10 todo 4 8;
  ok 1 - Test version 
  ok 2 - Pass test 
  ok 3 - Skipped tests  # skip
@@ -1261,42 +1302,102 @@ follow on the next lines. For example,
  not ok 5 - Failed test that skips the rest 
  # Test 5 got: '5' (xxxx.t at line 000)
  #   Expected: '6' (Should Turn on Skip Test)
- ok 6 - A test to skip  # skip
- # Test 6 got:
- # Expected: (Skip test on)
- not ok 7 Not Performed # missing
- # Test 7 got:
- # Expected: (Missing. Skip test on)
- not ok 8 Not Performed # missing
- # Test 8 got:
- # Expected: (Missing. Skip test on)
- # Missing: 7 8
+ ok 6 - A test to skip  # skip - Skip test on
+ ok 7 - Turn off skip 
+ ok 8 - Skip flag  # (xxxx.t at line 000 TODO?!)
+ not ok 9 Not Performed # missing 
+ # Test 9 got: (Missing)
+ # Expected: (Missing)
+ not ok 10 Not Performed # missing 
+ # Test 10 got: (Missing)
+ # Expected: (Missing)
+ # Missing: 9 10
  # Skipped: 3 6
- # Failed : 4 5 7 8
- # Passed : 2/6 33%
+ # Failed : 4 5 9 10
+ # Passed : 4/8 50%
  '
 
+ => ##################
+ => # config Test.ONFAIL, read undef
+ => # 
+ => ###
+
  => my $tech = new Test::Tech
- => $tech->tech_config('Test.TestLevel')
+ => $tech->tech_config('Test.ONFAIL')
  undef
 
- => $tech->tech_config('Test.TestLevel', 2)
+ => ##################
+ => # config Test.ONFAIL, read undef, write 0
+ => # 
+ => ###
+
+ => $tech->tech_config('Test.ONFAIL',0)
  undef
 
- => $tech->tech_config('Test.TestLevel')
- 2
+ => ##################
+ => # config Test.ONFAIL, read 0
+ => # 
+ => ###
 
- => $Test::TestLevel
- 2
+ => $tech->tech_config('Test.ONFAIL')
+ 0
+
+ => ##################
+ => # $Test::ONFAIL, read 0
+ => # 
+ => ###
+
+ => $Test::ONFAIL
+ 0
+
+ => ##################
+ => # restore Test.ONFAIL on finish
+ => # 
+ => ###
 
  =>      $tech->finish( );
  =>      $Test::planned = 1;  # keep going
- => $Test::TestLevel
- 2
 
+ => ##################
+ => # Test.ONFAIL restored by finish()
+ => # 
+ => ###
+
+ => $tech->tech_config('Test.ONFAIL')
+ 0
+
+ => unlink 'tech1.txt'
  => unlink 'tech1.txt'
 
 =head1 QUALITY ASSURANCE
+
+=head2 Test Report
+
+ => perl Tech.t
+
+1..10
+# Running under perl version 5.006001 for MSWin32
+# Win32::BuildNumber 635
+# Current time local: Fri Apr 16 12:13:38 2004
+# Current time GMT:   Fri Apr 16 16:13:38 2004
+# Using Test.pm version 1.24
+# Test::Tech    : 1.20
+# Data::Secs2   : 1.17
+# Data::SecsPack: 0.02
+# =cut 
+ok 1 - UUT loaded 
+ok 2 - Run test script techA0.t using Test 1.15 
+ok 3 - Run test script techB0.t using Test 1.24 
+ok 4 - Run test script techC0.t using Test 1.24 
+ok 5 - Run test script techE0.t using Test 1.24 
+ok 6 - config Test.ONFAIL, read undef 
+ok 7 - config Test.ONFAIL, read undef, write 0 
+ok 8 - config Test.ONFAIL, read 0 
+ok 9 - 0, read 0 
+ok 10 - Test.ONFAIL restored by finish() 
+# Passed : 10/10 100%
+
+=head2 Test Script Notes
 
 Running the test script 'Tech.t' found in
 the "Test-Tech-$VERSION.tar.gz" distribution file verifies

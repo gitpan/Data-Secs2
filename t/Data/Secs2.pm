@@ -10,8 +10,8 @@ use warnings;
 use warnings::register;
 
 use vars qw($VERSION $DATE $FILE );
-$VERSION = '0.02';
-$DATE = '2004/04/13';
+$VERSION = '0.03';
+$DATE = '2004/04/17';
 $FILE = __FILE__;
 
 ########
@@ -40,7 +40,7 @@ $FILE = __FILE__;
 
  Version: 
 
- Date: 2004/04/13
+ Date: 2004/04/17
 
  Prepared for: General Public 
 
@@ -80,7 +80,7 @@ L<STD FormDB Test Description Fields|Test::STDmaker/STD FormDB Test Description 
 
 =head2 Test Plan
 
- T: 26^
+ T: 30^
 
 =head2 ok: 1
 
@@ -88,10 +88,93 @@ L<STD FormDB Test Description Fields|Test::STDmaker/STD FormDB Test Description 
   C:
      use File::Package;
      my $fp = 'File::Package';
-     use Data::Secs2 qw(arrayify itemify listify neuterify scalarize secsify 
-         stringify  transify vectorize);
+     use Data::Secs2 qw(arrayify listify neuterify numberify 
+          perlify secsify secs_elementify stringify textify transify);
      my $uut = 'Data::Secs2';
      my $loaded;
+ my $test_data1 =
+ 'U1[1] 80
+ L[5]
+   A[0]
+   A[5] ARRAY
+   U1[1] 2
+   A[5] hello
+   U1[1] 4
+ ';
+ my $test_data2 =
+ 'U1[1] 80
+ L[6]
+   A[0]
+   A[4] HASH
+   A[4] body
+   A[5] hello
+   A[6] header
+   A[9] To: world
+ ';
+ my $test_data3 =
+ 'U1[1] 80
+ U1[1] 2
+ L[4]
+   A[0]
+   A[5] ARRAY
+   A[5] hello
+   A[5] world
+ U2[1] 512
+ ';
+ my $test_data4 =
+ 'U1[1] 80
+ U1[1] 2
+ L[6]
+   A[0]
+   A[4] HASH
+   A[6] header
+   L[6]
+     A[11] Class::None
+     A[4] HASH
+     A[4] From
+     A[6] nobody
+     A[2] To
+     A[6] nobody
+   A[3] msg
+   L[4]
+     A[0]
+     A[5] ARRAY
+     A[5] hello
+     A[5] world
+ ';
+ my $test_data5 =
+ 'U1[1] 80
+ L[6]
+   A[0]
+   A[4] HASH
+   A[6] header
+   L[6]
+     A[11] Class::None
+     A[4] HASH
+     A[4] From
+     A[6] nobody
+     A[2] To
+     A[6] nobody
+   A[3] msg
+   L[4]
+     A[0]
+     A[5] ARRAY
+     A[5] hello
+     A[5] world
+ L[6]
+   A[0]
+   A[4] HASH
+   A[6] header
+   L[3]
+     A[0]
+     A[5] Index
+     U1[1] 10
+   A[3] msg
+   L[3]
+     A[0]
+     A[5] ARRAY
+     A[4] body
+ ';
  ^
  VO: ^
   N: UUT loaded as Part of Test::Tech^
@@ -101,6 +184,7 @@ L<STD FormDB Test Description Fields|Test::STDmaker/STD FormDB Test Description 
 
 =head2 ok: 2
 
+ VO: ^
   N: stringify a scalar string^
   C: $uut->import( 'stringify' )^
   A: stringify( 'string' )^
@@ -109,6 +193,7 @@ L<STD FormDB Test Description Fields|Test::STDmaker/STD FormDB Test Description 
 
 =head2 ok: 3
 
+ VO: ^
   N: stringify a scalar number^
   A: stringify( 2 )^
   E: 2^
@@ -130,23 +215,6 @@ L<STD FormDB Test Description Fields|Test::STDmaker/STD FormDB Test Description 
 
 =head2 ok: 5
 
-  N: stringify an array reference^
-  A: stringify( ['2', 'hello', 4] )^
-
-  E:
- 'U1[1] 80
- L[5]
-   A[0]
-   A[5] ARRAY
-   U1[1] 2
-   A[5] hello
-   U1[1] 4
- '
- ^
- ok: 5^
-
-=head2 ok: 6
-
   N: stringify a hash reference^
   A: stringify( {header => 'To: world', body => 'hello'})^
 
@@ -161,143 +229,97 @@ L<STD FormDB Test Description Fields|Test::STDmaker/STD FormDB Test Description 
    A[9] To: world
  '
  ^
+ ok: 5^
+
+=head2 ok: 6
+
+  N: ascii secsify lisfication of test_data1 an array reference^
+  A: secsify( listify( ['2', 'hello', 4] ) )^
+  E: $test_data1^
  ok: 6^
 
 =head2 ok: 7
 
-  N: ascii secsify an array reference^
-  A: secsify( listify( ['2', 'hello', 4] ) )^
-
-  E:
- 'U1[1] 80
- L[5]
-   A[0]
-   A[5] ARRAY
-   U1[1] 2
-   A[5] hello
-   U1[1] 4
- '
- ^
+ VO: ^
+  N: ascii secsify lisfication of test_data2 -  a hash reference^
+  A: secsify( listify( {header => 'To: world', body => 'hello'}) )^
+  E: $test_data2^
  ok: 7^
 
 =head2 ok: 8
 
-  N: ascii secsify a hash reference^
-  A: secsify( listify( {header => 'To: world', body => 'hello'}) )^
-
-  E:
- 'U1[1] 80
- L[6]
-   A[0]
-   A[4] HASH
-   A[4] body
-   A[5] hello
-   A[6] header
-   A[9] To: world
- '
- ^
+  N: ascii secsify lisfication of test_data3 - array with an array ref^
+  A: secsify( listify( '2', ['hello', 'world'], 512 ) )^
+  E: $test_data3^
  ok: 8^
 
 =head2 ok: 9
 
-  N: ascii secsify array with an array ref^
-  A: secsify( listify( '2', ['hello', 'world'], 512 ) )^
-
-  E:
- 'U1[1] 80
- U1[1] 2
- L[4]
-   A[0]
-   A[5] ARRAY
-   A[5] hello
-   A[5] world
- U2[1] 512
- '
- ^
+  A: my $obj = bless { To => 'nobody', From => 'nobody'}, 'Class::None'^
+ VO: ^
+  N: ascii secsify lisfication of test_data4 - array with nested hashes, arrays, objects^
+  C: my $obj = bless { To => 'nobody', From => 'nobody'}, 'Class::None'^
+  A: secsify( listify( '2', { msg => ['hello', 'world'] , header => $obj } ) )^
+  E: $test_data4^
  ok: 9^
 
 =head2 ok: 10
 
-  N: ascii secsify array with nested hashes, arrays, objects^
-  C: my $obj = bless { To => 'nobody', From => 'nobody'}, 'Class::None'^
-  A: secsify( listify( '2', { msg => ['hello', 'world'] , header => $obj } ) )^
+  N: ascii secsify lisfication of test_data5 - hash with nested hashes, arrays, common objects^
 
-  E:
- 'U1[1] 80
- U1[1] 2
- L[6]
-   A[0]
-   A[4] HASH
-   A[6] header
-   L[6]
-     A[11] Class::None
-     A[4] HASH
-     A[4] From
-     A[6] nobody
-     A[2] To
-     A[6] nobody
-   A[3] msg
-   L[4]
-     A[0]
-     A[5] ARRAY
-     A[5] hello
-     A[5] world
- '
+  A:
+     secsify( listify( {msg => ['hello', 'world'] , header => $obj }, 
+      {msg => [ 'body' ], header => $obj} ) )
  ^
+  E: $test_data5^
  ok: 10^
 
 =head2 ok: 11
 
-  N: ascii secsify ref to a hash with nested hashes, arrays, common objects^
-
-  A:
- secsify( listify( {msg => ['hello', 'world'] , header => $obj }, 
-                {msg => [ 'body' ], header => $obj} ) )
- ^
-
-  E:
- 'U1[1] 80
- L[6]
-   A[0]
-   A[4] HASH
-   A[6] header
-   L[6]
-     A[11] Class::None
-     A[4] HASH
-     A[4] From
-     A[6] nobody
-     A[2] To
-     A[6] nobody
-   A[3] msg
-   L[4]
-     A[0]
-     A[5] ARRAY
-     A[5] hello
-     A[5] world
- L[6]
-   A[0]
-   A[4] HASH
-   A[6] header
-   L[2]
-     A[5] Index
-     U1[3] 2 0 3
-   A[3] msg
-   L[3]
-     A[0]
-     A[5] ARRAY
-     A[4] body
- '
- ^
+ VO: ^
+  N: ascii secsify listifcation perilification transfication of test_data1^
+  A: secsify( listify(perlify( transify($test_data1 ) ) ) )^
+  E: $test_data1^
  ok: 11^
 
 =head2 ok: 12
 
-  N: binary secsify an array reference^
-  A: my $big_secs2 = unpack('H*',secsify( listify( ['2', 'hello', 4] ), {type => 'binary'}))^
-  E: 'a50150010541004105' . unpack('H*','ARRAY') . 'a501024105' . unpack('H*','hello') . 'a50104'^
+ VO: ^
+  N: ascii secsify listifcation perilification transfication of test_data2^
+  A: secsify( listify(perlify( transify($test_data2 ) ) ) )^
+  E: $test_data2^
  ok: 12^
 
 =head2 ok: 13
+
+ VO: ^
+  N: ascii secsify listifcation perilification transfication of test_data3^
+  A: secsify( listify(perlify( transify($test_data3 )) ) )^
+  E: $test_data3^
+ ok: 13^
+
+=head2 ok: 14
+
+  N: ascii secsify listifcation perilification transfication of test_data4^
+  A: secsify( listify(perlify( transify($test_data4 ))) )^
+  E: $test_data4^
+ ok: 14^
+
+=head2 ok: 15
+
+  N: ascii secsify listifcation perilification transfication of test_data5^
+  A: secsify( listify(perlify( transify($test_data5))) )^
+  E: $test_data5^
+ ok: 15^
+
+=head2 ok: 16
+
+  N: binary secsify an array reference^
+  A: my $big_secs2 = unpack('H*',secsify( listify( ['2', 'hello', 4] ), {type => 'binary'}))^
+  E: 'a50150010541004105' . unpack('H*','ARRAY') . 'a501024105' . unpack('H*','hello') . 'a50104'^
+ ok: 16^
+
+=head2 ok: 17
 
  VO: ^
   N: binary secsify array with nested hashes, arrays, objects^
@@ -332,38 +354,16 @@ L<STD FormDB Test Description Fields|Test::STDmaker/STD FormDB Test Description 
     )
  ^
   E: $big_secs2^
- ok: 13^
+ ok: 17^
 
-=head2 ok: 14
+=head2 ok: 18
 
   N: neuterify a big secsii^
   A: secsify(neuterify (pack('H*',$big_secs2)))^
+  E: $test_data4^
+ ok: 18^
 
-  E:
- 'U1[1] 80
- U1[1] 2
- L[6]
-   A[0]
-   A[4] HASH
-   A[6] header
-   L[6]
-     A[11] Class::None
-     A[4] HASH
-     A[4] From
-     A[6] nobody
-     A[2] To
-     A[6] nobody
-   A[3] msg
-   L[4]
-     A[0]
-     A[5] ARRAY
-     A[5] hello
-     A[5] world
- '
- ^
- ok: 14^
-
-=head2 ok: 15
+=head2 ok: 19
 
   N: transify a free for all secsii input^
 
@@ -384,66 +384,33 @@ L<STD FormDB Test Description Fields|Test::STDmaker/STD FormDB Test Description 
  L 
  (
    A[0] A "HASH"  A /header/
-   L[2] A \'Index\' U1 2 0 3
+   L[3] A[0] A \'Index\' U1 10
    A  \'msg\'
    L < A[0] A \'ARRAY\' A  \'body\' >
  )
  '
  ^
-  C: my $list = transify ($ascii_secsii, format_code => 'P');^
+  C: my $list = transify ($ascii_secsii, obj_format_code => 'P');^
  DM: $list^
   A: ref($list)^
  SE: 'ARRAY'^
- ok: 15^
+ ok: 19^
 
-=head2 ok: 16
+=head2 ok: 20
 
   N: secsify transifed free style secs text^
   A: ref($list) ? secsify( $list ) : ''^
+  E: $test_data5^
+ ok: 20^
 
-  E:
- 'U1[1] 80
- L[6]
-   A[0]
-   A[4] HASH
-   A[6] header
-   L[6]
-     A[11] Class::None
-     A[4] HASH
-     A[4] From
-     A[6] nobody
-     A[2] To
-     A[6] nobody
-   A[3] msg
-   L[4]
-     A[0]
-     A[5] ARRAY
-     A[5] hello
-     A[5] world
- L[6]
-   A[0]
-   A[4] HASH
-   A[6] header
-   L[2]
-     A[5] Index
-     U1[3] 2 0 3
-   A[3] msg
-   L[3]
-     A[0]
-     A[5] ARRAY
-     A[4] body
- '
- ^
- ok: 16^
-
-=head2 ok: 17
+=head2 ok: 21
 
   N: listify a list of number arrays^
-  A: ref(my $number_list = listify( [ [78,45,25], [512,1024], 100000] ))^
+  A: ref(my $number_list = listify( my $test_data6 = [ [78,45,25], [512,1024], 100000 ] ))^
   E: 'ARRAY'^
- ok: 17^
+ ok: 21^
 
-=head2 ok: 18
+=head2 ok: 22
 
   N: secify a listified list of number arrays^
   A: secsify($number_list)^
@@ -458,63 +425,63 @@ L<STD FormDB Test Description Fields|Test::STDmaker/STD FormDB Test Description 
    U4[1] 100000
  '
  ^
- ok: 18^
-
-=head2 ok: 19
-
-  N: vectorize listified list of number arrays^
-  A: vectorize($number_list)^
-  E: ''^
- ok: 19^
-
-=head2 ok: 20
-
-  N: verify 1st vectorized array^
-  A: [@{$number_list->[9]}]^
-  E: [78,45,25]^
- ok: 20^
-
-=head2 ok: 21
-
-  N: verify 2nd vectorized array^
-  A: [@{$number_list->[11]}]^
-  E: [512,1024]^
- ok: 21^
-
-=head2 ok: 22
-
-  N: verify 3rd vectorized array^
-  A: [@{$number_list->[13]}]^
-  E: [100000]^
  ok: 22^
 
 =head2 ok: 23
 
-  N: scalarize listified list of number arrays^
-  A: scalarize($number_list)^
+  N: textify listified list of number arrays^
+  A: textify($number_list)^
   E: ''^
  ok: 23^
 
 =head2 ok: 24
 
-  N: verify 1st scalarized array^
-  A: unpack('H*', $number_list->[9])^
-  E: '4e2d19'^
+  N: verify 1st textified item element body^
+  A: [@{$number_list->[9]}]^
+  E: [78,45,25]^
  ok: 24^
 
 =head2 ok: 25
 
-  N: verify 2nd scalarized array^
-  A: unpack('H*', $number_list->[11])^
-  E: '02000400'^
+  N: verify 2nd textified item element body^
+  A: [@{$number_list->[11]}]^
+  E: [512,1024]^
  ok: 25^
 
 =head2 ok: 26
 
-  N: verify 3rd scalarized array^
+  N: verify 3rd textified item element body^
+  A: [@{$number_list->[13]}]^
+  E: [100000]^
+ ok: 26^
+
+=head2 ok: 27
+
+  N: numberify listified list of number arrays^
+  A: numberify($number_list)^
+  E: ''^
+ ok: 27^
+
+=head2 ok: 28
+
+  N: verify 1st numberified item element body^
+  A: unpack('H*', $number_list->[9])^
+  E: '4e2d19'^
+ ok: 28^
+
+=head2 ok: 29
+
+  N: verify 2nd numberified item element body^
+  A: unpack('H*', $number_list->[11])^
+  E: '02000400'^
+ ok: 29^
+
+=head2 ok: 30
+
+  N: verify 3rd numberified item element body^
   A: unpack('H*', $number_list->[13])^
   E: '000186a0'^
- ok: 26^
+ ok: 30^
 
 
 
@@ -634,18 +601,106 @@ Demo: Secs2.d^
 Verify: Secs2.t^
 
 
- T: 26^
+ T: 30^
 
 
  C:
     use File::Package;
     my $fp = 'File::Package';
 
-    use Data::Secs2 qw(arrayify itemify listify neuterify scalarize secsify 
-        stringify  transify vectorize);
+    use Data::Secs2 qw(arrayify listify neuterify numberify 
+         perlify secsify secs_elementify stringify textify transify);
 
     my $uut = 'Data::Secs2';
     my $loaded;
+
+my $test_data1 =
+'U1[1] 80
+L[5]
+  A[0]
+  A[5] ARRAY
+  U1[1] 2
+  A[5] hello
+  U1[1] 4
+';
+
+my $test_data2 =
+'U1[1] 80
+L[6]
+  A[0]
+  A[4] HASH
+  A[4] body
+  A[5] hello
+  A[6] header
+  A[9] To: world
+';
+
+my $test_data3 =
+'U1[1] 80
+U1[1] 2
+L[4]
+  A[0]
+  A[5] ARRAY
+  A[5] hello
+  A[5] world
+U2[1] 512
+';
+
+my $test_data4 =
+'U1[1] 80
+U1[1] 2
+L[6]
+  A[0]
+  A[4] HASH
+  A[6] header
+  L[6]
+    A[11] Class::None
+    A[4] HASH
+    A[4] From
+    A[6] nobody
+    A[2] To
+    A[6] nobody
+  A[3] msg
+  L[4]
+    A[0]
+    A[5] ARRAY
+    A[5] hello
+    A[5] world
+';
+
+my $test_data5 =
+'U1[1] 80
+L[6]
+  A[0]
+  A[4] HASH
+  A[6] header
+  L[6]
+    A[11] Class::None
+    A[4] HASH
+    A[4] From
+    A[6] nobody
+    A[2] To
+    A[6] nobody
+  A[3] msg
+  L[4]
+    A[0]
+    A[5] ARRAY
+    A[5] hello
+    A[5] world
+L[6]
+  A[0]
+  A[4] HASH
+  A[6] header
+  L[3]
+    A[0]
+    A[5] Index
+    U1[1] 10
+  A[3] msg
+  L[3]
+    A[0]
+    A[5] ARRAY
+    A[4] body
+';
 ^
 
 VO: ^
@@ -654,12 +709,14 @@ VO: ^
 SE:  '1'^
 ok: 1^
 
+VO: ^
  N: stringify a scalar string^
  C: $uut->import( 'stringify' )^
  A: stringify( 'string' )^
  E: 'string'^
 ok: 2^
 
+VO: ^
  N: stringify a scalar number^
  A: stringify( 2 )^
  E: 2^
@@ -678,22 +735,6 @@ U1[1] 4
 
 ok: 4^
 
- N: stringify an array reference^
- A: stringify( ['2', 'hello', 4] )^
-
- E:
-'U1[1] 80
-L[5]
-  A[0]
-  A[5] ARRAY
-  U1[1] 2
-  A[5] hello
-  U1[1] 4
-'
-^
-
-ok: 5^
-
  N: stringify a hash reference^
  A: stringify( {header => 'To: world', body => 'hello'})^
 
@@ -709,135 +750,74 @@ L[6]
 '
 ^
 
+ok: 5^
+
+ N: ascii secsify lisfication of test_data1 an array reference^
+ A: secsify( listify( ['2', 'hello', 4] ) )^
+ E: $test_data1^
 ok: 6^
 
- N: ascii secsify an array reference^
- A: secsify( listify( ['2', 'hello', 4] ) )^
-
- E:
-'U1[1] 80
-L[5]
-  A[0]
-  A[5] ARRAY
-  U1[1] 2
-  A[5] hello
-  U1[1] 4
-'
-^
-
+VO: ^
+ N: ascii secsify lisfication of test_data2 -  a hash reference^
+ A: secsify( listify( {header => 'To: world', body => 'hello'}) )^
+ E: $test_data2^
 ok: 7^
 
- N: ascii secsify a hash reference^
- A: secsify( listify( {header => 'To: world', body => 'hello'}) )^
-
- E:
-'U1[1] 80
-L[6]
-  A[0]
-  A[4] HASH
-  A[4] body
-  A[5] hello
-  A[6] header
-  A[9] To: world
-'
-^
-
+ N: ascii secsify lisfication of test_data3 - array with an array ref^
+ A: secsify( listify( '2', ['hello', 'world'], 512 ) )^
+ E: $test_data3^
 ok: 8^
 
- N: ascii secsify array with an array ref^
- A: secsify( listify( '2', ['hello', 'world'], 512 ) )^
-
- E:
-'U1[1] 80
-U1[1] 2
-L[4]
-  A[0]
-  A[5] ARRAY
-  A[5] hello
-  A[5] world
-U2[1] 512
-'
-^
-
-ok: 9^
-
- N: ascii secsify array with nested hashes, arrays, objects^
+ A: my $obj = bless { To => 'nobody', From => 'nobody'}, 'Class::None'^
+VO: ^
+ N: ascii secsify lisfication of test_data4 - array with nested hashes, arrays, objects^
  C: my $obj = bless { To => 'nobody', From => 'nobody'}, 'Class::None'^
  A: secsify( listify( '2', { msg => ['hello', 'world'] , header => $obj } ) )^
+ E: $test_data4^
+ok: 9^
 
- E:
-'U1[1] 80
-U1[1] 2
-L[6]
-  A[0]
-  A[4] HASH
-  A[6] header
-  L[6]
-    A[11] Class::None
-    A[4] HASH
-    A[4] From
-    A[6] nobody
-    A[2] To
-    A[6] nobody
-  A[3] msg
-  L[4]
-    A[0]
-    A[5] ARRAY
-    A[5] hello
-    A[5] world
-'
-^
-
-ok: 10^
-
- N: ascii secsify ref to a hash with nested hashes, arrays, common objects^
+ N: ascii secsify lisfication of test_data5 - hash with nested hashes, arrays, common objects^
 
  A:
-secsify( listify( {msg => ['hello', 'world'] , header => $obj }, 
-               {msg => [ 'body' ], header => $obj} ) )
+    secsify( listify( {msg => ['hello', 'world'] , header => $obj }, 
+     {msg => [ 'body' ], header => $obj} ) )
 ^
 
+ E: $test_data5^
+ok: 10^
 
- E:
-'U1[1] 80
-L[6]
-  A[0]
-  A[4] HASH
-  A[6] header
-  L[6]
-    A[11] Class::None
-    A[4] HASH
-    A[4] From
-    A[6] nobody
-    A[2] To
-    A[6] nobody
-  A[3] msg
-  L[4]
-    A[0]
-    A[5] ARRAY
-    A[5] hello
-    A[5] world
-L[6]
-  A[0]
-  A[4] HASH
-  A[6] header
-  L[2]
-    A[5] Index
-    U1[3] 2 0 3
-  A[3] msg
-  L[3]
-    A[0]
-    A[5] ARRAY
-    A[4] body
-'
-^
-
+VO: ^
+ N: ascii secsify listifcation perilification transfication of test_data1^
+ A: secsify( listify(perlify( transify($test_data1 ) ) ) )^
+ E: $test_data1^
 ok: 11^
+
+VO: ^
+ N: ascii secsify listifcation perilification transfication of test_data2^
+ A: secsify( listify(perlify( transify($test_data2 ) ) ) )^
+ E: $test_data2^
+ok: 12^
+
+VO: ^
+ N: ascii secsify listifcation perilification transfication of test_data3^
+ A: secsify( listify(perlify( transify($test_data3 )) ) )^
+ E: $test_data3^
+ok: 13^
+
+ N: ascii secsify listifcation perilification transfication of test_data4^
+ A: secsify( listify(perlify( transify($test_data4 ))) )^
+ E: $test_data4^
+ok: 14^
+
+ N: ascii secsify listifcation perilification transfication of test_data5^
+ A: secsify( listify(perlify( transify($test_data5))) )^
+ E: $test_data5^
+ok: 15^
 
  N: binary secsify an array reference^
  A: my $big_secs2 = unpack('H*',secsify( listify( ['2', 'hello', 4] ), {type => 'binary'}))^
  E: 'a50150010541004105' . unpack('H*','ARRAY') . 'a501024105' . unpack('H*','hello') . 'a50104'^
-ok: 12^
+ok: 16^
 
 VO: ^
  N: binary secsify array with nested hashes, arrays, objects^
@@ -874,35 +854,12 @@ unpack('H*',
 ^
 
  E: $big_secs2^
-ok: 13^
+ok: 17^
 
  N: neuterify a big secsii^
  A: secsify(neuterify (pack('H*',$big_secs2)))^
-
- E:
-'U1[1] 80
-U1[1] 2
-L[6]
-  A[0]
-  A[4] HASH
-  A[6] header
-  L[6]
-    A[11] Class::None
-    A[4] HASH
-    A[4] From
-    A[6] nobody
-    A[2] To
-    A[6] nobody
-  A[3] msg
-  L[4]
-    A[0]
-    A[5] ARRAY
-    A[5] hello
-    A[5] world
-'
-^
-
-ok: 14^
+ E: $test_data4^
+ok: 18^
 
  N: transify a free for all secsii input^
 
@@ -924,7 +881,7 @@ L
 L 
 (
   A[0] A "HASH"  A /header/
-  L[2] A \'Index\' U1 2 0 3
+  L[3] A[0] A \'Index\' U1 10
   A  \'msg\'
   L < A[0] A \'ARRAY\' A  \'body\' >
 )
@@ -932,55 +889,21 @@ L
 '
 ^
 
- C: my $list = transify ($ascii_secsii, format_code => 'P');^
+ C: my $list = transify ($ascii_secsii, obj_format_code => 'P');^
 DM: $list^
  A: ref($list)^
 SE: 'ARRAY'^
-ok: 15^
+ok: 19^
 
  N: secsify transifed free style secs text^
  A: ref($list) ? secsify( $list ) : ''^
-
- E:
-'U1[1] 80
-L[6]
-  A[0]
-  A[4] HASH
-  A[6] header
-  L[6]
-    A[11] Class::None
-    A[4] HASH
-    A[4] From
-    A[6] nobody
-    A[2] To
-    A[6] nobody
-  A[3] msg
-  L[4]
-    A[0]
-    A[5] ARRAY
-    A[5] hello
-    A[5] world
-L[6]
-  A[0]
-  A[4] HASH
-  A[6] header
-  L[2]
-    A[5] Index
-    U1[3] 2 0 3
-  A[3] msg
-  L[3]
-    A[0]
-    A[5] ARRAY
-    A[4] body
-'
-^
-
-ok: 16^
+ E: $test_data5^
+ok: 20^
 
  N: listify a list of number arrays^
- A: ref(my $number_list = listify( [ [78,45,25], [512,1024], 100000] ))^
+ A: ref(my $number_list = listify( my $test_data6 = [ [78,45,25], [512,1024], 100000 ] ))^
  E: 'ARRAY'^
-ok: 17^
+ok: 21^
 
  N: secify a listified list of number arrays^
  A: secsify($number_list)^
@@ -996,47 +919,47 @@ L[5]
 '
 ^
 
-ok: 18^
-
- N: vectorize listified list of number arrays^
- A: vectorize($number_list)^
- E: ''^
-ok: 19^
-
- N: verify 1st vectorized array^
- A: [@{$number_list->[9]}]^
- E: [78,45,25]^
-ok: 20^
-
- N: verify 2nd vectorized array^
- A: [@{$number_list->[11]}]^
- E: [512,1024]^
-ok: 21^
-
- N: verify 3rd vectorized array^
- A: [@{$number_list->[13]}]^
- E: [100000]^
 ok: 22^
 
- N: scalarize listified list of number arrays^
- A: scalarize($number_list)^
+ N: textify listified list of number arrays^
+ A: textify($number_list)^
  E: ''^
 ok: 23^
 
- N: verify 1st scalarized array^
- A: unpack('H*', $number_list->[9])^
- E: '4e2d19'^
+ N: verify 1st textified item element body^
+ A: [@{$number_list->[9]}]^
+ E: [78,45,25]^
 ok: 24^
 
- N: verify 2nd scalarized array^
- A: unpack('H*', $number_list->[11])^
- E: '02000400'^
+ N: verify 2nd textified item element body^
+ A: [@{$number_list->[11]}]^
+ E: [512,1024]^
 ok: 25^
 
- N: verify 3rd scalarized array^
+ N: verify 3rd textified item element body^
+ A: [@{$number_list->[13]}]^
+ E: [100000]^
+ok: 26^
+
+ N: numberify listified list of number arrays^
+ A: numberify($number_list)^
+ E: ''^
+ok: 27^
+
+ N: verify 1st numberified item element body^
+ A: unpack('H*', $number_list->[9])^
+ E: '4e2d19'^
+ok: 28^
+
+ N: verify 2nd numberified item element body^
+ A: unpack('H*', $number_list->[11])^
+ E: '02000400'^
+ok: 29^
+
+ N: verify 3rd numberified item element body^
  A: unpack('H*', $number_list->[13])^
  E: '000186a0'^
-ok: 26^
+ok: 30^
 
 
 See_Also: ^
